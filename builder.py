@@ -1,17 +1,15 @@
 import os
 import re
 import time
+import json
 import urllib.request
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
-from google import genai
 
-# 1. API 설정 (Pay-as-you-go)
+# 1. API 키 설정
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
-
-client = genai.Client(api_key=API_KEY)
 
 SITE_URL = "https://carissue.koo1000.com"
 POSTS_DIR = "posts"
@@ -60,7 +58,7 @@ def save_history(link):
 def fetch_feed_items(feed_conf, history_set):
     items = []
     target = feed_conf["target_count"]
-    print(f"\n[{feed_conf['name']}] 피드 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
+    print(f"\n[{feed_conf['name']}] 피드 수집 ({feed_conf['category']} - 목표: {target}건)")
     
     try:
         req = urllib.request.Request(
@@ -121,42 +119,61 @@ def fetch_feed_items(feed_conf, history_set):
                 "image_url": image_url
             })
             history_set.add(link)
-            print(f"-> [수집 채택] {title[:30]}...")
+            print(f"-> [채택] {title[:30]}...")
 
     except Exception as e:
         print(f"-> [수집 실패]: {e}")
 
     return items
 
-def generate_article(item):
+def generate_article_rest(item):
     prompt = f"""
 당신은 대한민국 1위 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 기자입니다.
-아래 뉴스 브리핑 정보를 바탕으로 독자들의 관심과 몰입도를 극대화하는 심층 분석 기사를 작성해주세요.
+아래 뉴스 정보를 바탕으로 완성형 심층 분석 기사를 작성해주세요.
 
 [구분]: {item['category']} 자동차 이슈 ({item['source']})
 [주제 헤드라인]: {item['title']}
 [핵심 내용]: {item['desc']}
 
 [기사 작성 지침]
-1. 제목: 클릭을 부르는 품격 있는 뉴스 헤드라인 (따옴표 적극 활용)
+1. 제목: 클릭을 유도하는 품격 있는 뉴스 헤드라인 (따옴표 활용)
 2. 분량: 공백 제외 800자 내외
-3. 본문 구성:
-   - 도입부: 이 소식이 국내외 자동차 시장에서 뜨거운 화제가 되는 이유
-   - 본문: 디자인, 기술 혁신, 성능 스펙 및 파워트레인 분석
-   - 맺음말: 경쟁 모델과의 상품성 비교 및 국내 소비자 출시/구매 가이드 전망
-4. 문체: 정돈되고 신뢰감 있는 언론사 전문 기사체 (~했습니다, ~기대를 모으고 있습니다)
-5. 독창성: 단순 전재가 아닌 에디터의 독창적 시각과 분석 코멘터리 포함
+3. 본문 구성: 도입부(주목 배경), 본론(디자인/스펙/성능), 결론(경쟁차 비교 및 출시 전망)
+4. 문체: 정돈된 전문 기사체 (~했습니다, ~전망됩니다)
 
-[출력 형식 - 반드시 준수]
+[출력 형식]
 TITLE: [기사 제목]
-CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
+CONTENT: [본문 내용 (각 문단은 빈 줄 1개로 구분)]
 """
-    response = client.models.generate_content(
-        model="gemini-1.5-flash",
-        contents=prompt
-    )
-    txt = response.text.strip()
+    # 라이브러리 없이 공식 REST API(v1 GA) 직통 호출
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
     
+    payload = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 2048
+        }
+    }
+    
+    headers = {"Content-Type": "application/json"}
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers)
+    
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            txt = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode("utf-8")
+        # v1beta 실패 시 정식 v1으로 2차 폴백
+        fallback_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        req_fb = urllib.request.Request(fallback_url, data=json.dumps(payload).encode("utf-8"), headers=headers)
+        with urllib.request.urlopen(req_fb, timeout=30) as fb_res:
+            res_data = json.loads(fb_res.read().decode("utf-8"))
+            txt = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+
     title = ""
     content = ""
     if "TITLE:" in txt and "CONTENT:" in txt:
@@ -270,7 +287,7 @@ def main():
         items = fetch_feed_items(feed, history_set)
         collected.extend(items)
         
-    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨 (국내 {sum(1 for i in collected if i['category']=='국내')} / 글로벌 {sum(1 for i in collected if i['category']=='글로벌')})")
+    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
     if not collected:
         print("수집 대상 기사가 없습니다. 종료합니다.")
         return
@@ -281,7 +298,7 @@ def main():
     for idx, item in enumerate(collected):
         print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
         try:
-            t, c = generate_article(item)
+            t, c = generate_article_rest(item)
             timestamp = int(time.time()) + idx
             post_id = f"post_{timestamp}_{idx}"
             date_str = time.strftime("%Y-%m-%d %H:%M")
