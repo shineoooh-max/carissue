@@ -4,7 +4,7 @@ on:
   schedule:
     # 한국 시간 기준 매일 오전 8시, 오후 6시 (UTC 23:00, 09:00)
     - cron: '0 23,9 * * *'
-  workflow_dispatch: # 수동으로 즉시 1회 실행할 수 있는 버튼
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,5 +38,10 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add posts/ index.html sitemap.xml published_links.txt
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto: publish 5 new articles" && git push origin main)
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto: publish 5 new articles"
+            git push origin main
+          fi
