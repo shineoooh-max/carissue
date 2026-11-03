@@ -6,83 +6,169 @@
     <title>CARISSUE - 글로벌 신차 및 자동차 매거진</title>
     <meta name="description" content="글로벌 자동차 신차 정보 및 실시간 모터 트렌드 매거진">
     <link rel="icon" href="assets/favicon.ico">
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3677274092490514" crossorigin="anonymous"></script>
     <style>
-        :root { --primary: #e63946; --dark: #111827; --gray: #6b7280; --bg: #f9fafb; --card-bg: #ffffff; }
+        :root { --primary: #e63946; --bg: #f8f9fa; --card-bg: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; line-height: 1.6; color: #1f2937; background: var(--bg); }
         .container { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
-        
-        /* 헤더 */
-        .header { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
-        .nav-wrap { display: flex; justify-content: space-between; align-items: center; height: 64px; }
-        .logo { display: flex; align-items: center; text-decoration: none; }
-        .logo-img { height: 38px; width: auto; object-fit: contain; }
-        .logo-text { font-size: 1.4rem; font-weight: 800; color: #111; letter-spacing: -0.5px; }
-        .logo-text span { color: var(--primary); }
-
-        /* 히어로 타이틀 */
-        .hero { padding: 30px 0 15px; text-align: left; border-bottom: 2px solid #111; margin-bottom: 24px; }
-        .hero h1 { font-size: 1.6rem; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
-        .hero p { color: var(--gray); font-size: 0.95rem; margin-top: 4px; }
-
-        /* 애드센스 래퍼 (광고 미송출 시 높이 붕괴 방지 및 깔끔한 여백) */
-        .ad-wrap { margin: 15px 0 25px; text-align: center; overflow: hidden; }
-
-        /* 뉴스 그리드 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; padding-bottom: 60px; }
-        .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; border: 1px solid #e5e7eb; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.07); }
-        .card-thumb { width: 100%; height: 190px; background: #e5e7eb; overflow: hidden; }
-        .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .card:hover .card-thumb img { transform: scale(1.03); }
-        .card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 1.1rem; font-weight: 700; line-height: 1.45; margin-bottom: 10px; color: #111; word-break: keep-all; }
-        .card-date { font-size: 0.8rem; color: #9ca3af; margin-top: auto; }
-
-        .footer { background: #111827; color: #9ca3af; padding: 30px 0; text-align: center; font-size: 0.85rem; }
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; gap: 18px; }
-            .hero h1 { font-size: 1.35rem; }
-        }
+        .header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 12px 0; }
+        .logo img { height: 40px; object-fit: contain; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; padding: 30px 0 60px; }
+        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; border: 1px solid #e5e7eb; display: flex; flex-direction: column; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); }
+        .thumb { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        .card-body { padding: 16px; flex: 1; }
+        .card-title { font-size: 1.05rem; font-weight: 700; line-height: 1.45; color: #111; word-break: keep-all; }
+        .ad { margin: 20px 0; text-align: center; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <header class="header">
-        <div class="container nav-wrap">
-            <a href="/" class="logo">
-                <img src="assets/logo.png" alt="CARISSUE" class="logo-img" onerror="this.outerHTML='<span class=\'logo-text\'>CAR<span>ISSUE</span></span>'">
-            </a>
+        <div class="container">
+            <a href="/"><img src="assets/logo.png" alt="CARISSUE" onerror="this.outerHTML='<b>CARISSUE</b>'"></a>
         </div>
     </header>
-
     <main class="container">
-        <section class="hero">
-            <h1>LATEST MOTOR TRENDS</h1>
-            <p>실시간 업데이트되는 글로벌 신차와 모터 트렌드 매거진</p>
-        </section>
-
-        <!-- 상단 반응형 광고 슬롯 -->
-        <div class="ad-wrap">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-3677274092490514"
-                 data-ad-slot="auto"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
+        <div class="ad">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3677274092490514" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
-
-        <section class="grid" id="news-grid">
-            <!-- 기사 리스트 (빌더 및 워크플로우를 통해 최신순 업데이트 유지) -->
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 CARISSUE. All rights reserved.</p>
+        <div class="grid">
+            <a href="posts/post_1793612494_9.html" class="card">
+                <img src="https://www.motor1.com/media/motor1/images/2026/04/porsche-911-hybrid-leak.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">포르쉐, 911 카레라 하이브리드 프로토타입 뉘르부르크링 포착</div></div>
+            </a>
+            <a href="posts/post_1793612466_8.html" class="card">
+                <img src="https://www.carscoops.com/wp-content/uploads/2026/04/Ferrari-Hypercar.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">페라리, 라페라리 후속 플래그십 하이퍼카 코드명 F250 최종 테스트 돌입</div></div>
+            </a>
+            <a href="posts/post_1793612444_7.html" class="card">
+                <img src="https://www.motor1.com/media/motor1/images/2026/04/bmw-m5-touring.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">BMW, 700마력 넘는 신형 M5 투어링 왜건 티저 깜짝 공개</div></div>
+            </a>
+            <a href="posts/post_1793612420_6.html" class="card">
+                <img src="https://www.carscoops.com/wp-content/uploads/2026/04/Hyundai-Ioniq-9.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">현대차 대형 플래그십 전기 SUV '아이오닉 9' 연말 글로벌 출시 확정</div></div>
+            </a>
+            <a href="posts/post_1793612388_5.html" class="card">
+                <img src="https://www.motor1.com/media/motor1/images/2026/04/mercedes-amg-gt-4door.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">메르세데스-AMG, 차세대 전용 전기 고성능 4도어 쿠페 개발 막바지</div></div>
+            </a>
+            <a href="posts/post_1793612360_4.html" class="card">
+                <img src="https://www.carscoops.com/wp-content/uploads/2026/04/Toyota-Land-Cruiser-FJ.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">토요타, 미니 랜드크루저 '랜드호퍼' 상표 등록… 오프로드 팬 열광</div></div>
+            </a>
+            <a href="posts/post_1793612339_3.html" class="card">
+                <img src="https://www.motor1.com/media/motor1/images/2026/04/audi-rs6-e-tron.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">아우디, 800마력 육박하는 RS6 e-트론 순수전기 슈퍼 왜건 예고</div></div>
+            </a>
+            <a href="posts/post_1793612314_2.html" class="card">
+                <img src="https://www.carscoops.com/wp-content/uploads/2026/04/Kia-EV4-Hatchback.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">기아, 유럽 전략형 EV4 해치백 테스트카 첫 포착… 보급형 전기차 라인업 완성</div></div>
+            </a>
+            <a href="posts/post_1793612287_1.html" class="card">
+                <img src="https://www.motor1.com/media/motor1/images/2026/04/chevrolet-corvette-zr1.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">쉐보레, 1,000마력 돌파하는 콜벳 ZR1 여름 공식 공개 발표</div></div>
+            </a>
+            <a href="posts/post_1793612215_0.html" class="card">
+                <img src="https://www.carscoops.com/wp-content/uploads/2026/04/Tesla-Model-2-Project.jpg" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">테슬라, 2만 5천 달러 보급형 플랫폼 기반 차세대 로보택시 전면 배치</div></div>
+            </a>
+            <a href="posts/post_1793609519_9.html" class="card">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">포르쉐 차세대 911 GT3 RS, 에어로다이내믹스 기술의 정점 공개</div></div>
+            </a>
+            <a href="posts/post_1793609490_8.html" class="card">
+                <img src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">폭스바겐 골프 탄생 50주년 기념 에디션 출시 및 라인업 정비</div></div>
+            </a>
+            <a href="posts/post_1793609460_7.html" class="card">
+                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">쉐보레 콜벳 전동화의 미래, 하이브리드 E-Ray 양산 개시</div></div>
+            </a>
+            <a href="posts/post_1793609428_6.html" class="card">
+                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">BMW 차세대 전기차 플랫폼 노이어 클라세 최초 적용 세단 콘셉트</div></div>
+            </a>
+            <a href="posts/post_1793609395_5.html" class="card">
+                <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">벤츠 순수전기 G클래스 공식 공개, 오프로더 전동화의 새 이정표</div></div>
+            </a>
+            <a href="posts/post_1793609370_4.html" class="card">
+                <img src="https://images.unsplash.com/photo-1541348263662-e0c8de4259ba?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">현대 아이오닉 5 N 실전 트랙 주행 성능과 주요 드라이빙 평가</div></div>
+            </a>
+            <a href="posts/post_1793609347_3.html" class="card">
+                <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">람보르기니 우루스 SE 플러그인 하이브리드 공개, 800마력 돌파</div></div>
+            </a>
+            <a href="posts/post_1793609323_2.html" class="card">
+                <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">메르세데스-마이바흐 최초의 순수전기 SUV EQS SUV 글로벌 론칭</div></div>
+            </a>
+            <a href="posts/post_1793609299_1.html" class="card">
+                <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">볼보 EX90 플래그십 순수전기 패밀리 SUV의 혁신적 안전 기술</div></div>
+            </a>
+            <a href="posts/post_1793609268_0.html" class="card">
+                <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">기아 EV3 소형 전기 SUV 공개, 대중화 전기차 시장 정조준</div></div>
+            </a>
+            <a href="posts/post_1793605824_9.html" class="card">
+                <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">포드 머스탱 다크호스, 500마력 V8 엔진과 수동변속기의 조화</div></div>
+            </a>
+            <a href="posts/post_1793605796_8.html" class="card">
+                <img src="https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">아우디 Q6 e-트론 공개, PPE 전용 플랫폼 기반 프리미엄 SUV</div></div>
+            </a>
+            <a href="posts/post_1793605773_7.html" class="card">
+                <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">벤츠 신형 E클래스 롱휠베이스 모델, 최고급 쇼퍼드리븐 사양</div></div>
+            </a>
+            <a href="posts/post_1793605739_6.html" class="card">
+                <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">제네시스 네오룬 콘셉트 공개, 한국적 미학과 럭셔리의 만남</div></div>
+            </a>
+            <a href="posts/post_1793605706_5.html" class="card">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">포르쉐 파나메라 3세대, 강력해진 하이브리드 파워트레인 탑재</div></div>
+            </a>
+            <a href="posts/post_1793605680_4.html" class="card">
+                <img src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">토요타 프리우스 5세대, 고성능 플러그인 하이브리드 인기 돌풍</div></div>
+            </a>
+            <a href="posts/post_1793605649_3.html" class="card">
+                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">페라리 최초의 V6 플러그인 하이브리드 슈퍼카 296 GTB 트랙 리뷰</div></div>
+            </a>
+            <a href="posts/post_1793605615_2.html" class="card">
+                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">BMW 신형 5시리즈 및 순수전기 i5 글로벌 베스트셀러 진단</div></div>
+            </a>
+            <a href="posts/post_1793605589_1.html" class="card">
+                <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">현대 팰리세이드 풀체인지 스파이샷 포착, 박시한 정통 SUV 디자인</div></div>
+            </a>
+            <a href="posts/post_1793605566_0.html" class="card">
+                <img src="https://images.unsplash.com/photo-1541348263662-e0c8de4259ba?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">루시드 에어 사파이어, 테슬라 플래드를 압도하는 1,200마력 슈퍼세단</div></div>
+            </a>
+            <a href="posts/post_1793594480_3.html" class="card">
+                <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">롤스로이스 스펙터, 브랜드 최초의 순수전기 울트라 럭셔리 쿠페 시승기</div></div>
+            </a>
+            <a href="posts/post_1793594328_2.html" class="card">
+                <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">애스턴마틴 DB12, 슈퍼 투어러의 새로운 기준을 제시하다</div></div>
+            </a>
+            <a href="posts/post_1793594270_1.html" class="card">
+                <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80" class="thumb" onerror="this.style.display='none'">
+                <div class="card-body"><div class="card-title">랜드로버 레인지로버 SV, 궁극의 비스포크 럭셔리 SUV의 정점</div></div>
+            </a>
         </div>
-    </footer>
+    </main>
 </body>
 </html>
