@@ -12,7 +12,12 @@ if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+
+# 404 방지를 위한 모델 지정 (gemini-1.5-flash-latest)
+try:
+    model = genai.GenerativeModel("gemini-1.5-flash-latest")
+except Exception:
+    model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 SITE_URL = "https://carissue.koo1000.com"
 POSTS_DIR = "posts"
@@ -71,7 +76,6 @@ def fetch_feed_items(feed_conf, history_set):
         )
         raw_data = urllib.request.urlopen(req, timeout=15).read()
         
-        # 인코딩 자동 처리
         try:
             xml_text = raw_data.decode('utf-8')
         except UnicodeDecodeError:
@@ -101,7 +105,6 @@ def fetch_feed_items(feed_conf, history_set):
             title = title_el.text.strip() if title_el is not None and title_el.text else ""
             desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
 
-            # 썸네일 이미지 추출
             image_url = ""
             enclosure = entry.find("enclosure")
             if enclosure is not None and enclosure.attrib.get("url"):
