@@ -2,10 +2,11 @@ import os
 import re
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 import google.generativeai as genai
 
-# 1. 환경 설정
+# 1. API 설정 (Pay-as-you-go)
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
@@ -20,19 +21,31 @@ SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 ADSENSE_ID = "ca-pub-3677274092490514"
 
-# 2. 100% 차단 없는 신뢰할 수 있는 공식 RSS 피드
-# 국내: 구글 뉴스 한국판 자동차 공식 토픽 (국내 모든 주요 자동차 기사 실시간 집계)
-# 글로벌: Motor1, Autoblog
+# 2. 검증 완료된 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 총 5건)
 FEEDS = [
     {
+        "name": "모터그래프",
         "category": "국내",
-        "url": "https://news.google.com/rss/search?q=%EC%9E%90%EB%8F%99%EC%83%A8+%EC%8B%A0%EC%B0%A8+when:2d&hl=ko&gl=KR&ceid=KR:ko",
-        "count": 2
+        "url": "https://www.motorgraph.com/rss/allArticle.xml",
+        "target_count": 1
     },
     {
+        "name": "오토헤럴드",
+        "category": "국내",
+        "url": "http://www.autoherald.co.kr/rss/allArticle.xml",
+        "target_count": 1
+    },
+    {
+        "name": "Motor1",
         "category": "글로벌",
         "url": "https://www.motor1.com/rss/news/all/",
-        "count": 3
+        "target_count": 2
+    },
+    {
+        "name": "Carscoops",
+        "category": "글로벌",
+        "url": "https://www.carscoops.com/feed/",
+        "target_count": 1
     }
 ]
 
@@ -46,77 +59,77 @@ def save_history(link):
     with open(HISTORY_FILE, "a", encoding="utf-8") as f:
         f.write(link.strip() + "\n")
 
-def fetch_rss_items(feed_conf, history_set):
+def fetch_feed_items(feed_conf, history_set):
     items = []
-    category = feed_conf["category"]
-    url = feed_conf["url"]
-    target_count = feed_conf["count"]
+    target = feed_conf["target_count"]
+    print(f"\n[{feed_conf['name']}] 피드 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
     
-    print(f"[{category}] 뉴스 피드 수집 시도: {url[:60]}...")
     try:
         req = urllib.request.Request(
-            url,
-            headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
+            feed_conf["url"],
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         )
-        xml_content = urllib.request.urlopen(req, timeout=15).read()
-        soup = BeautifulSoup(xml_content, "xml")
+        raw_data = urllib.request.urlopen(req, timeout=15).read()
         
-        entries = soup.find_all("item")
-        print(f"   └ 피드에서 발견된 전체 기사 수: {len(entries)}개")
-        
+        # 인코딩 자동 처리
+        try:
+            xml_text = raw_data.decode('utf-8')
+        except UnicodeDecodeError:
+            xml_text = raw_data.decode('cp949', errors='ignore')
+            
+        root = ET.fromstring(xml_text)
+        entries = root.findall(".//item")
+        print(f"-> 발견된 기사 수: {len(entries)}개")
+
         for entry in entries:
-            if len(items) >= target_count:
+            if len(items) >= target:
                 break
                 
-            link_tag = entry.find("link")
-            guid_tag = entry.find("guid")
+            link_el = entry.find("link")
+            guid_el = entry.find("guid")
             link = ""
-            if link_tag and link_tag.text:
-                link = link_tag.text.strip()
-            elif guid_tag and guid_tag.text:
-                link = guid_tag.text.strip()
+            if link_el is not None and link_el.text:
+                link = link_el.text.strip()
+            elif guid_el is not None and guid_el.text:
+                link = guid_el.text.strip()
                 
             if not link or link in history_set:
                 continue
-                
-            title = entry.find("title").text.strip() if entry.find("title") else ""
-            desc = entry.find("description").text.strip() if entry.find("description") else ""
-            
-            # 구글 뉴스의 경우 " - 언론사명" 형식 제거
-            if category == "국내" and " - " in title:
-                title = title.rsplit(" - ", 1)[0].strip()
-                
-            # 이미지 추출
+
+            title_el = entry.find("title")
+            desc_el = entry.find("description")
+            title = title_el.text.strip() if title_el is not None and title_el.text else ""
+            desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
+
+            # 썸네일 이미지 추출
             image_url = ""
             enclosure = entry.find("enclosure")
-            if enclosure and enclosure.get("url"):
-                image_url = enclosure.get("url")
+            if enclosure is not None and enclosure.attrib.get("url"):
+                image_url = enclosure.attrib.get("url")
             elif desc:
                 img_search = re.search(r'src=["\']([^"\']+)["\']', desc)
                 if img_search:
                     image_url = img_search.group(1)
-                    
+
             if not image_url or not image_url.startswith("http"):
-                # 기본 고화질 자동차 프리셋 이미지
                 image_url = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
-                
+
             clean_desc = re.sub(r'<[^>]+>', '', desc).strip()
-            
+
             items.append({
-                "category": category,
+                "category": feed_conf["category"],
+                "source": feed_conf["name"],
                 "title": title,
                 "link": link,
                 "desc": clean_desc[:500],
                 "image_url": image_url
             })
             history_set.add(link)
-            print(f"   └ 채택: {title[:30]}...")
-            
+            print(f"-> [수집 채택] {title[:30]}...")
+
     except Exception as e:
-        print(f"   └ [에러] 수집 실패: {e}")
-        
+        print(f"-> [수집 실패]: {e}")
+
     return items
 
 def generate_article(item):
@@ -124,13 +137,12 @@ def generate_article(item):
 당신은 대한민국 1위 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 기자입니다.
 아래 뉴스 브리핑 정보를 바탕으로 독자들의 관심과 몰입도를 극대화하는 심층 분석 기사를 작성해주세요.
 
-[구분]: {item['category']} 자동차 이슈
+[구분]: {item['category']} 자동차 이슈 ({item['source']})
 [주제 헤드라인]: {item['title']}
 [핵심 내용]: {item['desc']}
 
 [기사 작성 지침]
 1. 제목: 클릭을 부르는 품격 있는 뉴스 헤드라인 (따옴표 적극 활용)
-   - 예시: "역대급 디자인 변화"... 기아 신형 SUV 베일 벗었다
 2. 분량: 공백 제외 800자 내외
 3. 본문 구성:
    - 도입부: 이 소식이 국내외 자동차 시장에서 뜨거운 화제가 되는 이유
@@ -211,7 +223,6 @@ def update_site(new_posts):
     if not new_posts:
         return
 
-    # index.html 업데이트
     with open(INDEX_PATH, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
         
@@ -239,7 +250,6 @@ def update_site(new_posts):
         with open(INDEX_PATH, 'w', encoding='utf-8') as f:
             f.write(str(soup))
 
-    # sitemap.xml 업데이트
     sitemap_entries = ""
     for post in new_posts:
         sitemap_entries += f"  <url>\n    <loc>{SITE_URL}/posts/{post['id']}.html</loc>\n    <lastmod>{post['date_str'][:10]}</lastmod>\n    <priority>0.8</priority>\n  </url>\n"
@@ -253,15 +263,15 @@ def update_site(new_posts):
                 f.write(sitemap_content)
 
 def main():
-    print(">>> 1. 최신 뉴스 피드 수집 단계 시작...")
+    print(">>> 1. 4대 공식 피드 수집 시작...")
     history_set = load_history()
     collected = []
     
     for feed in FEEDS:
-        items = fetch_rss_items(feed, history_set)
+        items = fetch_feed_items(feed, history_set)
         collected.extend(items)
         
-    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 선정됨")
+    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨 (국내 {sum(1 for i in collected if i['category']=='국내')} / 글로벌 {sum(1 for i in collected if i['category']=='글로벌')})")
     if not collected:
         print("수집 대상 기사가 없습니다. 종료합니다.")
         return
@@ -270,7 +280,7 @@ def main():
     new_posts = []
     
     for idx, item in enumerate(collected):
-        print(f"\n[{idx+1}/{len(collected)}] 기사 작성 중: {item['title'][:25]}...")
+        print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
         try:
             t, c = generate_article(item)
             timestamp = int(time.time()) + idx
@@ -289,12 +299,12 @@ def main():
                 "date_str": date_str,
                 "category": item['category']
             })
-            print(f"   └ 생성 완료: {t}")
+            print(f"-> 생성 완료: {t}")
             time.sleep(3)
         except Exception as e:
-            print(f"   └ [오류 발생]: {e}")
+            print(f"-> [작성 실패]: {e}")
 
-    print("\n>>> 2. 사이트 메인(index.html) 및 사이트맵(sitemap.xml) 갱신...")
+    print("\n>>> 2. index.html 및 sitemap.xml 갱신...")
     update_site(new_posts)
     print(f">>> 성공: 총 {len(new_posts)}건 신규 기사 발행 완료!")
 
