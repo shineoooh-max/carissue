@@ -1,328 +1,63 @@
 import os
-import re
-import time
 import json
 import urllib.request
-import xml.etree.ElementTree as ET
-from bs4 import BeautifulSoup
 
-# 1. API 키 설정
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is missing.")
+    raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다.")
 
-SITE_URL = "https://carissue.koo1000.com"
-POSTS_DIR = "posts"
-INDEX_PATH = "index.html"
-SITEMAP_PATH = "sitemap.xml"
-HISTORY_FILE = "published_links.txt"
-ADSENSE_ID = "ca-pub-3677274092490514"
+print(f">>> API Key 접두사 확인: {API_KEY[:6]}... (정상 로드됨)")
 
-FEEDS = [
-    {
-        "name": "모터그래프",
-        "category": "국내",
-        "url": "https://www.motorgraph.com/rss/allArticle.xml",
-        "target_count": 1
-    },
-    {
-        "name": "오토헤럴드",
-        "category": "국내",
-        "url": "http://www.autoherald.co.kr/rss/allArticle.xml",
-        "target_count": 1
-    },
-    {
-        "name": "Motor1",
-        "category": "글로벌",
-        "url": "https://www.motor1.com/rss/news/all/",
-        "target_count": 2
-    },
-    {
-        "name": "Carscoops",
-        "category": "글로벌",
-        "url": "https://www.carscoops.com/feed/",
-        "target_count": 1
-    }
-]
+# 1. 내 API 키로 사용 가능한 전체 모델 목록 조회 (ListModels)
+list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
 
-def load_history():
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-            return set(line.strip() for line in f if line.strip())
-    return set()
-
-def save_history(link):
-    with open(HISTORY_FILE, "a", encoding="utf-8") as f:
-        f.write(link.strip() + "\n")
-
-def fetch_feed_items(feed_conf, history_set):
-    items = []
-    target = feed_conf["target_count"]
-    print(f"\n[{feed_conf['name']}] 피드 수집 ({feed_conf['category']} - 목표: {target}건)")
-    
-    try:
-        req = urllib.request.Request(
-            feed_conf["url"],
-            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        )
-        raw_data = urllib.request.urlopen(req, timeout=15).read()
+print(">>> 구글 서버에 지원 모델 목록(ListModels) 요청 중...")
+try:
+    req = urllib.request.Request(list_url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=15) as res:
+        data = json.loads(res.read().decode("utf-8"))
+        models = data.get("models", [])
         
-        try:
-            xml_text = raw_data.decode('utf-8')
-        except UnicodeDecodeError:
-            xml_text = raw_data.decode('cp949', errors='ignore')
-            
-        root = ET.fromstring(xml_text)
-        entries = root.findall(".//item")
-        print(f"-> 발견된 기사 수: {len(entries)}개")
+        print("\n================ [사용 가능한 모델 목록] ================")
+        usable_models = []
+        for m in models:
+            methods = m.get("supportedGenerationMethods", [])
+            if "generateContent" in methods:
+                name = m.get("name") # e.g. models/gemini-1.5-flash
+                print(f"- {name}")
+                usable_models.append(name)
+        print("========================================================\n")
 
-        for entry in entries:
-            if len(items) >= target:
-                break
-                
-            link_el = entry.find("link")
-            guid_el = entry.find("guid")
-            link = ""
-            if link_el is not None and link_el.text:
-                link = link_el.text.strip()
-            elif guid_el is not None and guid_el.text:
-                link = guid_el.text.strip()
-                
-            if not link or link in history_set:
-                continue
+except urllib.error.HTTPError as e:
+    err_body = e.read().decode("utf-8")
+    print(f"!!! ListModels 실패 (HTTP {e.code}) !!!")
+    print(f"구글 응답 본문: {err_body}")
+    exit(1)
 
-            title_el = entry.find("title")
-            desc_el = entry.find("description")
-            title = title_el.text.strip() if title_el is not None and title_el.text else ""
-            desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
+if not usable_models:
+    print("generateContent를 지원하는 모델이 목록에 없습니다.")
+    exit(1)
 
-            image_url = ""
-            enclosure = entry.find("enclosure")
-            if enclosure is not None and enclosure.attrib.get("url"):
-                image_url = enclosure.attrib.get("url")
-            elif desc:
-                img_search = re.search(r'src=["\']([^"\']+)["\']', desc)
-                if img_search:
-                    image_url = img_search.group(1)
+# 2. 첫 번째 발견된 정상 모델로 즉시 1건 테스트 호출
+target_model = usable_models[0]
+print(f">>> 감지된 지원 모델 [{target_model}]로 즉시 기사 생성 테스트 진행...")
 
-            if not image_url or not image_url.startswith("http"):
-                image_url = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
+test_url = f"https://generativelanguage.googleapis.com/v1beta/{target_model}:generateContent?key={API_KEY}"
+payload = {
+    "contents": [{"parts": [{"text": "대한민국 자동차 매거진 카이슈 테스트 기사 한 문장만 써줘."}]}]
+}
 
-            clean_desc = re.sub(r'<[^>]+>', '', desc).strip()
-
-            items.append({
-                "category": feed_conf["category"],
-                "source": feed_conf["name"],
-                "title": title,
-                "link": link,
-                "desc": clean_desc[:500],
-                "image_url": image_url
-            })
-            history_set.add(link)
-            print(f"-> [채택] {title[:30]}...")
-
-    except Exception as e:
-        print(f"-> [수집 실패]: {e}")
-
-    return items
-
-def generate_article_rest(item):
-    prompt = f"""
-당신은 대한민국 1위 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 기자입니다.
-아래 뉴스 정보를 바탕으로 완성형 심층 분석 기사를 작성해주세요.
-
-[구분]: {item['category']} 자동차 이슈 ({item['source']})
-[주제 헤드라인]: {item['title']}
-[핵심 내용]: {item['desc']}
-
-[기사 작성 지침]
-1. 제목: 클릭을 유도하는 품격 있는 뉴스 헤드라인 (따옴표 활용)
-2. 분량: 공백 제외 800자 내외
-3. 본문 구성: 도입부(주목 배경), 본론(디자인/스펙/성능), 결론(경쟁차 비교 및 출시 전망)
-4. 문체: 정돈된 전문 기사체 (~했습니다, ~전망됩니다)
-
-[출력 형식]
-TITLE: [기사 제목]
-CONTENT: [본문 내용 (각 문단은 빈 줄 1개로 구분)]
-"""
-    # 라이브러리 없이 공식 REST API(v1 GA) 직통 호출
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
-    
-    payload = {
-        "contents": [{
-            "parts": [{"text": prompt}]
-        }],
-        "generationConfig": {
-            "temperature": 0.7,
-            "maxOutputTokens": 2048
-        }
-    }
-    
-    headers = {"Content-Type": "application/json"}
-    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers)
-    
-    try:
-        with urllib.request.urlopen(req, timeout=30) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            txt = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except urllib.error.HTTPError as e:
-        err_msg = e.read().decode("utf-8")
-        # v1beta 실패 시 정식 v1으로 2차 폴백
-        fallback_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY}"
-        req_fb = urllib.request.Request(fallback_url, data=json.dumps(payload).encode("utf-8"), headers=headers)
-        with urllib.request.urlopen(req_fb, timeout=30) as fb_res:
-            res_data = json.loads(fb_res.read().decode("utf-8"))
-            txt = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
-
-    title = ""
-    content = ""
-    if "TITLE:" in txt and "CONTENT:" in txt:
-        parts = txt.split("CONTENT:")
-        title = parts[0].replace("TITLE:", "").strip()
-        content = parts[1].strip()
-    else:
-        lines = [l for l in txt.split("\n") if l.strip()]
-        title = lines[0].replace("#", "").strip()
-        content = "\n\n".join(lines[1:]).strip()
-        
-    return title, content
-
-def build_post_html(post_id, title, content, image_url, date_str, category):
-    paragraphs = "".join([f"<p>{p.strip()}</p>" for p in content.split("\n\n") if p.strip()])
-    
-    return f"""<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - CARISSUE</title>
-    <meta name="description" content="{title}">
-    <link rel="stylesheet" href="../assets/style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_ID}" crossorigin="anonymous"></script>
-    <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: #f8f9fa; color: #212529; line-height: 1.8; }}
-        header {{ background: #fff; border-bottom: 1px solid #eaeaea; text-align: center; padding: 15px 0; }}
-        header img {{ height: 38px; }}
-        .article-container {{ max-width: 760px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }}
-        h1 {{ font-size: 26px; line-height: 1.4; margin-bottom: 15px; color: #111; word-break: keep-all; }}
-        .badge {{ display: inline-block; background: #0066cc; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }}
-        .meta {{ font-size: 13px; color: #888; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }}
-        .featured-img {{ width: 100%; border-radius: 8px; margin-bottom: 30px; object-fit: cover; max-height: 480px; }}
-        .article-body p {{ font-size: 16px; margin-bottom: 20px; word-break: keep-all; }}
-        footer {{ text-align: center; padding: 40px; font-size: 13px; color: #888; border-top: 1px solid #eee; margin-top: 60px; }}
-    </style>
-</head>
-<body>
-    <header>
-        <a href="../"><img src="../assets/logo.png" alt="CARISSUE"></a>
-    </header>
-
-    <div class="article-container">
-        <span class="badge">{category} 자동차 이슈</span>
-        <h1>{title}</h1>
-        <div class="meta">발행일: {date_str} | 카이슈 편집국</div>
-        
-        <img src="{image_url}" alt="{title}" class="featured-img">
-        
-        <div class="article-body">
-            {paragraphs}
-        </div>
-    </div>
-
-    <footer>
-        &copy; CARISSUE. All rights reserved.
-    </footer>
-</body>
-</html>"""
-
-def update_site(new_posts):
-    if not new_posts:
-        return
-
-    with open(INDEX_PATH, 'r', encoding='utf-8') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
-        
-    grid = soup.find('div', class_=re.compile(r'grid', re.I))
-    if not grid:
-        sample_card = soup.find('a', href=re.compile(r'posts/'))
-        if sample_card:
-            grid = sample_card.parent
-
-    if grid:
-        for post in reversed(new_posts):
-            card_html = f"""
-            <a href="posts/{post['id']}.html" class="post-card" style="text-decoration: none; color: inherit;">
-                <div style="overflow: hidden; border-radius: 8px; margin-bottom: 12px; height: 180px; background: #eee;">
-                    <img src="{post['image_url']}" alt="{post['title']}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #0066cc; margin-bottom: 6px;">CARISSUE {post['category']}</span>
-                <h3 style="font-size: 15px; font-weight: 700; line-height: 1.4; margin: 0 0 8px 0; color: #111;">{post['title']}</h3>
-                <span style="font-size: 11px; color: #999;">{post['date_str']}</span>
-            </a>
-            """
-            card_soup = BeautifulSoup(card_html, 'html.parser')
-            grid.insert(0, card_soup)
-            
-        with open(INDEX_PATH, 'w', encoding='utf-8') as f:
-            f.write(str(soup))
-
-    sitemap_entries = ""
-    for post in new_posts:
-        sitemap_entries += f"  <url>\n    <loc>{SITE_URL}/posts/{post['id']}.html</loc>\n    <lastmod>{post['date_str'][:10]}</lastmod>\n    <priority>0.8</priority>\n  </url>\n"
-        
-    if os.path.exists(SITEMAP_PATH):
-        with open(SITEMAP_PATH, 'r', encoding='utf-8') as f:
-            sitemap_content = f.read()
-        if "</urlset>" in sitemap_content:
-            sitemap_content = sitemap_content.replace("</urlset>", sitemap_entries + "</urlset>")
-            with open(SITEMAP_PATH, 'w', encoding='utf-8') as f:
-                f.write(sitemap_content)
-
-def main():
-    print(">>> 1. 4대 공식 피드 수집 시작...")
-    history_set = load_history()
-    collected = []
-    
-    for feed in FEEDS:
-        items = fetch_feed_items(feed, history_set)
-        collected.extend(items)
-        
-    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
-    if not collected:
-        print("수집 대상 기사가 없습니다. 종료합니다.")
-        return
-
-    os.makedirs(POSTS_DIR, exist_ok=True)
-    new_posts = []
-    
-    for idx, item in enumerate(collected):
-        print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
-        try:
-            t, c = generate_article_rest(item)
-            timestamp = int(time.time()) + idx
-            post_id = f"post_{timestamp}_{idx}"
-            date_str = time.strftime("%Y-%m-%d %H:%M")
-            
-            html = build_post_html(post_id, t, c, item['image_url'], date_str, item['category'])
-            with open(os.path.join(POSTS_DIR, f"{post_id}.html"), "w", encoding="utf-8") as f:
-                f.write(html)
-                
-            save_history(item['link'])
-            new_posts.append({
-                "id": post_id,
-                "title": t,
-                "image_url": item['image_url'],
-                "date_str": date_str,
-                "category": item['category']
-            })
-            print(f"-> 생성 완료: {t}")
-            time.sleep(3)
-        except Exception as e:
-            print(f"-> [작성 실패]: {e}")
-
-    print("\n>>> 2. index.html 및 sitemap.xml 갱신...")
-    update_site(new_posts)
-    print(f">>> 성공: 총 {len(new_posts)}건 신규 기사 발행 완료!")
-
-if __name__ == "__main__":
-    main()
+try:
+    req_test = urllib.request.Request(
+        test_url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(req_test, timeout=20) as test_res:
+        res_json = json.loads(test_res.read().decode("utf-8"))
+        reply = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+        print("\n>>> [성공!] 구글 AI 응답 확인:")
+        print(reply)
+        print("\n>>> 이 모델 식별자로 builder.py에 영구 고정하면 100% 끝납니다.")
+except urllib.error.HTTPError as e:
+    print(f"!!! 호출 실패: {e.read().decode('utf-8')}")
