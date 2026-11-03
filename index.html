@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CARISSUE - 글로벌 &amp; 국내 자동차 매거진</title>
-    <meta content="글로벌 및 국내 최신 자동차 뉴스, 신차 스펙, 시승기 및 심층 분석 매거진" name="description"/>
+    <meta name="description" content="글로벌 및 국내 최신 자동차 뉴스, 신차 스펙, 시승기 및 심층 분석 매거진">
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
     
-    <!-- 파비콘: 절대경로 및 favicon.ico 정상 연결 -->
-    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon"/>
-    
-    <!-- Google AdSense 실제 계정 반영 -->
-    <script async="" crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542"></script>
-    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff; color: #111; line-height: 1.6; }
         a { text-decoration: none; color: inherit; }
 
-        /* 상단 공통 헤더: 화이트 배경 + 3px 블랙 구분선 */
         header { background: #fff; border-bottom: 3px solid #111; position: sticky; top: 0; z-index: 1000; }
         .header-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }
         .logo img { height: 32px; display: block; }
@@ -31,7 +28,6 @@
         .section-header { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; margin: 40px 0 20px 0; border-bottom: 2px solid #111; padding-bottom: 8px; text-transform: uppercase; }
         .section-header span { color: #d32f2f; }
 
-        /* 3열 기사 그리드 */
         .article-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 24px; }
         .post-card { display: flex; flex-direction: column; background: #fff; }
         .post-card:hover h3 { color: #d32f2f; }
@@ -56,87 +52,726 @@
     </style>
 </head>
 <body>
-<header>
-    <div class="header-inner">
-        <!-- 로고 이미지 정상 적용 -->
-        <a class="logo" href="/"><img src="/assets/logo.png" alt="CARISSUE"></a>
-        <div class="nav-right">
-            <a class="nav-menu" href="/">NEWS</a>
-            <div class="sns-icons">
-                <a aria-label="Facebook" href="#"><svg viewbox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg></a>
-                <a aria-label="YouTube" href="#"><svg viewbox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path></svg></a>
-                <a aria-label="X" href="#"><svg viewbox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
-                <a aria-label="Instagram" href="#"><svg viewbox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg></a>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo.png" alt="CARISSUE"></a>
+            <div class="nav-right">
+                <a href="/" class="nav-menu">NEWS</a>
+                <div class="sns-icons">
+                    <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                    <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                </div>
             </div>
         </div>
-    </div>
-</header>
-<main class="container">
-    <div class="section-header">LATEST STORIES <span>●</span></div>
-    <div class="article-grid" id="article-grid">
-        <article class="post-card">
-            <a class="thumb-wrap" href="posts/post_1793713154_0.html">
-                <img alt="&quot;고성능 헤리티지와 힙한 감각의 조우&quot;… MINI 코리아, 'JCW 팩' 앰버서더로 배우 이종원 발탁" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&amp;fit=crop&amp;w=800&amp;q=80"/>
-            </a>
-            <span class="card-tag">CARISSUE 국내</span>
-            <a href="posts/post_1793713154_0.html">
-                <h3>"고성능 헤리티지와 힙한 감각의 조우"… MINI 코리아, 'JCW 팩' 앰버서더로 배우 이종원 발탁</h3>
-            </a>
-            <span class="date">2026-11-03 13:39</span>
-            <a class="read-more" href="posts/post_1793713154_0.html">READ MORE →</a>
-        </article>
+    </header>
 
+    <main class="container">
+        <div class="section-header">LATEST STORIES <span>●</span></div>
+        <div class="article-grid" id="article-grid">
+            
         <article class="post-card">
-            <a class="thumb-wrap" href="posts/post_1793713181_1.html">
-                <img alt="'RV가 가른 형제간 명암'… 기아, '7,708대 폭주' 스포티지 앞세워 현대차 넘었다" src="https://cdn.autoherald.co.kr/news/photo/202611/62083_119916_733.jpg"/>
-            </a>
-            <span class="card-tag">CARISSUE 국내</span>
-            <a href="posts/post_1793713181_1.html">
-                <h3>'RV가 가른 형제간 명암'… 기아, '7,708대 폭주' 스포티지 앞세워 현대차 넘었다</h3>
-            </a>
-            <span class="date">2026-11-03 13:39</span>
-            <a class="read-more" href="posts/post_1793713181_1.html">READ MORE →</a>
-        </article>
-
-        <article class="post-card">
-            <a class="thumb-wrap" href="posts/post_1793713207_2.html">
-                <img alt="&quot;F1 심장 품은 최후의 아날로그&quot;… 페라리 F50, 경매서 '258억 원' 역대 최고가 경신" src="https://cdn.motor1.com/images/mgl/pb8Gmv/s3/broad-arrow-las-vegas-2026---1997-ferrari-f50.jpg"/>
+            <a href="posts/post_1793715520_4.html" class="thumb-wrap">
+                <img src="https://www.carscoops.com/img/gallery/jeep-scrambler-returns-with-v8-power-and-independent-front-suspension-but-you-cant-buy-it-yet/l-intro-1793714304.jpg" alt=""V8 심장과 독립 현가장치의 파격"… 지프 전설의 귀환, '스크램블러' 콘셉트 전격 공개">
             </a>
             <span class="card-tag">CARISSUE 글로벌</span>
-            <a href="posts/post_1793713207_2.html">
-                <h3>"F1 심장 품은 최후의 아날로그"… 페라리 F50, 경매서 '258억 원' 역대 최고가 경신</h3>
+            <a href="posts/post_1793715520_4.html">
+                <h3>"V8 심장과 독립 현가장치의 파격"… 지프 전설의 귀환, '스크램블러' 콘셉트 전격 공개</h3>
             </a>
-            <span class="date">2026-11-03 13:40</span>
-            <a class="read-more" href="posts/post_1793713207_2.html">READ MORE →</a>
+            <span class="date">2026-11-03 14:18</span>
+            <a href="posts/post_1793715520_4.html" class="read-more">READ MORE &rarr;</a>
         </article>
-
+        
         <article class="post-card">
-            <a class="thumb-wrap" href="posts/post_1793713232_3.html">
-                <img alt="&quot;단돈 110만 원의 반전&quot;… 화려한 슈퍼카 제치고 SEMA 홀린 '1985 포드 F-250'" src="https://cdn.motor1.com/images/mgl/wlkbGo/s3/1985-ford-f-250-sema-restomod.jpg"/>
+            <a href="posts/post_1793715502_3.html" class="thumb-wrap">
+                <img src="https://cdn.motor1.com/images/mgl/G3bjzJ/s3/tesla-optimus-v3.jpg" alt=""차보다 로봇 먼저 팔리나"…테슬라 '옵티머스' 사전 예약설에 숨겨진 진실 [카이슈 심층분석]">
             </a>
             <span class="card-tag">CARISSUE 글로벌</span>
-            <a href="posts/post_1793713232_3.html">
-                <h3>"단돈 110만 원의 반전"… 화려한 슈퍼카 제치고 SEMA 홀린 '1985 포드 F-250'</h3>
+            <a href="posts/post_1793715502_3.html">
+                <h3>"차보다 로봇 먼저 팔리나"…테슬라 '옵티머스' 사전 예약설에 숨겨진 진실 [카이슈 심층분석]</h3>
             </a>
-            <span class="date">2026-11-03 13:40</span>
-            <a class="read-more" href="posts/post_1793713232_3.html">READ MORE →</a>
+            <span class="date">2026-11-03 14:18</span>
+            <a href="posts/post_1793715502_3.html" class="read-more">READ MORE &rarr;</a>
         </article>
-
+        
         <article class="post-card">
-            <a class="thumb-wrap" href="posts/post_1793713255_4.html">
-                <img alt="&quot;알피나가 완성한 7시리즈의 정점&quot;… 베일 벗는 새 플래그십, 우리가 이미 알고 있는 실체는?" src="https://www.carscoops.com/img/gallery/bmw-alpina-teases-its-next-model-but-we-already-know-what-it-is/l-intro-1793712339.jpg"/>
+            <a href="posts/post_1793715471_2.html" class="thumb-wrap">
+                <img src="https://cdn.motor1.com/images/mgl/BX1LJm/s3/2028-bmw-alpina-7-series-teaser.jpg" alt=""시속 300km 돌파"…BMW 품에 안긴 알피나의 첫 역작, 'V8 럭셔리 세단' 베일 벗다">
+            </a>
+            <span class="card-tag">CARISSUE 글로벌</span>
+            <a href="posts/post_1793715471_2.html">
+                <h3>"시속 300km 돌파"…BMW 품에 안긴 알피나의 첫 역작, 'V8 럭셔리 세단' 베일 벗다</h3>
+            </a>
+            <span class="date">2026-11-03 14:17</span>
+            <a href="posts/post_1793715471_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793715438_1.html" class="thumb-wrap">
+                <img src="https://cdn.autoherald.co.kr/news/photo/202611/62082_119915_5850.png" alt=""과반 무너진 K-전기차"... 8% 관세 뚫고 안방 삼킨 '중국산 공습', 정부 지원 골든타임 놓치나">
+            </a>
+            <span class="card-tag">CARISSUE 국내</span>
+            <a href="posts/post_1793715438_1.html">
+                <h3>"과반 무너진 K-전기차"... 8% 관세 뚫고 안방 삼킨 '중국산 공습', 정부 지원 골든타임 놓치나</h3>
+            </a>
+            <span class="date">2026-11-03 14:17</span>
+            <a href="posts/post_1793715438_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793715412_0.html" class="thumb-wrap">
+                <img src="https://cdn.motorgraph.com/image/brand/brand-kia.png" alt=""베텔 기록 3년 앞당겼다" 20세 괴물 안토넬리, F1 역대 최연소 월드 챔피언 등극… 메르세데스 제국의 화려한 부활">
+            </a>
+            <span class="card-tag">CARISSUE 국내</span>
+            <a href="posts/post_1793715412_0.html">
+                <h3>"베텔 기록 3년 앞당겼다" 20세 괴물 안토넬리, F1 역대 최연소 월드 챔피언 등극… 메르세데스 제국의 화려한 부활</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793715412_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612494_9.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""잡힐 때까지 10,000rpm으로 쫓는다"… 907마력 람보르기니 '테메라리오', 두바이 경찰 합류">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612494_9.html">
+                <h3>"잡힐 때까지 10,000rpm으로 쫓는다"… 907마력 람보르기니 '테메라리오', 두바이 경찰 합류</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612494_9.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612466_8.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""원하는 사람이 없다"... 포르쉐, 순수 전기 슈퍼카 개발 전격 철회한 진짜 이유">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612466_8.html">
+                <h3>"원하는 사람이 없다"... 포르쉐, 순수 전기 슈퍼카 개발 전격 철회한 진짜 이유</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612466_8.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612444_7.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""시속 530km 벽 깬다?" 테슬라 신형 로드스터, 전무후무한 최고속도 예고에 업계 '술렁'">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612444_7.html">
+                <h3>"시속 530km 벽 깬다?" 테슬라 신형 로드스터, 전무후무한 최고속도 예고에 업계 '술렁'</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612444_7.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612420_6.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="단 170km 달린 ‘타임캡슐’ 페라리 F50, 경매가 270억 원 전망">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612420_6.html">
+                <h3>단 170km 달린 ‘타임캡슐’ 페라리 F50, 경매가 270억 원 전망</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612420_6.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612388_5.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="10년 만에 몰샤임 귀환… 거울처럼 눈부신 알루미늄의 ‘원오프’ 부가티 베이론 부활">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612388_5.html">
+                <h3>10년 만에 몰샤임 귀환… 거울처럼 눈부신 알루미늄의 ‘원오프’ 부가티 베이론 부활</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612388_5.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612360_4.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="뉴욕 심장부 수놓은 순수 전기 레이서, 포르쉐 '미션 S 콘셉트' 도심 점령기">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612360_4.html">
+                <h3>뉴욕 심장부 수놓은 순수 전기 레이서, 포르쉐 '미션 S 콘셉트' 도심 점령기</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612360_4.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612339_3.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="폭스바겐의 '순수 전기 부가티' 막아선 마테 리막… 1,800마력 V16 심장 살려낸 비화">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612339_3.html">
+                <h3>폭스바겐의 '순수 전기 부가티' 막아선 마테 리막… 1,800마력 V16 심장 살려낸 비화</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612339_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612314_2.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="차 한 대에 200억 원? 포르쉐가 준비 중인 15대의 궁극적 ‘원오프’, 럭셔리의 정점을 찌르다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612314_2.html">
+                <h3>차 한 대에 200억 원? 포르쉐가 준비 중인 15대의 궁극적 ‘원오프’, 럭셔리의 정점을 찌르다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612314_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612287_1.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="다이아몬드를 갈아 넣은 수동 V12의 마침표… 파가니, 최종장 ‘와이라 70 아니마’ 공개">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612287_1.html">
+                <h3>다이아몬드를 갈아 넣은 수동 V12의 마침표… 파가니, 최종장 ‘와이라 70 아니마’ 공개</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612287_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793612215_0.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""기술은 완성됐다, 문제는 고객" 현대차의 뼈아픈 고백… 수소 승용차는 생존할 수 있을까?">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793612215_0.html">
+                <h3>"기술은 완성됐다, 문제는 고객" 현대차의 뼈아픈 고백… 수소 승용차는 생존할 수 있을까?</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793612215_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609519_9.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="‘V16에 수동변속기라니’… 부가티, 전기 모터 걷어낸 순수 내연기관 하이퍼카 검토">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609519_9.html">
+                <h3>‘V16에 수동변속기라니’… 부가티, 전기 모터 걷어낸 순수 내연기관 하이퍼카 검토</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609519_9.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609490_8.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="“도로 위의 전투기 실현되나” 592마력 품은 KTM 경량 슈퍼카 ‘X-Bow’, 美 시장 전격 출격">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609490_8.html">
+                <h3>“도로 위의 전투기 실현되나” 592마력 품은 KTM 경량 슈퍼카 ‘X-Bow’, 美 시장 전격 출격</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609490_8.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609460_7.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""미국 전역 단 7대 전량 리콜"… 50억 코닉세그 CC850, 주차 브레이크 결함 터졌다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609460_7.html">
+                <h3>"미국 전역 단 7대 전량 리콜"… 50억 코닉세그 CC850, 주차 브레이크 결함 터졌다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609460_7.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609428_6.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="지붕 열고 350km/h로 질주한다… 1,000마력 품은 애스턴마틴 ‘발할라 스파이더’의 습격">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609428_6.html">
+                <h3>지붕 열고 350km/h로 질주한다… 1,000마력 품은 애스턴마틴 ‘발할라 스파이더’의 습격</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609428_6.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609395_5.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""백지수표 내밀어도 못 산다"…포르쉐 차세대 슈퍼카, 폭발적 반응에도 출시 미루는 이유">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609395_5.html">
+                <h3>"백지수표 내밀어도 못 산다"…포르쉐 차세대 슈퍼카, 폭발적 반응에도 출시 미루는 이유</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609395_5.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609370_4.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="수동변속기와 자연흡기 V8의 부활... 풀 카본 바디로 부활한 '페라리 308' 레스토모드">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609370_4.html">
+                <h3>수동변속기와 자연흡기 V8의 부활... 풀 카본 바디로 부활한 '페라리 308' 레스토모드</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609370_4.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609347_3.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="블랙 루프의 치명적 관능미... 람보르기니, 투톤 감성 극대화한 '테메라리오 테토네로' 전격 공개">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609347_3.html">
+                <h3>블랙 루프의 치명적 관능미... 람보르기니, 투톤 감성 극대화한 '테메라리오 테토네로' 전격 공개</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609347_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609323_2.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="공장서 도난당한 수십억 부가티, 포르쉐 911 몰고 직접 추격한 마테 리막 CEO">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609323_2.html">
+                <h3>공장서 도난당한 수십억 부가티, 포르쉐 911 몰고 직접 추격한 마테 리막 CEO</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609323_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609299_1.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="“옛 주인이 돌아왔다” 미쓰비시 부활 이끄는 신형 파제로, 타사 고객까지 집어삼킨 비결">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609299_1.html">
+                <h3>“옛 주인이 돌아왔다” 미쓰비시 부활 이끄는 신형 파제로, 타사 고객까지 집어삼킨 비결</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609299_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793609268_0.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""궁극의 앞바퀴 굴림 나온다"… 혼다, 트랙 무기 '시빅 타입 R HRC' 양산 착수">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793609268_0.html">
+                <h3>"궁극의 앞바퀴 굴림 나온다"… 혼다, 트랙 무기 '시빅 타입 R HRC' 양산 착수</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793609268_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605824_9.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="자존심 버린 폭스바겐의 승부수… 中서 만든 ‘차세대 두뇌’, 유럽 안방과 글로벌로 역수출한다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605824_9.html">
+                <h3>자존심 버린 폭스바겐의 승부수… 中서 만든 ‘차세대 두뇌’, 유럽 안방과 글로벌로 역수출한다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605824_9.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605796_8.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="전기차 올인이 능사 아니다… 알핀, 차세대 '내연기관 스포츠카' 부활 가능성 시사">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605796_8.html">
+                <h3>전기차 올인이 능사 아니다… 알핀, 차세대 '내연기관 스포츠카' 부활 가능성 시사</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605796_8.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605773_7.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="운전대 놓는 토요타, 구글 웨이모와 맞손… 2027년 '무인 bZ4X' 달린다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605773_7.html">
+                <h3>운전대 놓는 토요타, 구글 웨이모와 맞손… 2027년 '무인 bZ4X' 달린다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605773_7.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605739_6.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="슈퍼카 뺨치는 709마력의 괴물 왜건... 압트(ABT), 아우디 RS5 기반 'RS5-R' 130대 한정 공개">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605739_6.html">
+                <h3>슈퍼카 뺨치는 709마력의 괴물 왜건... 압트(ABT), 아우디 RS5 기반 'RS5-R' 130대 한정 공개</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605739_6.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605706_5.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="공도 위 포뮬러의 귀환, 아리엘 '아톰 4RR & 노마드 2' 미국 상륙… '순수 롤링 섀시'로 규제 뚫었다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605706_5.html">
+                <h3>공도 위 포뮬러의 귀환, 아리엘 '아톰 4RR & 노마드 2' 미국 상륙… '순수 롤링 섀시'로 규제 뚫었다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605706_5.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605680_4.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="골프마저 멈춰 세운 전기차 한파… 폭스바겐, 'ID. 골프' 개발 전격 중단한 진짜 속사정">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605680_4.html">
+                <h3>골프마저 멈춰 세운 전기차 한파… 폭스바겐, 'ID. 골프' 개발 전격 중단한 진짜 속사정</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605680_4.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605649_3.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""지구 25바퀴 돌았다" 100만 km 극한 테스트 끝낸 벤틀리 첫 전기차, 럭셔리 EV의 새 기준 제시하나">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605649_3.html">
+                <h3>"지구 25바퀴 돌았다" 100만 km 극한 테스트 끝낸 벤틀리 첫 전기차, 럭셔리 EV의 새 기준 제시하나</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605649_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605615_2.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""지상고 올리고 펜더 키웠다"… 토요타, SEMA 뒤흔든 5종의 '우드랜드' 리프트업 콘셉트 공개">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605615_2.html">
+                <h3>"지상고 올리고 펜더 키웠다"… 토요타, SEMA 뒤흔든 5종의 '우드랜드' 리프트업 콘셉트 공개</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605615_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605589_1.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="클래식 닷선 240Z의 파격적 부활… 트윈터보 V6와 풀 카본으로 무장한 원오프 S30 콘셉트">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605589_1.html">
+                <h3>클래식 닷선 240Z의 파격적 부활… 트윈터보 V6와 풀 카본으로 무장한 원오프 S30 콘셉트</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605589_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793605566_0.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""정통 픽업 흉내 낼 생각 없었다"… 혼다 릿지라인, 20년 앞서간 'SUV형 픽업'의 탄생 비화">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793605566_0.html">
+                <h3>"정통 픽업 흉내 낼 생각 없었다"… 혼다 릿지라인, 20년 앞서간 'SUV형 픽업'의 탄생 비화</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793605566_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604197_9.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="클래식 콰트로의 부활? 10,000RPM 찍는 괴물 V8 품은 레스트모드 '오다셔스 IV' 등장">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604197_9.html">
+                <h3>클래식 콰트로의 부활? 10,000RPM 찍는 괴물 V8 품은 레스트모드 '오다셔스 IV' 등장</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604197_9.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604176_8.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="마침내 봉인 해제된 맥라렌의 차세대 괴물, 이름은 'McL 820'… 2027년 슈퍼카 판도 뒤흔든다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604176_8.html">
+                <h3>마침내 봉인 해제된 맥라렌의 차세대 괴물, 이름은 'McL 820'… 2027년 슈퍼카 판도 뒤흔든다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604176_8.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604152_7.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""내 차가 내 운전 습관을 몰래 팔았다?" GM, 주행 데이터 무단 판매 의혹에 3,000억 원대 '철퇴'">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604152_7.html">
+                <h3>"내 차가 내 운전 습관을 몰래 팔았다?" GM, 주행 데이터 무단 판매 의혹에 3,000억 원대 '철퇴'</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604152_7.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604125_6.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""몬차 서킷을 찢었다!" 포드, 코요테 V8 탑재한 차세대 LMDh 하이퍼카 폭풍 질주 포착">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604125_6.html">
+                <h3>"몬차 서킷을 찢었다!" 포드, 코요테 V8 탑재한 차세대 LMDh 하이퍼카 폭풍 질주 포착</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604125_6.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604094_5.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""이건 진짜 사고 싶네"… 깐깐한 제임스 메이도 반한 초소형 전기 픽업 '슬레이트'">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604094_5.html">
+                <h3>"이건 진짜 사고 싶네"… 깐깐한 제임스 메이도 반한 초소형 전기 픽업 '슬레이트'</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604094_5.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604069_4.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="단 하나의 크랙이 부른 참사… 1,400만 원짜리 포르쉐 911 엔진이 통째로 녹아내린 이유">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604069_4.html">
+                <h3>단 하나의 크랙이 부른 참사… 1,400만 원짜리 포르쉐 911 엔진이 통째로 녹아내린 이유</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604069_4.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604037_3.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="V8 헤미 엔진 잊혀질라… 무려 1,000마력 뿜어내는 신형 닷지 차저, 결국 변속기까지 비명 질렀다">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604037_3.html">
+                <h3>V8 헤미 엔진 잊혀질라… 무려 1,000마력 뿜어내는 신형 닷지 차저, 결국 변속기까지 비명 질렀다</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604037_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793604013_2.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""이게 진짜 복원된다고?" 30년 묵은 '폐차 직전' 토요타 캠리가 신차급으로 부활한 순간">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793604013_2.html">
+                <h3>"이게 진짜 복원된다고?" 30년 묵은 '폐차 직전' 토요타 캠리가 신차급으로 부활한 순간</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793604013_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793603980_1.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="‘1,200마력 V8 괴물’로 돌변했다… 카르마의 충격적인 하이브리드 트랙 웨폰 ‘엑시미우스 1’">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793603980_1.html">
+                <h3>‘1,200마력 V8 괴물’로 돌변했다… 카르마의 충격적인 하이브리드 트랙 웨폰 ‘엑시미우스 1’</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793603980_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793603951_0.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""상징마저 포기하나"… 폭스바겐, '전기차 골프' 개발 중단 위기에 발칵">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793603951_0.html">
+                <h3>"상징마저 포기하나"… 폭스바겐, '전기차 골프' 개발 중단 위기에 발칵</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793603951_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793594480_3.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="서킷의 문턱을 낮추고 팬덤을 완성하다: 현대 N 페스티벌이 증명한 K-모터스포츠의 진화">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793594480_3.html">
+                <h3>서킷의 문턱을 낮추고 팬덤을 완성하다: 현대 N 페스티벌이 증명한 K-모터스포츠의 진화</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793594480_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793594328_2.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""변속기가 비명을 지른다" 휠마력 1,000마력 뿜어내는 닷지 차저의 반전">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793594328_2.html">
+                <h3>"변속기가 비명을 지른다" 휠마력 1,000마력 뿜어내는 닷지 차저의 반전</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793594328_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793594270_1.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="30년 묵은 때 벗겨낸 '전설의 세단'… 1995년형 토요타 캠리의 완벽한 환골탈태">
+            </a>
+            <span class="card-tag">CARISSUE 이슈</span>
+            <a href="posts/post_1793594270_1.html">
+                <h3>30년 묵은 때 벗겨낸 '전설의 세단'… 1995년형 토요타 캠리의 완벽한 환골탈태</h3>
+            </a>
+            <span class="date">2026-11-03 14:16</span>
+            <a href="posts/post_1793594270_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793713255_4.html" class="thumb-wrap">
+                <img src="https://www.carscoops.com/img/gallery/bmw-alpina-teases-its-next-model-but-we-already-know-what-it-is/l-intro-1793712339.jpg" alt=""알피나가 완성한 7시리즈의 정점"… 베일 벗는 새 플래그십, 우리가 이미 알고 있는 실체는?">
             </a>
             <span class="card-tag">CARISSUE 글로벌</span>
             <a href="posts/post_1793713255_4.html">
                 <h3>"알피나가 완성한 7시리즈의 정점"… 베일 벗는 새 플래그십, 우리가 이미 알고 있는 실체는?</h3>
             </a>
             <span class="date">2026-11-03 13:40</span>
-            <a class="read-more" href="posts/post_1793713255_4.html">READ MORE →</a>
+            <a href="posts/post_1793713255_4.html" class="read-more">READ MORE &rarr;</a>
         </article>
-    </div>
-</main>
-<footer>
-    © CARISSUE. All rights reserved.
-</footer>
+        
+        <article class="post-card">
+            <a href="posts/post_1793713232_3.html" class="thumb-wrap">
+                <img src="https://cdn.motor1.com/images/mgl/wlkbGo/s3/1985-ford-f-250-sema-restomod.jpg" alt=""단돈 110만 원의 반전"… 화려한 슈퍼카 제치고 SEMA 홀린 '1985 포드 F-250'">
+            </a>
+            <span class="card-tag">CARISSUE 글로벌</span>
+            <a href="posts/post_1793713232_3.html">
+                <h3>"단돈 110만 원의 반전"… 화려한 슈퍼카 제치고 SEMA 홀린 '1985 포드 F-250'</h3>
+            </a>
+            <span class="date">2026-11-03 13:40</span>
+            <a href="posts/post_1793713232_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793713207_2.html" class="thumb-wrap">
+                <img src="https://cdn.motor1.com/images/mgl/pb8Gmv/s3/broad-arrow-las-vegas-2026---1997-ferrari-f50.jpg" alt=""F1 심장 품은 최후의 아날로그"… 페라리 F50, 경매서 '258억 원' 역대 최고가 경신">
+            </a>
+            <span class="card-tag">CARISSUE 글로벌</span>
+            <a href="posts/post_1793713207_2.html">
+                <h3>"F1 심장 품은 최후의 아날로그"… 페라리 F50, 경매서 '258억 원' 역대 최고가 경신</h3>
+            </a>
+            <span class="date">2026-11-03 13:40</span>
+            <a href="posts/post_1793713207_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793713181_1.html" class="thumb-wrap">
+                <img src="https://cdn.autoherald.co.kr/news/photo/202611/62083_119916_733.jpg" alt="'RV가 가른 형제간 명암'… 기아, '7,708대 폭주' 스포티지 앞세워 현대차 넘었다">
+            </a>
+            <span class="card-tag">CARISSUE 국내</span>
+            <a href="posts/post_1793713181_1.html">
+                <h3>'RV가 가른 형제간 명암'… 기아, '7,708대 폭주' 스포티지 앞세워 현대차 넘었다</h3>
+            </a>
+            <span class="date">2026-11-03 13:39</span>
+            <a href="posts/post_1793713181_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793713154_0.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""고성능 헤리티지와 힙한 감각의 조우"… MINI 코리아, 'JCW 팩' 앰버서더로 배우 이종원 발탁">
+            </a>
+            <span class="card-tag">CARISSUE 국내</span>
+            <a href="posts/post_1793713154_0.html">
+                <h3>"고성능 헤리티지와 힙한 감각의 조우"… MINI 코리아, 'JCW 팩' 앰버서더로 배우 이종원 발탁</h3>
+            </a>
+            <span class="date">2026-11-03 13:39</span>
+            <a href="posts/post_1793713154_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793703901_4.html" class="thumb-wrap">
+                <img src="https://www.carscoops.com/img/gallery/dodge-is-returning-to-nascar-after-a-14-year-hiatus/l-intro-1793672352.jpg" alt=""14년 만의 포효"… 아메리칸 머슬의 상징 닷지, 나스카(NASCAR) 전격 복귀">
+            </a>
+            <span class="card-tag">CARISSUE 글로벌 자동차</span>
+            <a href="posts/post_1793703901_4.html">
+                <h3>"14년 만의 포효"… 아메리칸 머슬의 상징 닷지, 나스카(NASCAR) 전격 복귀</h3>
+            </a>
+            <span class="date">2026-11-03 11:04</span>
+            <a href="posts/post_1793703901_4.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793703877_3.html" class="thumb-wrap">
+                <img src="https://cdn.motor1.com/images/mgl/Mk6LZp/s3/2002-2005-acura-nsx.jpg" alt=""전설은 영원히 달린다"… 아큐라, 1세대 NSX 위한 '3,000개 순정 부품' 전격 부활">
+            </a>
+            <span class="card-tag">CARISSUE 글로벌 자동차</span>
+            <a href="posts/post_1793703877_3.html">
+                <h3>"전설은 영원히 달린다"… 아큐라, 1세대 NSX 위한 '3,000개 순정 부품' 전격 부활</h3>
+            </a>
+            <span class="date">2026-11-03 11:04</span>
+            <a href="posts/post_1793703877_3.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793703852_2.html" class="thumb-wrap">
+                <img src="https://cdn.motor1.com/images/mgl/Vzb949/s3/ford-racing-r125-mustang-fastback-restomod.jpg" alt=""1966년의 영혼에 심은 현대적 V8"…포드가 직접 증명한 '궁극의 레스토모드' 머스탱">
+            </a>
+            <span class="card-tag">CARISSUE 글로벌 자동차</span>
+            <a href="posts/post_1793703852_2.html">
+                <h3>"1966년의 영혼에 심은 현대적 V8"…포드가 직접 증명한 '궁극의 레스토모드' 머스탱</h3>
+            </a>
+            <span class="date">2026-11-03 11:04</span>
+            <a href="posts/post_1793703852_2.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793703829_1.html" class="thumb-wrap">
+                <img src="https://cdn.autoherald.co.kr/news/photo/202611/62084_119922_5711.jpg" alt=""美 3분기 실적 단 한 달에 넘었다"…BYD, 순수전기차 30만 대 돌파의 '충격'">
+            </a>
+            <span class="card-tag">CARISSUE 국내 자동차</span>
+            <a href="posts/post_1793703829_1.html">
+                <h3>"美 3분기 실적 단 한 달에 넘었다"…BYD, 순수전기차 30만 대 돌파의 '충격'</h3>
+            </a>
+            <span class="date">2026-11-03 11:03</span>
+            <a href="posts/post_1793703829_1.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        <article class="post-card">
+            <a href="posts/post_1793703800_0.html" class="thumb-wrap">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt=""볼보 신화 주역 품었다"… 중국 테크 프리미엄 '엑스펑', 이만식 대표 앞세워 한국 상륙 초읽기">
+            </a>
+            <span class="card-tag">CARISSUE 국내 자동차</span>
+            <a href="posts/post_1793703800_0.html">
+                <h3>"볼보 신화 주역 품었다"… 중국 테크 프리미엄 '엑스펑', 이만식 대표 앞세워 한국 상륙 초읽기</h3>
+            </a>
+            <span class="date">2026-11-03 11:03</span>
+            <a href="posts/post_1793703800_0.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        
+        </div>
+    </main>
+
+    <footer>
+        &copy; CARISSUE. All rights reserved.
+    </footer>
 </body>
 </html>
