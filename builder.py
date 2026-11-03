@@ -23,15 +23,15 @@ SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 
 # ==========================================
-# 2. 애드센스 실제 계정 및 고유 슬롯 번호 반영
+# 2. 확정된 애드센스 계정 및 고유 슬롯 ID
 # ==========================================
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
 AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 글 사이 중간광고 (인아티클)
-AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 광고 (사각형 중간광고)
-AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이 광고 (최상단 광고)
+AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 광고
+AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이 광고
 
 # ==========================================
-# 3. 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 5건)
+# 3. 4대 공식 피드 배분 (5건)
 # ==========================================
 FEEDS = [
     {"name": "모터그래프", "category": "국내", "url": "https://www.motorgraph.com/rss/allArticle.xml", "target_count": 1},
@@ -160,13 +160,9 @@ CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
         
     return title, content
 
-# ==========================================
-# 4. 서브 본문 HTML 렌더링 (인아티클/사이드바 슬롯 반영)
-# ==========================================
 def build_post_html(post_id, title, content, image_url, date_str, category):
     paras = [p.strip() for p in content.split("\n\n") if p.strip()]
     
-    # 본문 첫 단락 직후 인아티클 광고 코드
     in_article_ad = f"""
     <div class="ad-in-article">
         <ins class="adsbygoogle"
@@ -207,12 +203,12 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - CARISSUE</title>
     <meta name="description" content="{paras[0][:120] if paras else title}">
-    <link rel="icon" href="../assets/logo.png">
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
     
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
     
-    <!-- JSON-LD SEO 구조화 데이터 -->
+    <!-- SEO Schema -->
     <script type="application/ld+json">
     {schema_json}
     </script>
@@ -222,16 +218,14 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
         body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff; color: #111; line-height: 1.8; }}
         a {{ text-decoration: none; color: inherit; }}
 
-        /* 상단 헤더: 화이트 배경 + 3px 블랙 구분선 */
         header {{ background: #fff; border-bottom: 3px solid #111; position: sticky; top: 0; z-index: 1000; }}
-        .header-inner {{ max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; }}
-        .logo {{ font-size: 26px; font-weight: 900; letter-spacing: -1px; color: #111; }}
+        .header-inner {{ max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }}
+        .logo img {{ height: 32px; display: block; }}
         .nav-right {{ display: flex; align-items: center; gap: 24px; }}
         .nav-menu {{ font-size: 15px; font-weight: 800; color: #111; letter-spacing: 0.5px; }}
         .sns-icons {{ display: flex; align-items: center; gap: 14px; }}
         .sns-icons svg {{ width: 17px; height: 17px; fill: #111; }}
 
-        /* 2단 본문 그리드 (PC 7:3 구조) */
         .main-wrapper {{ max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 320px; gap: 40px; }}
         .content-area {{ min-width: 0; }}
         .badge {{ display: inline-block; background: #d32f2f; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 2px; text-transform: uppercase; margin-bottom: 12px; }}
@@ -240,11 +234,9 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
         .featured-img {{ width: 100%; border-radius: 4px; margin-bottom: 25px; object-fit: cover; max-height: 520px; }}
         
         .article-body p {{ font-size: 17px; line-height: 1.85; margin-bottom: 22px; color: #222; word-break: keep-all; }}
-        
         .ad-in-article {{ margin: 35px 0; text-align: center; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; }}
         .ad-bottom {{ margin: 40px 0; text-align: center; }}
 
-        /* 우측 고정 사이드바 */
         .sidebar {{ min-width: 0; }}
         .sidebar-sticky {{ position: -webkit-sticky; position: sticky; top: 85px; }}
         .sidebar-title {{ font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #111; padding-bottom: 6px; }}
@@ -263,9 +255,9 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
 <body>
     <header>
         <div class="header-inner">
-            <a href="../" class="logo">CARISSUE</a>
+            <a href="/" class="logo"><img src="/assets/logo.png" alt="CARISSUE"></a>
             <div class="nav-right">
-                <a href="../" class="nav-menu">NEWS</a>
+                <a href="/" class="nav-menu">NEWS</a>
                 <div class="sns-icons">
                     <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
                     <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
@@ -288,7 +280,6 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
                 {article_body_html}
             </div>
 
-            <!-- 본문 하단 디스플레이 반응형 광고 -->
             <div class="ad-bottom">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -302,7 +293,6 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
             </div>
         </article>
 
-        <!-- 우측 고정 사이드바 광고 (스크롤 다운 시 상단 고정 유지) -->
         <aside class="sidebar">
             <div class="sidebar-sticky">
                 <div class="sidebar-title">ADVERTISEMENT</div>
@@ -324,51 +314,174 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
 </html>"""
 
 # ==========================================
-# 5. 메인 인덱스 및 사이트맵 갱신
+# 5. 기존 posts 폴더의 모든 글 전체 자동 복구 및 인덱스 재생성
 # ==========================================
-def update_site(new_posts):
-    if not new_posts:
-        return
+def rebuild_entire_site():
+    print(">>> [전체 복구] posts 폴더의 모든 과거 기사를 스캔하여 메인 페이지를 재구성합니다...")
+    posts = []
+    
+    if os.path.exists(POSTS_DIR):
+        for fname in os.listdir(POSTS_DIR):
+            if not fname.endswith(".html"):
+                continue
+            fpath = os.path.join(POSTS_DIR, fname)
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    soup = BeautifulSoup(f.read(), "html.parser")
+                
+                h1 = soup.find("h1")
+                title = h1.text.strip() if h1 else fname.replace(".html", "")
+                
+                img = soup.find("img", class_="featured-img")
+                img_url = img["src"] if img and img.get("src") else "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
+                
+                badge = soup.find("span", class_="badge")
+                cat = badge.text.replace("이슈", "").strip() if badge else "이슈"
+                
+                meta = soup.find("div", class_="meta")
+                date_str = ""
+                if meta:
+                    m = re.search(r'\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}', meta.text)
+                    if m:
+                        date_str = m.group(0)
+                if not date_str:
+                    date_str = time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(fpath)))
+                    
+                posts.append({
+                    "id": fname.replace(".html", ""),
+                    "title": title,
+                    "image_url": img_url,
+                    "category": cat,
+                    "date_str": date_str
+                })
+            except Exception as e:
+                print(f"-> 파일 파싱 실패 ({fname}): {e}")
 
-    with open(INDEX_PATH, 'r', encoding='utf-8') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
+    # 최신 날짜 및 파일명 역순 정렬
+    posts.sort(key=lambda x: (x["date_str"], x["id"]), reverse=True)
+    print(f"-> 총 {len(posts)}개의 과거 기사가 정상 확인되었습니다.")
+
+    # 메인 카드 HTML 조립
+    cards_html = ""
+    for post in posts:
+        cards_html += f"""
+        <article class="post-card">
+            <a href="posts/{post['id']}.html" class="thumb-wrap">
+                <img src="{post['image_url']}" alt="{post['title']}">
+            </a>
+            <span class="card-tag">CARISSUE {post['category']}</span>
+            <a href="posts/{post['id']}.html">
+                <h3>{post['title']}</h3>
+            </a>
+            <span class="date">{post['date_str']}</span>
+            <a href="posts/{post['id']}.html" class="read-more">READ MORE &rarr;</a>
+        </article>
+        """
+
+    # 메인 index.html 전체 작성 (로고 이미지 태그 반영)
+    full_index = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARISSUE - 글로벌 & 국내 자동차 매거진</title>
+    <meta name="description" content="글로벌 및 국내 최신 자동차 뉴스, 신차 스펙, 시승기 및 심층 분석 매거진">
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
+
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff; color: #111; line-height: 1.6; }}
+        a {{ text-decoration: none; color: inherit; }}
+
+        /* 상단 공통 헤더: 로고 이미지 + 3px 블랙 구분선 */
+        header {{ background: #fff; border-bottom: 3px solid #111; position: sticky; top: 0; z-index: 1000; }}
+        .header-inner {{ max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }}
+        .logo img {{ height: 32px; display: block; }}
+        .nav-right {{ display: flex; align-items: center; gap: 24px; }}
+        .nav-menu {{ font-size: 15px; font-weight: 800; color: #111; letter-spacing: 0.5px; }}
         
-    grid = soup.find(id='article-grid')
-    if not grid:
-        grid = soup.find('div', class_=re.compile(r'article-grid|grid', re.I))
+        .sns-icons {{ display: flex; align-items: center; gap: 14px; }}
+        .sns-icons svg {{ width: 17px; height: 17px; fill: #111; }}
 
-    if grid:
-        for post in reversed(new_posts):
-            card_html = f"""
-            <article class="post-card">
-                <a href="posts/{post['id']}.html" class="thumb-wrap">
-                    <img src="{post['image_url']}" alt="{post['title']}">
-                </a>
-                <span class="card-tag">CARISSUE {post['category']}</span>
-                <a href="posts/{post['id']}.html">
-                    <h3>{post['title']}</h3>
-                </a>
-                <span class="date">{post['date_str']}</span>
-                <a href="posts/{post['id']}.html" class="read-more">READ MORE &rarr;</a>
-            </article>
-            """
-            card_soup = BeautifulSoup(card_html, 'html.parser')
-            grid.insert(0, card_soup)
-            
-        with open(INDEX_PATH, 'w', encoding='utf-8') as f:
-            f.write(str(soup))
+        .container {{ max-width: 1200px; margin: 30px auto; padding: 0 20px; }}
+        .section-header {{ font-size: 20px; font-weight: 900; letter-spacing: 0.5px; margin: 40px 0 20px 0; border-bottom: 2px solid #111; padding-bottom: 8px; text-transform: uppercase; }}
+        .section-header span {{ color: #d32f2f; }}
 
+        /* 3열 기사 그리드 */
+        .article-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 24px; }}
+        .post-card {{ display: flex; flex-direction: column; background: #fff; }}
+        .post-card:hover h3 {{ color: #d32f2f; }}
+        .post-card .thumb-wrap {{ width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 4px; margin-bottom: 12px; background: #f0f0f0; }}
+        .post-card img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }}
+        .post-card:hover img {{ transform: scale(1.03); }}
+        .card-tag {{ font-size: 11px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 6px; }}
+        .post-card h3 {{ font-size: 17px; font-weight: 800; line-height: 1.4; margin-bottom: 8px; color: #111; word-break: keep-all; }}
+        .post-card .date {{ font-size: 12px; color: #888; }}
+        .read-more {{ font-size: 11px; font-weight: 800; color: #d32f2f; margin-top: 10px; display: inline-block; }}
+
+        footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
+
+        @media (max-width: 900px) {{
+            .article-grid {{ grid-template-columns: repeat(2, 1fr); }}
+        }}
+        @media (max-width: 600px) {{
+            .article-grid {{ grid-template-columns: 1fr; }}
+            .sns-icons {{ display: none; }}
+            .container {{ padding: 0 16px; margin: 15px auto; }}
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="/assets/logo.png" alt="CARISSUE"></a>
+            <div class="nav-right">
+                <a href="/" class="nav-menu">NEWS</a>
+                <div class="sns-icons">
+                    <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                    <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="section-header">LATEST STORIES <span>●</span></div>
+        <div class="article-grid" id="article-grid">
+            {cards_html}
+        </div>
+    </main>
+
+    <footer>
+        &copy; CARISSUE. All rights reserved.
+    </footer>
+</body>
+</html>"""
+
+    with open(INDEX_PATH, "w", encoding="utf-8") as f:
+        f.write(full_index)
+
+    # sitemap.xml도 전체 posts 기준으로 일괄 재구축
     sitemap_entries = ""
-    for post in new_posts:
+    for post in posts:
         sitemap_entries += f"  <url>\n    <loc>{SITE_URL}/posts/{post['id']}.html</loc>\n    <lastmod>{post['date_str'][:10]}</lastmod>\n    <priority>0.8</priority>\n  </url>\n"
         
-    if os.path.exists(SITEMAP_PATH):
-        with open(SITEMAP_PATH, 'r', encoding='utf-8') as f:
-            sitemap_content = f.read()
-        if "</urlset>" in sitemap_content:
-            sitemap_content = sitemap_content.replace("</urlset>", sitemap_entries + "</urlset>")
-            with open(SITEMAP_PATH, 'w', encoding='utf-8') as f:
-                f.write(sitemap_content)
+    sitemap_full = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{SITE_URL}/</loc>
+    <priority>1.0</priority>
+  </url>
+{sitemap_entries}</urlset>"""
+
+    with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
+        f.write(sitemap_full)
+    print("-> 메인 페이지 및 sitemap.xml 복구 완료!")
 
 def main():
     print(">>> 1. 4대 공식 피드 수집 시작...")
@@ -380,41 +493,30 @@ def main():
         collected.extend(items)
         
     print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
-    if not collected:
-        print("수집 대상 기사가 없습니다. 종료합니다.")
-        return
 
     os.makedirs(POSTS_DIR, exist_ok=True)
-    new_posts = []
     
-    for idx, item in enumerate(collected):
-        print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
-        try:
-            t, c = generate_article(item)
-            timestamp = int(time.time()) + idx
-            post_id = f"post_{timestamp}_{idx}"
-            date_str = time.strftime("%Y-%m-%d %H:%M")
-            
-            html = build_post_html(post_id, t, c, item['image_url'], date_str, item['category'])
-            with open(os.path.join(POSTS_DIR, f"{post_id}.html"), "w", encoding="utf-8") as f:
-                f.write(html)
+    if collected:
+        for idx, item in enumerate(collected):
+            print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
+            try:
+                t, c = generate_article(item)
+                timestamp = int(time.time()) + idx
+                post_id = f"post_{timestamp}_{idx}"
+                date_str = time.strftime("%Y-%m-%d %H:%M")
                 
-            save_history(item['link'])
-            new_posts.append({
-                "id": post_id,
-                "title": t,
-                "image_url": item['image_url'],
-                "date_str": date_str,
-                "category": item['category']
-            })
-            print(f"-> 생성 완료: {t}")
-            time.sleep(3)
-        except Exception as e:
-            print(f"-> [작성 실패]: {e}")
+                html = build_post_html(post_id, t, c, item['image_url'], date_str, item['category'])
+                with open(os.path.join(POSTS_DIR, f"{post_id}.html"), "w", encoding="utf-8") as f:
+                    f.write(html)
+                    
+                save_history(item['link'])
+                time.sleep(3)
+            except Exception as e:
+                print(f"-> [작성 실패]: {e}")
 
-    print("\n>>> 2. index.html 및 sitemap.xml 갱신...")
-    update_site(new_posts)
-    print(f">>> 성공: 총 {len(new_posts)}건 신규 기사 발행 완료!")
+    # 신규 기사 생성 여부와 관계없이 기존 글 전체를 읽어와 메인 화면 복원
+    rebuild_entire_site()
+    print(">>> 모든 작업 완료!")
 
 if __name__ == "__main__":
     main()
