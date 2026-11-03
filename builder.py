@@ -2,6 +2,7 @@ import os
 import re
 import time
 import json
+import random
 import urllib.request
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
@@ -23,7 +24,7 @@ SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 
 # ==========================================
-# 2. 확정된 애드센스 계정 및 고유 슬롯 번호 (불변 고정)
+# 2. 확정된 애드센스 계정 및 고유 슬롯 번호 (불변)
 # ==========================================
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
 AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 글 사이 중간광고 (인아티클)
@@ -89,9 +90,7 @@ def fetch_feed_items(feed_conf, history_set):
             title = title_el.text.strip() if title_el is not None and title_el.text else ""
             desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
 
-            # ----------------------------------------------------
-            # 이미지 다중 추출: 1장 ~ 최대 5장 확보
-            # ----------------------------------------------------
+            # 다중 이미지 추출 (1장 ~ 최대 5장)
             images = []
             enclosure = entry.find("enclosure")
             if enclosure is not None and enclosure.attrib.get("url"):
@@ -104,7 +103,6 @@ def fetch_feed_items(feed_conf, history_set):
                         if img_src not in images:
                             images.append(img_src)
             
-            # 피드 내 이미지가 부족하면 원문 페이지에서 보충 (최대 5장)
             if len(images) < 3:
                 try:
                     sub_req = urllib.request.Request(link, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
@@ -185,14 +183,13 @@ CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
     return title, content
 
 # ==========================================
-# 4. 서브 본문 HTML 렌더링 (다중 이미지 분산 + 공유 모달)
+# 4. 서브 본문 HTML 렌더링 (하단 추천 리스트 + 공유 모달 정상화)
 # ==========================================
-def build_post_html(post_id, title, content, images, date_str, category):
+def build_post_html(post_id, title, content, images, date_str, category, recent_posts=None):
     paras = [p.strip() for p in content.split("\n\n") if p.strip()]
     main_image = images[0] if images else "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
     extra_images = images[1:]
 
-    # 인아티클 중간광고
     in_article_ad = f"""
     <div class="ad-in-article">
         <ins class="adsbygoogle"
@@ -223,6 +220,36 @@ def build_post_html(post_id, title, content, images, date_str, category):
 
     article_body_html = "".join(p_tags)
 
+    # ----------------------------------------------------
+    # [추천 글 섹션 HTML 빌드 (최대 6개)]
+    # ----------------------------------------------------
+    related_html = ""
+    if recent_posts:
+        related_cards = ""
+        # 현재 글 제외하고 최대 6개 추천
+        candidates = [p for p in recent_posts if p["id"] != post_id]
+        selected_related = candidates[:6]
+        
+        for r_post in selected_related:
+            related_cards += f"""
+            <a href="{r_post['id']}.html" class="related-card">
+                <div class="related-thumb"><img src="{r_post['image_url']}" alt="{r_post['title']}"></div>
+                <div class="related-info">
+                    <span class="related-cat">{r_post.get('category', '이슈')}</span>
+                    <h4>{r_post['title']}</h4>
+                    <span class="related-date">{r_post['date_str'][:10]}</span>
+                </div>
+            </a>
+            """
+        related_html = f"""
+        <div class="related-section">
+            <div class="related-title">당신이 놓치지 말아야 할 인기 자동차 이슈</div>
+            <div class="related-grid">
+                {related_cards}
+            </div>
+        </div>
+        """
+
     schema_data = {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
@@ -235,6 +262,7 @@ def build_post_html(post_id, title, content, images, date_str, category):
     schema_json = json.dumps(schema_data, ensure_ascii=False)
     current_post_url = f"{SITE_URL}/posts/{post_id}.html"
 
+    # HTML 템플릿 반환
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -243,13 +271,12 @@ def build_post_html(post_id, title, content, images, date_str, category):
     <title>{title} - CARISSUE</title>
     <meta name="description" content="{paras[0][:120] if paras else title}">
     
-    <!-- 파비콘: 도메인 루트 절대경로 -->
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
     
-    <!-- Google AdSense 실제 계정 -->
+    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
     
-    <!-- JSON-LD SEO Schema -->
+    <!-- SEO Schema -->
     <script type="application/ld+json">
     {schema_json}
     </script>
@@ -272,12 +299,11 @@ def build_post_html(post_id, title, content, images, date_str, category):
         .badge {{ display: inline-block; background: #d32f2f; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 2px; text-transform: uppercase; margin-bottom: 12px; }}
         h1 {{ font-size: 32px; line-height: 1.35; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 15px; word-break: keep-all; }}
         
-        /* 메타 정보 + 공유하기 버튼 라인 */
         .meta-bar {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }}
         .meta-info {{ font-size: 13px; color: #777; }}
-        .share-btn {{ display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-weight: 700; color: #333; cursor: pointer; transition: all 0.2s; }}
-        .share-btn:hover {{ background: #eee; border-color: #bbb; }}
-        .share-btn svg {{ width: 14px; height: 14px; fill: #444; }}
+        .share-btn {{ display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; font-weight: 700; color: #222; cursor: pointer; transition: all 0.2s; }}
+        .share-btn:hover {{ background: #e9ecef; border-color: #999; }}
+        .share-btn svg {{ width: 14px; height: 14px; fill: #333; }}
 
         .featured-img {{ width: 100%; border-radius: 4px; margin-bottom: 25px; object-fit: cover; max-height: 520px; }}
         .article-sub-img {{ margin: 30px 0; }}
@@ -287,28 +313,39 @@ def build_post_html(post_id, title, content, images, date_str, category):
         .ad-in-article {{ margin: 35px 0; text-align: center; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; }}
         .ad-bottom {{ margin: 40px 0; text-align: center; }}
 
+        /* 본문 하단 추천 글 스타일 */
+        .related-section {{ margin-top: 50px; padding-top: 30px; border-top: 2px solid #111; }}
+        .related-title {{ font-size: 19px; font-weight: 900; margin-bottom: 20px; color: #111; letter-spacing: -0.5px; }}
+        .related-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }}
+        .related-card {{ display: flex; gap: 14px; background: #fff; align-items: flex-start; }}
+        .related-card:hover h4 {{ color: #d32f2f; }}
+        .related-thumb {{ width: 110px; height: 75px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #f0f0f0; }}
+        .related-thumb img {{ width: 100%; height: 100%; object-fit: cover; }}
+        .related-info {{ flex: 1; min-width: 0; }}
+        .related-cat {{ font-size: 10px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 4px; display: inline-block; }}
+        .related-info h4 {{ font-size: 14px; font-weight: 700; line-height: 1.4; color: #222; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
+        .related-date {{ font-size: 11px; color: #999; }}
+
         .sidebar {{ min-width: 0; }}
         .sidebar-sticky {{ position: -webkit-sticky; position: sticky; top: 85px; }}
         .sidebar-title {{ font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #111; padding-bottom: 6px; }}
 
         footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
 
-        /* 공유 모달 레이어 */
-        .modal-overlay {{ display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }}
-        .modal-box {{ background: #fff; width: 90%; max-width: 400px; border-radius: 8px; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease-out; }}
+        /* 모달 레이어 */
+        .modal-overlay {{ display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; }}
+        .modal-box {{ background: #fff; width: 90%; max-width: 380px; border-radius: 10px; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }}
         .modal-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }}
         .modal-title {{ font-size: 17px; font-weight: 800; color: #111; }}
-        .modal-close {{ font-size: 20px; color: #888; cursor: pointer; border: none; background: none; }}
-        .share-icons {{ display: flex; justify-content: space-around; margin-bottom: 24px; }}
-        .share-icon-btn {{ display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; font-size: 11px; color: #555; border: none; background: none; }}
-        .share-icon-btn div {{ width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: 900; }}
+        .modal-close {{ font-size: 26px; line-height: 1; color: #888; cursor: pointer; border: none; background: none; }}
+        .share-icons {{ display: flex; justify-content: space-around; margin-bottom: 22px; }}
+        .share-icon-btn {{ display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; font-size: 11px; font-weight: 600; color: #444; border: none; background: none; }}
+        .share-icon-btn div {{ width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: 900; font-size: 15px; }}
         .url-box {{ display: flex; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: #f8f9fa; }}
-        .url-input {{ flex: 1; border: none; background: transparent; padding: 10px 12px; font-size: 12px; color: #666; outline: none; }}
-        .copy-btn {{ background: #333; color: #fff; border: none; padding: 0 16px; font-size: 12px; font-weight: 700; cursor: pointer; }}
-        .copy-btn:hover {{ background: #111; }}
-        .toast-msg {{ display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 3000; }}
-
-        @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(-10px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+        .url-input {{ flex: 1; border: none; background: transparent; padding: 10px 12px; font-size: 12px; color: #555; outline: none; }}
+        .copy-btn {{ background: #222; color: #fff; border: none; padding: 0 16px; font-size: 12px; font-weight: 700; cursor: pointer; }}
+        .copy-btn:hover {{ background: #000; }}
+        .toast-msg {{ display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 22px; border-radius: 30px; font-size: 13px; z-index: 100000; font-weight: 600; }}
 
         @media (max-width: 768px) {{
             .main-wrapper {{ grid-template-columns: 1fr; gap: 0; margin: 15px auto; padding: 0 16px; }}
@@ -316,6 +353,7 @@ def build_post_html(post_id, title, content, images, date_str, category):
             .article-body p {{ font-size: 16px; line-height: 1.75; margin-bottom: 18px; }}
             .sidebar {{ display: none; }}
             .sns-icons {{ display: none; }}
+            .related-grid {{ grid-template-columns: 1fr; gap: 16px; }}
         }}
     </style>
 </head>
@@ -342,7 +380,7 @@ def build_post_html(post_id, title, content, images, date_str, category):
             
             <div class="meta-bar">
                 <div class="meta-info">발행일: {date_str} | CARISSUE 편집국</div>
-                <button type="button" class="share-btn" onclick="openShareModal()">
+                <button type="button" class="share-btn" id="openShareModalBtn">
                     <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
                     공유
                 </button>
@@ -365,6 +403,9 @@ def build_post_html(post_id, title, content, images, date_str, category):
                      (adsbygoogle = window.adsbygoogle || []).push({{}});
                 </script>
             </div>
+
+            <!-- 하단 추천 기사 그리드 -->
+            {related_html}
         </article>
 
         <aside class="sidebar">
@@ -381,87 +422,104 @@ def build_post_html(post_id, title, content, images, date_str, category):
         </aside>
     </div>
 
-    <div id="shareModal" class="modal-overlay" onclick="closeShareModal(event)">
-        <div class="modal-box" onclick="event.stopPropagation()">
+    <!-- 공유 모달 (인라인 리스너로 즉시 반응 보장) -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-box">
             <div class="modal-header">
                 <div class="modal-title">공유하기</div>
-                <button type="button" class="modal-close" onclick="closeShareModal()">&times;</button>
+                <button type="button" class="modal-close" id="closeShareModalBtn">&times;</button>
             </div>
             <div class="share-icons">
-                <button type="button" class="share-icon-btn" onclick="shareX()">
+                <button type="button" class="share-icon-btn" id="shareXBtn">
                     <div style="background:#111;">X</div>
                     <span>X(트위터)</span>
                 </button>
-                <button type="button" class="share-icon-btn" onclick="shareFB()">
+                <button type="button" class="share-icon-btn" id="shareFBBtn">
                     <div style="background:#1877F2;">f</div>
                     <span>페이스북</span>
                 </button>
-                <button type="button" class="share-icon-btn" onclick="shareKakao()">
+                <button type="button" class="share-icon-btn" id="shareKakaoBtn">
                     <div style="background:#FEE500; color:#111;">talk</div>
-                    <span>카카오톡</span>
+                    <span>카카오스토리</span>
                 </button>
             </div>
             <div class="url-box">
                 <input type="text" id="shareUrlInput" class="url-input" value="{current_post_url}" readonly>
-                <button type="button" class="copy-btn" onclick="copyCurrentUrl()">복사</button>
+                <button type="button" class="copy-btn" id="copyUrlBtn">복사</button>
             </div>
         </div>
     </div>
 
-    <div id="toastMsg" class="toast-msg">기사 주소가 클립보드에 복사되었습니다.</div>
+    <div id="toastMsg" class="toast-msg">기사 주소가 복사되었습니다.</div>
 
     <footer>
         &copy; CARISSUE. All rights reserved.
     </footer>
 
     <script>
-        const postTitle = "{title}";
-        const postUrl = "{current_post_url}";
+        document.addEventListener('DOMContentLoaded', function() {{
+            var modal = document.getElementById('shareModal');
+            var openBtn = document.getElementById('openShareModalBtn');
+            var closeBtn = document.getElementById('closeShareModalBtn');
+            var copyBtn = document.getElementById('copyUrlBtn');
+            var toast = document.getElementById('toastMsg');
+            var urlInput = document.getElementById('shareUrlInput');
+            var currentUrl = "{current_post_url}";
+            var currentTitle = "{title}";
 
-        function openShareModal() {{
-            if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {{
-                navigator.share({{ title: postTitle, url: postUrl }}).catch(() => {{}});
-            }} else {{
-                document.getElementById('shareModal').style.display = 'flex';
+            if (openBtn) {{
+                openBtn.onclick = function() {{
+                    if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {{
+                        navigator.share({{ title: currentTitle, url: currentUrl }}).catch(function(){{}});
+                    }} else {{
+                        modal.style.display = 'flex';
+                    }}
+                }};
             }}
-        }}
 
-        function closeShareModal() {{
-            document.getElementById('shareModal').style.display = 'none';
-        }}
+            if (closeBtn) {{
+                closeBtn.onclick = function() {{
+                    modal.style.display = 'none';
+                }};
+            }}
 
-        function copyCurrentUrl() {{
-            const input = document.getElementById('shareUrlInput');
-            input.select();
-            navigator.clipboard.writeText(postUrl).then(() => {{
-                const toast = document.getElementById('toastMsg');
-                toast.style.display = 'block';
-                setTimeout(() => {{ toast.style.display = 'none'; }}, 2500);
-            }});
-        }}
+            modal.onclick = function(e) {{
+                if (e.target === modal) {{
+                    modal.style.display = 'none';
+                }}
+            }};
 
-        function shareX() {{
-            window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(postTitle) + '&url=' + encodeURIComponent(postUrl), '_blank');
-        }}
+            if (copyBtn) {{
+                copyBtn.onclick = function() {{
+                    urlInput.select();
+                    navigator.clipboard.writeText(currentUrl).then(function() {{
+                        toast.style.display = 'block';
+                        setTimeout(function() {{ toast.style.display = 'none'; }}, 2500);
+                    }});
+                }};
+            }}
 
-        function shareFB() {{
-            window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(postUrl), '_blank');
-        }}
+            document.getElementById('shareXBtn').onclick = function() {{
+                window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(currentTitle) + '&url=' + encodeURIComponent(currentUrl), '_blank');
+            }};
 
-        function shareKakao() {{
-            window.open('https://story.kakao.com/share?url=' + encodeURIComponent(postUrl), '_blank');
-        }}
+            document.getElementById('shareFBBtn').onclick = function() {{
+                window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(currentUrl), '_blank');
+            }};
+
+            document.getElementById('shareKakaoBtn').onclick = function() {{
+                window.open('https://story.kakao.com/share?url=' + encodeURIComponent(currentUrl), '_blank');
+            }};
+        }});
     </script>
 </body>
 </html>"""
 
 # ==========================================
-# 5. 기존 글 전체 스캔 복구 (고유 썸네일 완벽 추출)
+# 5. 기존 posts 폴더 스캔 및 전체 사이트 빌드 (추천 글 연결)
 # ==========================================
-def rebuild_entire_site():
-    print(">>> [전체 복구] posts 폴더의 모든 과거 기사를 스캔하여 메인 페이지를 재구성합니다...")
+def scan_all_posts():
     posts = []
-    
     if os.path.exists(POSTS_DIR):
         for fname in os.listdir(POSTS_DIR):
             if not fname.endswith(".html"):
@@ -474,9 +532,6 @@ def rebuild_entire_site():
                 h1 = soup.find("h1")
                 title = h1.text.strip() if h1 else fname.replace(".html", "")
                 
-                # ----------------------------------------------------
-                # [버그 해결]: 클래스명 무관하게 실제 본문 차량 이미지 추출
-                # ----------------------------------------------------
                 img_url = ""
                 for im in soup.find_all("img"):
                     src = im.get("src") or ""
@@ -507,10 +562,15 @@ def rebuild_entire_site():
                     "date_str": date_str
                 })
             except Exception as e:
-                print(f"-> 파일 파싱 실패 ({fname}): {e}")
+                pass
 
     posts.sort(key=lambda x: (x["date_str"], x["id"]), reverse=True)
-    print(f"-> 총 {len(posts)}개의 과거 기사가 정상 확인되었습니다.")
+    return posts
+
+def rebuild_entire_site():
+    print(">>> [전체 복구] posts 폴더의 기사들을 스캔하여 메인 페이지를 재구성합니다...")
+    posts = scan_all_posts()
+    print(f"-> 총 {len(posts)}개의 기사가 확인되었습니다.")
 
     cards_html = ""
     for post in posts:
@@ -642,6 +702,9 @@ def main():
 
     os.makedirs(POSTS_DIR, exist_ok=True)
     
+    # 추천 글 연결을 위해 현재 쌓여 있는 과거 글 목록 우선 확보
+    existing_posts = scan_all_posts()
+    
     if collected:
         for idx, item in enumerate(collected):
             print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
@@ -651,7 +714,8 @@ def main():
                 post_id = f"post_{timestamp}_{idx}"
                 date_str = time.strftime("%Y-%m-%d %H:%M")
                 
-                html = build_post_html(post_id, t, c, item['images'], date_str, item['category'])
+                # 하단 추천 글 후보(existing_posts) 넘김
+                html = build_post_html(post_id, t, c, item['images'], date_str, item['category'], existing_posts)
                 with open(os.path.join(POSTS_DIR, f"{post_id}.html"), "w", encoding="utf-8") as f:
                     f.write(html)
                     
@@ -660,6 +724,7 @@ def main():
             except Exception as e:
                 print(f"-> [작성 실패]: {e}")
 
+    # 메인 화면 최신화 및 sitemap 갱신
     rebuild_entire_site()
     print(">>> 모든 작업 완료!")
 
