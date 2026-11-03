@@ -4,20 +4,14 @@ import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
-import google.generativeai as genai
+from google import genai
 
 # 1. API 설정 (Pay-as-you-go)
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
 
-genai.configure(api_key=API_KEY)
-
-# 404 방지를 위한 모델 지정 (gemini-1.5-flash-latest)
-try:
-    model = genai.GenerativeModel("gemini-1.5-flash-latest")
-except Exception:
-    model = genai.GenerativeModel("models/gemini-1.5-flash")
+client = genai.Client(api_key=API_KEY)
 
 SITE_URL = "https://carissue.koo1000.com"
 POSTS_DIR = "posts"
@@ -26,7 +20,6 @@ SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 ADSENSE_ID = "ca-pub-3677274092490514"
 
-# 2. 검증 완료된 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 총 5건)
 FEEDS = [
     {
         "name": "모터그래프",
@@ -158,8 +151,11 @@ def generate_article(item):
 TITLE: [기사 제목]
 CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
 """
-    res = model.generate_content(prompt)
-    txt = res.text.strip()
+    response = client.models.generate_content(
+        model="gemini-1.5-flash",
+        contents=prompt
+    )
+    txt = response.text.strip()
     
     title = ""
     content = ""
