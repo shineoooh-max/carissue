@@ -1,12 +1,15 @@
 import os
 import re
 import time
+import json
 import urllib.request
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from google import genai
 
-# 1. 최신 공식 Interactions API 설정
+# ==========================================
+# 1. Gemini Interactions API 설정
+# ==========================================
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
@@ -18,34 +21,23 @@ POSTS_DIR = "posts"
 INDEX_PATH = "index.html"
 SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
-ADSENSE_ID = "ca-pub-3677274092490514"
 
-# 2. 검증된 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 총 5건)
+# ==========================================
+# 2. 애드센스 실제 계정 및 고유 슬롯 번호 반영
+# ==========================================
+ADSENSE_CLIENT = "ca-pub-4793184080983542"
+AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 글 사이 중간광고 (인아티클)
+AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 광고 (사각형 중간광고)
+AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이 광고 (최상단 광고)
+
+# ==========================================
+# 3. 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 5건)
+# ==========================================
 FEEDS = [
-    {
-        "name": "모터그래프",
-        "category": "국내",
-        "url": "https://www.motorgraph.com/rss/allArticle.xml",
-        "target_count": 1
-    },
-    {
-        "name": "오토헤럴드",
-        "category": "국내",
-        "url": "http://www.autoherald.co.kr/rss/allArticle.xml",
-        "target_count": 1
-    },
-    {
-        "name": "Motor1",
-        "category": "글로벌",
-        "url": "https://www.motor1.com/rss/news/all/",
-        "target_count": 2
-    },
-    {
-        "name": "Carscoops",
-        "category": "글로벌",
-        "url": "https://www.carscoops.com/feed/",
-        "target_count": 1
-    }
+    {"name": "모터그래프", "category": "국내", "url": "https://www.motorgraph.com/rss/allArticle.xml", "target_count": 1},
+    {"name": "오토헤럴드", "category": "국내", "url": "http://www.autoherald.co.kr/rss/allArticle.xml", "target_count": 1},
+    {"name": "Motor1", "category": "글로벌", "url": "https://www.motor1.com/rss/news/all/", "target_count": 2},
+    {"name": "Carscoops", "category": "글로벌", "url": "https://www.carscoops.com/feed/", "target_count": 1}
 ]
 
 def load_history():
@@ -61,7 +53,7 @@ def save_history(link):
 def fetch_feed_items(feed_conf, history_set):
     items = []
     target = feed_conf["target_count"]
-    print(f"\n[{feed_conf['name']}] 피드 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
+    print(f"\n[{feed_conf['name']}] 피드 수집 ({feed_conf['category']} - 목표: {target}건)")
     
     try:
         req = urllib.request.Request(
@@ -69,7 +61,6 @@ def fetch_feed_items(feed_conf, history_set):
             headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         )
         raw_data = urllib.request.urlopen(req, timeout=15).read()
-        
         try:
             xml_text = raw_data.decode('utf-8')
         except UnicodeDecodeError:
@@ -82,7 +73,6 @@ def fetch_feed_items(feed_conf, history_set):
         for entry in entries:
             if len(items) >= target:
                 break
-                
             link_el = entry.find("link")
             guid_el = entry.find("guid")
             link = ""
@@ -122,8 +112,7 @@ def fetch_feed_items(feed_conf, history_set):
                 "image_url": image_url
             })
             history_set.add(link)
-            print(f"-> [수집 채택] {title[:30]}...")
-
+            print(f"-> [채택] {title[:30]}...")
     except Exception as e:
         print(f"-> [수집 실패]: {e}")
 
@@ -145,14 +134,13 @@ def generate_article(item):
    - 도입부: 이 소식이 국내외 자동차 시장에서 뜨거운 화제가 되는 이유
    - 본문: 디자인, 기술 혁신, 성능 스펙 및 파워트레인 분석
    - 맺음말: 경쟁 모델과의 상품성 비교 및 국내 소비자 출시/구매 가이드 전망
-4. 문체: 정돈되고 신뢰감 있는 언론사 전문 기사체 (~했습니다, ~기대를 모으고 있습니다)
+4. 문체: 정돈되고 신뢰감 있는 언론사 전문 기사체 (~했습니다, ~전망됩니다)
 5. 독창성: 단순 전재가 아닌 에디터의 독창적 시각과 분석 코멘터리 포함
 
 [출력 형식 - 반드시 준수]
 TITLE: [기사 제목]
 CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
 """
-    # 공식 문서 규격: Interactions API + gemini-3.8-flash
     interaction = client.interactions.create(
         model="gemini-3.8-flash",
         input=prompt
@@ -172,46 +160,161 @@ CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
         
     return title, content
 
+# ==========================================
+# 4. 서브 본문 HTML 렌더링 (인아티클/사이드바 슬롯 반영)
+# ==========================================
 def build_post_html(post_id, title, content, image_url, date_str, category):
-    paragraphs = "".join([f"<p>{p.strip()}</p>" for p in content.split("\n\n") if p.strip()])
+    paras = [p.strip() for p in content.split("\n\n") if p.strip()]
     
+    # 본문 첫 단락 직후 인아티클 광고 코드
+    in_article_ad = f"""
+    <div class="ad-in-article">
+        <ins class="adsbygoogle"
+             style="display:block; text-align:center;"
+             data-ad-layout="in-article"
+             data-ad-format="fluid"
+             data-ad-client="{ADSENSE_CLIENT}"
+             data-ad-slot="{AD_SLOT_IN_ARTICLE}"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({{}});
+        </script>
+    </div>
+    """
+
+    p_tags = []
+    for i, p in enumerate(paras):
+        p_tags.append(f"<p>{p}</p>")
+        if i == 0:
+            p_tags.append(in_article_ad)
+
+    article_body_html = "".join(p_tags)
+
+    schema_data = {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": title,
+        "image": [image_url],
+        "datePublished": f"{date_str[:10]}T{date_str[11:]}:00+09:00",
+        "dateModified": f"{date_str[:10]}T{date_str[11:]}:00+09:00",
+        "author": [{"@type": "Organization", "name": "CARISSUE", "url": SITE_URL}]
+    }
+    schema_json = json.dumps(schema_data, ensure_ascii=False)
+
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - CARISSUE</title>
-    <meta name="description" content="{title}">
-    <link rel="stylesheet" href="../assets/style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_ID}" crossorigin="anonymous"></script>
+    <meta name="description" content="{paras[0][:120] if paras else title}">
+    <link rel="icon" href="../assets/logo.png">
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
+    
+    <!-- JSON-LD SEO 구조화 데이터 -->
+    <script type="application/ld+json">
+    {schema_json}
+    </script>
+    
     <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background-color: #f8f9fa; color: #212529; line-height: 1.8; }}
-        header {{ background: #fff; border-bottom: 1px solid #eaeaea; text-align: center; padding: 15px 0; }}
-        header img {{ height: 38px; }}
-        .article-container {{ max-width: 760px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }}
-        h1 {{ font-size: 26px; line-height: 1.4; margin-bottom: 15px; color: #111; word-break: keep-all; }}
-        .badge {{ display: inline-block; background: #0066cc; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }}
-        .meta {{ font-size: 13px; color: #888; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }}
-        .featured-img {{ width: 100%; border-radius: 8px; margin-bottom: 30px; object-fit: cover; max-height: 480px; }}
-        .article-body p {{ font-size: 16px; margin-bottom: 20px; word-break: keep-all; }}
-        footer {{ text-align: center; padding: 40px; font-size: 13px; color: #888; border-top: 1px solid #eee; margin-top: 60px; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff; color: #111; line-height: 1.8; }}
+        a {{ text-decoration: none; color: inherit; }}
+
+        /* 상단 헤더: 화이트 배경 + 3px 블랙 구분선 */
+        header {{ background: #fff; border-bottom: 3px solid #111; position: sticky; top: 0; z-index: 1000; }}
+        .header-inner {{ max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; }}
+        .logo {{ font-size: 26px; font-weight: 900; letter-spacing: -1px; color: #111; }}
+        .nav-right {{ display: flex; align-items: center; gap: 24px; }}
+        .nav-menu {{ font-size: 15px; font-weight: 800; color: #111; letter-spacing: 0.5px; }}
+        .sns-icons {{ display: flex; align-items: center; gap: 14px; }}
+        .sns-icons svg {{ width: 17px; height: 17px; fill: #111; }}
+
+        /* 2단 본문 그리드 (PC 7:3 구조) */
+        .main-wrapper {{ max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 320px; gap: 40px; }}
+        .content-area {{ min-width: 0; }}
+        .badge {{ display: inline-block; background: #d32f2f; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 2px; text-transform: uppercase; margin-bottom: 12px; }}
+        h1 {{ font-size: 32px; line-height: 1.35; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 15px; word-break: keep-all; }}
+        .meta {{ font-size: 13px; color: #777; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }}
+        .featured-img {{ width: 100%; border-radius: 4px; margin-bottom: 25px; object-fit: cover; max-height: 520px; }}
+        
+        .article-body p {{ font-size: 17px; line-height: 1.85; margin-bottom: 22px; color: #222; word-break: keep-all; }}
+        
+        .ad-in-article {{ margin: 35px 0; text-align: center; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; }}
+        .ad-bottom {{ margin: 40px 0; text-align: center; }}
+
+        /* 우측 고정 사이드바 */
+        .sidebar {{ min-width: 0; }}
+        .sidebar-sticky {{ position: -webkit-sticky; position: sticky; top: 85px; }}
+        .sidebar-title {{ font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #111; padding-bottom: 6px; }}
+
+        footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
+
+        @media (max-width: 768px) {{
+            .main-wrapper {{ grid-template-columns: 1fr; gap: 0; margin: 15px auto; padding: 0 16px; }}
+            h1 {{ font-size: 24px; line-height: 1.35; }}
+            .article-body p {{ font-size: 16px; line-height: 1.75; margin-bottom: 18px; }}
+            .sidebar {{ display: none; }}
+            .sns-icons {{ display: none; }}
+        }}
     </style>
 </head>
 <body>
     <header>
-        <a href="../"><img src="../assets/logo.png" alt="CARISSUE"></a>
+        <div class="header-inner">
+            <a href="../" class="logo">CARISSUE</a>
+            <div class="nav-right">
+                <a href="../" class="nav-menu">NEWS</a>
+                <div class="sns-icons">
+                    <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                    <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <div class="article-container">
-        <span class="badge">{category} 자동차 이슈</span>
-        <h1>{title}</h1>
-        <div class="meta">발행일: {date_str} | 카이슈 편집국</div>
-        
-        <img src="{image_url}" alt="{title}" class="featured-img">
-        
-        <div class="article-body">
-            {paragraphs}
-        </div>
+    <div class="main-wrapper">
+        <article class="content-area">
+            <span class="badge">{category} 이슈</span>
+            <h1>{title}</h1>
+            <div class="meta">발행일: {date_str} | CARISSUE 편집국</div>
+            
+            <img src="{image_url}" alt="{title}" class="featured-img">
+            
+            <div class="article-body">
+                {article_body_html}
+            </div>
+
+            <!-- 본문 하단 디스플레이 반응형 광고 -->
+            <div class="ad-bottom">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="{ADSENSE_CLIENT}"
+                     data-ad-slot="{AD_SLOT_BOTTOM}"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({{}});
+                </script>
+            </div>
+        </article>
+
+        <!-- 우측 고정 사이드바 광고 (스크롤 다운 시 상단 고정 유지) -->
+        <aside class="sidebar">
+            <div class="sidebar-sticky">
+                <div class="sidebar-title">ADVERTISEMENT</div>
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:300px;height:600px"
+                     data-ad-client="{ADSENSE_CLIENT}"
+                     data-ad-slot="{AD_SLOT_SIDEBAR}"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({{}});
+                </script>
+            </div>
+        </aside>
     </div>
 
     <footer>
@@ -220,6 +323,9 @@ def build_post_html(post_id, title, content, image_url, date_str, category):
 </body>
 </html>"""
 
+# ==========================================
+# 5. 메인 인덱스 및 사이트맵 갱신
+# ==========================================
 def update_site(new_posts):
     if not new_posts:
         return
@@ -227,23 +333,24 @@ def update_site(new_posts):
     with open(INDEX_PATH, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
         
-    grid = soup.find('div', class_=re.compile(r'grid', re.I))
+    grid = soup.find(id='article-grid')
     if not grid:
-        sample_card = soup.find('a', href=re.compile(r'posts/'))
-        if sample_card:
-            grid = sample_card.parent
+        grid = soup.find('div', class_=re.compile(r'article-grid|grid', re.I))
 
     if grid:
         for post in reversed(new_posts):
             card_html = f"""
-            <a href="posts/{post['id']}.html" class="post-card" style="text-decoration: none; color: inherit;">
-                <div style="overflow: hidden; border-radius: 8px; margin-bottom: 12px; height: 180px; background: #eee;">
-                    <img src="{post['image_url']}" alt="{post['title']}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #0066cc; margin-bottom: 6px;">CARISSUE {post['category']}</span>
-                <h3 style="font-size: 15px; font-weight: 700; line-height: 1.4; margin: 0 0 8px 0; color: #111;">{post['title']}</h3>
-                <span style="font-size: 11px; color: #999;">{post['date_str']}</span>
-            </a>
+            <article class="post-card">
+                <a href="posts/{post['id']}.html" class="thumb-wrap">
+                    <img src="{post['image_url']}" alt="{post['title']}">
+                </a>
+                <span class="card-tag">CARISSUE {post['category']}</span>
+                <a href="posts/{post['id']}.html">
+                    <h3>{post['title']}</h3>
+                </a>
+                <span class="date">{post['date_str']}</span>
+                <a href="posts/{post['id']}.html" class="read-more">READ MORE &rarr;</a>
+            </article>
             """
             card_soup = BeautifulSoup(card_html, 'html.parser')
             grid.insert(0, card_soup)
@@ -272,7 +379,7 @@ def main():
         items = fetch_feed_items(feed, history_set)
         collected.extend(items)
         
-    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨 (국내 {sum(1 for i in collected if i['category']=='국내')} / 글로벌 {sum(1 for i in collected if i['category']=='글로벌')})")
+    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
     if not collected:
         print("수집 대상 기사가 없습니다. 종료합니다.")
         return
