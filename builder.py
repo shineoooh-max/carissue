@@ -1,15 +1,17 @@
 import os
 import re
 import time
-import json
 import urllib.request
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
+from google import genai
 
-# 1. API 설정
+# 1. 최신 공식 Interactions API 설정
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
+
+client = genai.Client(api_key=API_KEY)
 
 SITE_URL = "https://carissue.koo1000.com"
 POSTS_DIR = "posts"
@@ -18,7 +20,7 @@ SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 ADSENSE_ID = "ca-pub-3677274092490514"
 
-# 2. 검증된 4대 피드 (국내 2 + 글로벌 3 = 총 5건)
+# 2. 검증된 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 총 5건)
 FEEDS = [
     {
         "name": "모터그래프",
@@ -59,7 +61,7 @@ def save_history(link):
 def fetch_feed_items(feed_conf, history_set):
     items = []
     target = feed_conf["target_count"]
-    print(f"\n[{feed_conf['name']}] 피드 수집 ({feed_conf['category']} - 목표: {target}건)")
+    print(f"\n[{feed_conf['name']}] 피드 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
     
     try:
         req = urllib.request.Request(
@@ -120,7 +122,7 @@ def fetch_feed_items(feed_conf, history_set):
                 "image_url": image_url
             })
             history_set.add(link)
-            print(f"-> [채택] {title[:30]}...")
+            print(f"-> [수집 채택] {title[:30]}...")
 
     except Exception as e:
         print(f"-> [수집 실패]: {e}")
@@ -148,35 +150,15 @@ def generate_article(item):
 
 [출력 형식 - 반드시 준수]
 TITLE: [기사 제목]
-CONTENT: [본문 내용 (각 문단은 빈 줄 1개로 구분)]
+CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
 """
-    # 현재 활성화된 공식 최신 모델 순차 시도 (gemini-2.5-flash -> gemini-2.0-flash)
-    target_models = ["gemini-2.5-flash", "gemini-2.0-flash"]
-    txt = ""
-    last_err = None
-
-    for m in target_models:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={API_KEY}"
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2048}
-        }
-        headers = {"Content-Type": "application/json"}
-        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers)
-        
-        try:
-            with urllib.request.urlopen(req, timeout=30) as response:
-                res_data = json.loads(response.read().decode("utf-8"))
-                txt = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
-                if txt:
-                    break
-        except urllib.error.HTTPError as e:
-            last_err = e
-            continue
-
-    if not txt and last_err:
-        raise last_err
-
+    # 공식 문서 규격: Interactions API + gemini-3.8-flash
+    interaction = client.interactions.create(
+        model="gemini-3.8-flash",
+        input=prompt
+    )
+    txt = interaction.output_text.strip()
+    
     title = ""
     content = ""
     if "TITLE:" in txt and "CONTENT:" in txt:
@@ -290,7 +272,7 @@ def main():
         items = fetch_feed_items(feed, history_set)
         collected.extend(items)
         
-    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
+    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨 (국내 {sum(1 for i in collected if i['category']=='국내')} / 글로벌 {sum(1 for i in collected if i['category']=='글로벌')})")
     if not collected:
         print("수집 대상 기사가 없습니다. 종료합니다.")
         return
