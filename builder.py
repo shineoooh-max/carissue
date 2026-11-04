@@ -8,9 +8,7 @@ from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
 from google import genai
 
-# ==========================================
-# 1. Gemini Interactions API 설정
-# ==========================================
+# 1. API 및 기본 경로 설정
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
@@ -23,7 +21,6 @@ INDEX_PATH = "index.html"
 SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 
-# 한국 표준시(KST, UTC+9) 고정
 KST = timezone(timedelta(hours=9))
 
 def get_now_kst_dt():
@@ -32,29 +29,23 @@ def get_now_kst_dt():
 def get_now_kst():
     return get_now_kst_dt().strftime("%Y-%m-%d %H:%M")
 
-# ==========================================
-# 2. 애드센스 계정 및 고유 슬롯 번호 (불변 규격)
-# ==========================================
+# 2. 애드센스 규격
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
-AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 중간 (인아티클)
-AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 (300x600)
-AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이
-AD_SLOT_MULTIPLEX = "3913014950"   # 본문 하단 멀티플렉스 (일치하는 콘텐츠)
+AD_SLOT_IN_ARTICLE = "4181249863"
+AD_SLOT_SIDEBAR = "5924062639"
+AD_SLOT_BOTTOM = "9203364457"
+AD_SLOT_MULTIPLEX = "3913014950"
 
-# ==========================================
-# 3. 오전(국내 5) / 오후(해외 5) 피드 배분 정의
-# ==========================================
+# 3. KST 오전 8시(국내 5) / 오후 6시(해외 5) 피드 정의
 def get_current_feeds():
     now = get_now_kst_dt()
-    # KST 기준 12시 이전: 오전 국내 기사 5건 (오토헤럴드)
     if now.hour < 12:
-        print(f">>> [피드 분기] 오전 스케줄 적용: 국내 기사 5건 (KST 현재시각: {now.strftime('%H:%M')})")
+        print(f">>> [KST 오전 8시 실행] 오토헤럴드 국내 기사 5건 수집 시작")
         return [
             {"name": "오토헤럴드", "category": "국내", "url": "http://www.autoherald.co.kr/rss/allArticle.xml", "target_count": 5}
         ]
-    # KST 기준 12시 이후: 오후 글로벌 기사 5건 (Motor1 3건 + Carscoops 2건)
     else:
-        print(f">>> [피드 분기] 오후 스케줄 적용: 해외 기사 5건 (KST 현재시각: {now.strftime('%H:%M')})")
+        print(f">>> [KST 오후 6시 실행] Motor1/Carscoops 해외 기사 5건 수집 시작")
         return [
             {"name": "Motor1", "category": "글로벌", "url": "https://www.motor1.com/rss/news/all/", "target_count": 3},
             {"name": "Carscoops", "category": "글로벌", "url": "https://www.carscoops.com/feed/", "target_count": 2}
@@ -73,7 +64,7 @@ def save_history(link):
 def fetch_feed_items(feed_conf, history_set):
     items = []
     target = feed_conf["target_count"]
-    print(f"\n[{feed_conf['name']}] 피드 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
+    print(f"\n[{feed_conf['name']}] RSS 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
     
     try:
         req = urllib.request.Request(
@@ -88,7 +79,6 @@ def fetch_feed_items(feed_conf, history_set):
             
         root = ET.fromstring(xml_text)
         entries = root.findall(".//item")
-        print(f"-> 수집된 원문 엔트리: {len(entries)}개")
 
         for entry in entries:
             if len(items) >= target:
@@ -109,7 +99,6 @@ def fetch_feed_items(feed_conf, history_set):
             title = title_el.text.strip() if title_el is not None and title_el.text else ""
             desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
             
-            # 피드 내부 이미지 추출 보조
             feed_img = ""
             enc = entry.find("enclosure")
             if enc is not None and enc.attrib.get("url"):
@@ -129,13 +118,14 @@ def fetch_feed_items(feed_conf, history_set):
                 "feed_desc": desc
             })
     except Exception as e:
-        print(f"[{feed_conf['name']}] RSS 수집 오류 발생: {e}")
+        print(f"[{feed_conf['name']}] RSS 수집 오류: {e}")
         
     return items
 
 def extract_article_details(url, feed_img="", feed_desc=""):
     images = []
     text_content = ""
+    safe_desc = feed_desc or ""
     try:
         req = urllib.request.Request(
             url,
@@ -144,11 +134,9 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         html = urllib.request.urlopen(req, timeout=15).read().decode('utf-8', errors='ignore')
         soup = BeautifulSoup(html, "html.parser")
 
-        # 본문 영역 탐색 범위 대폭 확장
         article_elem = (
             soup.find('article') or 
-            soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content|postContent|m1-article-body|article__body', re.I)) or
-            soup.find('div', id=re.compile(r'article-body|content|post-body', re.I)) or
+            soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content|m1-article-body', re.I)) or
             soup.body
         )
         
@@ -162,22 +150,17 @@ def extract_article_details(url, feed_img="", feed_desc=""):
                 if not src and img.get('srcset'):
                     src = img.get('srcset').split(',')[0].split(' ')[0]
                 if src and src.startswith('http'):
-                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_', 'advertisement']):
+                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_']):
                         continue
                     raw_imgs.append(src)
 
-            # 본문 문단 추출
             paragraphs = [p.get_text().strip() for p in article_elem.find_all(['p', 'h2', 'h3']) if len(p.get_text().strip()) > 20]
             text_content = "\n\n".join(paragraphs)
 
-        # 웹 파싱 실패 시 피드 내 description 텍스트로 보완(fallback)
-        if (not text_content or len(text_content) < 100) and feed_desc:
-            desc_soup = BeautifulSoup(feed_desc, "html.parser")
-            desc_text = desc_soup.get_text().strip()
-            if len(desc_text) > 80:
-                text_content = desc_text
+        if (not text_content or len(text_content) < 80) and safe_desc:
+            desc_soup = BeautifulSoup(safe_desc, "html.parser")
+            text_content = desc_soup.get_text().strip()
 
-        # 이미지 중복 제거
         seen = set()
         for i in raw_imgs:
             if i not in seen:
@@ -186,16 +169,13 @@ def extract_article_details(url, feed_img="", feed_desc=""):
                 if len(images) >= 5:
                     break
     except Exception as e:
-        print(f"기사 상세 파싱 예외 ({url}): {e}")
-        if feed_desc:
-            desc_soup = BeautifulSoup(feed_desc, "html.parser")
+        print(f"본문 파싱 예외: {e}")
+        if safe_desc:
+            desc_soup = BeautifulSoup(safe_desc, "html.parser")
             text_content = desc_soup.get_text().strip()
 
     return text_content[:4000], images
 
-# ==========================================
-# 4. Gemini 프롬프트 및 기사 재작성
-# ==========================================
 def generate_article_content(source, category, original_title, raw_text):
     prompt = f"""
 당신은 국내 최고의 프리미엄 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 에디터입니다.
@@ -206,18 +186,11 @@ def generate_article_content(source, category, original_title, raw_text):
 원문 내용:
 {raw_text}
 
-[작성 및 출력 가이드라인 - 반드시 준수]
-1. 제목:
-   - 독자의 클릭을 유도하는 전문적이고 세련된 한국어 헤드라인 1개.
-   - 첫 줄에 `# 제목` 형식으로 출력하세요.
-2. 부제목(서브헤드):
-   - 기사의 핵심을 찌르는 임팩트 있는 요약 1줄.
-   - `## 부제목` 형식으로 제목 바로 아래에 출력하세요.
-3. 본문 구조:
-   - 본문은 자연스러운 4~5개 단락으로 깊이 있게 구성하세요.
-   - 외신 기사의 경우 단순 직역을 지양하고, 한국 소비자의 시선과 시장 맥락(국내 출시 가능성, 경쟁 모델과의 비교, 가격 정책 등)을 결합해 분석적으로 재해석하세요.
-   - 각 단락 시작 전 `### 소제목`을 달아 가독성을 극대화하세요.
-   - 마크다운(Markdown) 포맷으로만 정갈하게 출력하세요.
+[작성 및 출력 가이드라인]
+1. 제목: 첫 줄에 `# 제목` 형식으로 출력 (매력적인 한국어 헤드라인 1개).
+2. 부제목: 제목 바로 아래 `## 부제목` 형식으로 1줄 요약 출력.
+3. 본문 구조: 자연스러운 4~5개 단락으로 구성하고 각 단락 시작 전 `### 소제목`을 달아주세요.
+4. 마크다운 포맷으로만 정갈하게 출력하세요.
 """
     try:
         interaction = client.interactions.create(
@@ -226,12 +199,9 @@ def generate_article_content(source, category, original_title, raw_text):
         )
         return interaction.output_text.strip()
     except Exception as e:
-        print(f"Gemini API 호출 에러: {e}")
+        print(f"Gemini API 에러: {e}")
         return None
 
-# ==========================================
-# 5. HTML 빌드 헬퍼 (공유 모달, 푸터, 주석)
-# ==========================================
 def render_header(active_nav=""):
     return f"""
     <header class="site-header">
@@ -289,31 +259,26 @@ def get_base_css():
     .footer-links a:hover { color: var(--primary); text-decoration: underline; }
     .copyright { font-size: 13px; color: #888; }
 
-    /* 공유 모달 */
     .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
     .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
     .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
     .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
     .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
     """
 
-# ==========================================
-# 6. 기사 상세 페이지 생성 및 리빌드
-# ==========================================
 def build_article_page(item_data, all_posts):
     post_id = item_data["id"]
     title = item_data["title"]
     subtitle = item_data.get("subtitle", "")
-    content_html = item_data["content_html"]
+    content_html = item_data.get("content_html", "")
     images = item_data.get("images", [])
     featured_img = images[0] if images else "/assets/logo.png"
     date_str = item_data.get("date", get_now_kst())
     category = item_data.get("category", "국내")
     source = item_data.get("source", "CARISSUE")
 
-    # SEO JSON-LD
     schema_ld = {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
@@ -321,22 +286,10 @@ def build_article_page(item_data, all_posts):
         "description": subtitle or title,
         "image": images,
         "datePublished": item_data.get("iso_date", datetime.now(timezone.utc).isoformat()),
-        "author": [{
-            "@type": "Organization",
-            "name": "CARISSUE",
-            "url": SITE_URL
-        }],
-        "publisher": {
-            "@type": "Organization",
-            "name": "CARISSUE",
-            "logo": {
-                "@type": "ImageObject",
-                "url": f"{SITE_URL}/assets/logo.png"
-            }
-        }
+        "author": [{"@type": "Organization", "name": "CARISSUE", "url": SITE_URL}],
+        "publisher": {"@type": "Organization", "name": "CARISSUE", "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/assets/logo.png"}}
     }
 
-    # 추천 기사 (최신 3개)
     related_html = ""
     for r in [p for p in all_posts if p["id"] != post_id][:3]:
         r_img = r.get("images", ["/assets/logo.png"])[0] if r.get("images") else "/assets/logo.png"
@@ -347,7 +300,6 @@ def build_article_page(item_data, all_posts):
         </a>
         """
 
-    # 저작권 주석 (폰트 크기 11px)
     copyright_notice = f"""
     <div class="copyright-notice">
         ※ 본 기사는 각 언론사({source} 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
@@ -391,7 +343,6 @@ def build_article_page(item_data, all_posts):
         .ad-in-article {{ margin: 35px 0; text-align: center; }}
         .ad-bottom {{ margin: 40px 0; }}
         .ad-multiplex {{ margin: 35px 0; }}
-
         .copyright-notice {{ font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }}
 
         .related-wrap {{ margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }}
@@ -428,10 +379,8 @@ def build_article_page(item_data, all_posts):
                 {content_html}
             </article>
 
-            <!-- 본문 최하단 저작권 및 출처 주석 -->
             {copyright_notice}
 
-            <!-- 구글 애드센스 하단 디스플레이 -->
             <div class="ad-bottom">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -442,7 +391,6 @@ def build_article_page(item_data, all_posts):
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
 
-            <!-- 구글 애드센스 멀티플렉스 (일치하는 콘텐츠) -->
             <div class="ad-multiplex">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -462,7 +410,6 @@ def build_article_page(item_data, all_posts):
 
         <aside class="sidebar-wrap">
             <div class="sidebar-sticky">
-                <!-- 우측 고정 사이드바 300x600 -->
                 <ins class="adsbygoogle"
                      style="display:inline-block;width:300px;height:600px"
                      data-ad-client="{ADSENSE_CLIENT}"
@@ -472,7 +419,6 @@ def build_article_page(item_data, all_posts):
         </aside>
     </div>
 
-    <!-- 공유 모달 팝업 -->
     <div id="shareModal" class="share-modal">
         <div class="share-modal-content">
             <div class="share-title">기사 공유하기</div>
@@ -501,13 +447,11 @@ def build_article_page(item_data, all_posts):
                     modal.style.display = 'flex';
                 }});
             }}
-
             if (closeBtn && modal) {{
                 closeBtn.addEventListener('click', function() {{
                     modal.style.display = 'none';
                 }});
             }}
-
             window.addEventListener('click', function(e) {{
                 if (e.target === modal) {{
                     modal.style.display = 'none';
@@ -517,11 +461,9 @@ def build_article_page(item_data, all_posts):
             document.getElementById('shareX').addEventListener('click', function() {{
                 window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(pageTitle) + '&url=' + encodeURIComponent(pageUrl), '_blank');
             }});
-
             document.getElementById('shareFB').addEventListener('click', function() {{
                 window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl), '_blank');
             }});
-
             document.getElementById('copyUrl').addEventListener('click', function() {{
                 navigator.clipboard.writeText(pageUrl).then(function() {{
                     alert('기사 주소가 클립보드에 복사되었습니다.');
@@ -539,9 +481,6 @@ def build_article_page(item_data, all_posts):
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(page_html)
 
-# ==========================================
-# 7. 메인 화면 (Motor1 스타일 레이아웃) 빌드
-# ==========================================
 def build_index_page(posts):
     if not posts:
         return
@@ -551,9 +490,9 @@ def build_index_page(posts):
     remaining_posts = posts[4:]
 
     def get_thumb(p):
-        return p.get("images", ["/assets/logo.png"])[0] if p.get("images") else "/assets/logo.png"
+        imgs = p.get("images", [])
+        return imgs[0] if (imgs and len(imgs) > 0 and imgs[0]) else "/assets/logo.png"
 
-    # Top Hero HTML
     top_hero_html = f"""
     <a href="/posts/{top_hero['id']}.html" class="top-hero-card">
         <div class="top-hero-thumb">
@@ -567,7 +506,6 @@ def build_index_page(posts):
     </a>
     """
 
-    # Sub Heroes HTML (3열 그리드)
     sub_heroes_html = ""
     for sh in sub_heroes:
         sub_heroes_html += f"""
@@ -583,7 +521,6 @@ def build_index_page(posts):
         </a>
         """
 
-    # 메인 하단 리스트 HTML
     list_html = ""
     for lp in remaining_posts:
         list_html += f"""
@@ -613,7 +550,6 @@ def build_index_page(posts):
     <style>
         {get_base_css()}
         .main-container {{ max-width: 1200px; margin: 24px auto; padding: 0 20px; }}
-        
         .top-hero-card {{ display: block; margin-bottom: 24px; border-radius: 10px; overflow: hidden; position: relative; background: #000; }}
         .top-hero-thumb {{ position: relative; aspect-ratio: 21/9; width: 100%; }}
         .top-hero-thumb img {{ width: 100%; height: 100%; object-fit: cover; opacity: 0.88; }}
@@ -635,7 +571,6 @@ def build_index_page(posts):
         .date {{ font-size: 12px; color: #888; display: block; margin-top: 6px; }}
 
         .infeed-ad-wrap {{ margin: 30px 0; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; }}
-
         .feed-layout {{ display: grid; grid-template-columns: 1fr 300px; gap: 40px; margin-top: 30px; }}
         @media(max-width: 900px) {{ .feed-layout {{ grid-template-columns: 1fr; }} .side-box {{ display: none; }} }}
 
@@ -657,7 +592,6 @@ def build_index_page(posts):
             {sub_heroes_html}
         </div>
 
-        <!-- 인피드 광고 영역 -->
         <div class="infeed-ad-wrap">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -691,9 +625,6 @@ def build_index_page(posts):
     with open(INDEX_PATH, "w", encoding="utf-8") as f:
         f.write(index_html)
 
-# ==========================================
-# 8. Sitemap.xml 실시간 동기화
-# ==========================================
 def update_sitemap(posts):
     now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     urls_xml = f"""  <url>
@@ -719,9 +650,6 @@ def update_sitemap(posts):
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_content)
 
-# ==========================================
-# 9. 메인 실행 파이프라인
-# ==========================================
 def main():
     os.makedirs(POSTS_DIR, exist_ok=True)
     history_set = load_history()
@@ -731,10 +659,9 @@ def main():
     for f_conf in feeds:
         items = fetch_feed_items(f_conf, history_set)
         for item in items:
-            print(f"\n[기사 변환 작업] 원문 분석: {item['title']}")
+            print(f"\n[기사 생성] 원문 분석: {item['title']}")
             raw_text, images = extract_article_details(item["link"], item["feed_img"], item.get("feed_desc", ""))
             if not raw_text or len(raw_text) < 80:
-                print("-> 본문 추출 실패 또는 내용 부족으로 패스.")
                 continue
 
             generated_md = generate_article_content(item["source"], item["category"], item["title"], raw_text)
@@ -745,7 +672,7 @@ def main():
             post_title = item["title"]
             subtitle = ""
             body_lines = []
-            post_title_found = False  # 버그 수정: 변수 사전 초기화 완료
+            post_title_found = False
 
             for line in lines:
                 if line.startswith("# ") and not post_title_found:
@@ -756,7 +683,6 @@ def main():
                 else:
                     body_lines.append(line)
 
-            # 마크다운 문단을 HTML로 변환하며 다중 이미지 분산 배치 및 중간 광고 삽입
             paragraphs = []
             cur_p = []
             for bl in body_lines:
@@ -778,7 +704,7 @@ def main():
                 else:
                     content_html_parts.append(f"<p>{p_text}</p>")
 
-                # 2번째 문단 뒤 인아티클 광고 삽입
+                # 2번째 문단 뒤 인아티클 광고 (중괄호 완전 이스케이프)
                 if p_i == 1:
                     content_html_parts.append(f"""
                     <div class="ad-in-article">
@@ -792,7 +718,6 @@ def main():
                     </div>
                     """)
 
-                # 본문 중간 이미지 분산 배치
                 if p_i in [0, 2, 4] and img_idx < len(images):
                     content_html_parts.append(f"""
                     <div class="content-img">
@@ -820,29 +745,67 @@ def main():
             save_history(item["link"])
             time.sleep(2)
 
-    # 기존 DB 동기화 및 전체 리빌드
-    data_file = "posts_data.json"
+    # 기존 글 복원 로직
     existing_posts = []
-    if os.path.exists(data_file):
-        try:
-            with open(data_file, "r", encoding="utf-8") as f:
-                existing_posts = json.load(f)
-        except Exception:
-            existing_posts = []
+    new_ids = {na["id"] for na in new_articles}
+
+    if os.path.exists(POSTS_DIR):
+        for fname in sorted(os.listdir(POSTS_DIR), reverse=True):
+            if fname.endswith(".html") and fname.startswith("post_"):
+                pid = fname.replace(".html", "")
+                if pid in new_ids:
+                    continue
+                fpath = os.path.join(POSTS_DIR, fname)
+                try:
+                    with open(fpath, "r", encoding="utf-8") as hf:
+                        h_soup = BeautifulSoup(hf.read(), "html.parser")
+                        h1_tag = h_soup.find("h1", class_="post-title")
+                        sub_tag = h_soup.find("div", class_="post-sub")
+                        cat_tag = h_soup.find("div", class_="post-cat")
+                        meta_tag = h_soup.find("div", class_="post-meta")
+                        feat_tag = h_soup.find("div", class_="featured-img-wrap")
+                        
+                        rec_title = h1_tag.get_text().strip() if h1_tag else pid
+                        rec_sub = sub_tag.get_text().strip() if sub_tag else ""
+                        rec_cat = "국내" if (cat_tag and "국내" in cat_tag.get_text()) else "글로벌"
+                        
+                        rec_img = "/assets/logo.png"
+                        if feat_tag:
+                            img_el = feat_tag.find("img")
+                            if img_el and img_el.get("src"):
+                                rec_img = img_el["src"]
+                        
+                        rec_date = get_now_kst()
+                        if meta_tag:
+                            d_match = re.search(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}', meta_tag.get_text())
+                            if d_match:
+                                rec_date = d_match.group(0)
+
+                        existing_posts.append({
+                            "id": pid,
+                            "title": rec_title,
+                            "subtitle": rec_sub,
+                            "category": rec_cat,
+                            "source": "CARISSUE",
+                            "date": rec_date,
+                            "iso_date": rec_date[:10],
+                            "images": [rec_img],
+                            "content_html": ""
+                        })
+                except Exception as err:
+                    print(f"기존 기사 파일 파싱 예외 ({fname}): {err}")
 
     all_posts = new_articles + existing_posts
-    with open(data_file, "w", encoding="utf-8") as f:
-        json.dump(all_posts, f, ensure_ascii=False, indent=2)
+    all_posts.sort(key=lambda x: x.get("id", ""), reverse=True)
 
-    print(f"\n>>> 전체 기사 수: {len(all_posts)}개 (신규 생성: {len(new_articles)}개)")
+    print(f"\n>>> [스캔 완료] 총 기사 수: {len(all_posts)}개 (신규: {len(new_articles)}개, 기존 복원: {len(existing_posts)}개)")
     
-    # 기존 글까지 포함하여 최신 스크립트(모달, 주석, 푸터)로 일괄 리빌드
-    for p in all_posts:
+    for p in new_articles:
         build_article_page(p, all_posts)
 
     build_index_page(all_posts)
     update_sitemap(all_posts)
-    print(">>> [완료] index.html, sitemap.xml 및 기사 전체 리빌드가 성공적으로 완료되었습니다.")
+    print(">>> [완료] index.html 및 sitemap.xml 빌드가 성공적으로 완료되었습니다.")
 
 if __name__ == "__main__":
     main()
