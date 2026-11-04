@@ -8,7 +8,9 @@ from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
 from google import genai
 
+# ==========================================
 # 1. API 및 기본 경로 설정
+# ==========================================
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is missing.")
@@ -21,6 +23,7 @@ INDEX_PATH = "index.html"
 SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 
+# 한국 표준시(KST, UTC+9) 고정
 KST = timezone(timedelta(hours=9))
 
 def get_now_kst_dt():
@@ -29,23 +32,29 @@ def get_now_kst_dt():
 def get_now_kst():
     return get_now_kst_dt().strftime("%Y-%m-%d %H:%M")
 
-# 2. 애드센스 규격
+# ==========================================
+# 2. 애드센스 고유 슬롯 번호
+# ==========================================
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
-AD_SLOT_IN_ARTICLE = "4181249863"
-AD_SLOT_SIDEBAR = "5924062639"
-AD_SLOT_BOTTOM = "9203364457"
-AD_SLOT_MULTIPLEX = "3913014950"
+AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 중간
+AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 (300x600)
+AD_SLOT_BOTTOM = "9203364457"      # 하단 디스플레이
+AD_SLOT_MULTIPLEX = "3913014950"   # 하단 멀티플렉스
 
+# ==========================================
 # 3. KST 오전 8시(국내 5) / 오후 6시(해외 5) 피드 정의
+# ==========================================
 def get_current_feeds():
     now = get_now_kst_dt()
+    # KST 12시 이전: auto.yml 23:00 UTC 스케줄 (KST 08:00) -> 국내 기사 5건
     if now.hour < 12:
-        print(f">>> [KST 오전 8시 실행] 오토헤럴드 국내 기사 5건 수집 시작")
+        print(f">>> [KST 오전 8시 실행] 오토헤럴드 국내 기사 5건 수집 시작 (현재시각: {now.strftime('%H:%M')})")
         return [
             {"name": "오토헤럴드", "category": "국내", "url": "http://www.autoherald.co.kr/rss/allArticle.xml", "target_count": 5}
         ]
+    # KST 12시 이후: auto.yml 09:00 UTC 스케줄 (KST 18:00) -> 해외 기사 5건
     else:
-        print(f">>> [KST 오후 6시 실행] Motor1/Carscoops 해외 기사 5건 수집 시작")
+        print(f">>> [KST 오후 6시 실행] Motor1/Carscoops 해외 기사 5건 수집 시작 (현재시각: {now.strftime('%H:%M')})")
         return [
             {"name": "Motor1", "category": "글로벌", "url": "https://www.motor1.com/rss/news/all/", "target_count": 3},
             {"name": "Carscoops", "category": "글로벌", "url": "https://www.carscoops.com/feed/", "target_count": 2}
@@ -176,6 +185,9 @@ def extract_article_details(url, feed_img="", feed_desc=""):
 
     return text_content[:4000], images
 
+# ==========================================
+# 4. Gemini 기사 작성
+# ==========================================
 def generate_article_content(source, category, original_title, raw_text):
     prompt = f"""
 당신은 국내 최고의 프리미엄 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 에디터입니다.
@@ -202,6 +214,9 @@ def generate_article_content(source, category, original_title, raw_text):
         print(f"Gemini API 에러: {e}")
         return None
 
+# ==========================================
+# 5. 헤더, 푸터, 스타일
+# ==========================================
 def render_header(active_nav=""):
     return f"""
     <header class="site-header">
@@ -268,6 +283,9 @@ def get_base_css():
     .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
     """
 
+# ==========================================
+# 6. 기사 상세 페이지 생성
+# ==========================================
 def build_article_page(item_data, all_posts):
     post_id = item_data["id"]
     title = item_data["title"]
@@ -481,6 +499,9 @@ def build_article_page(item_data, all_posts):
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(page_html)
 
+# ==========================================
+# 7. 메인 화면 생성
+# ==========================================
 def build_index_page(posts):
     if not posts:
         return
@@ -625,6 +646,9 @@ def build_index_page(posts):
     with open(INDEX_PATH, "w", encoding="utf-8") as f:
         f.write(index_html)
 
+# ==========================================
+# 8. Sitemap 동기화
+# ==========================================
 def update_sitemap(posts):
     now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     urls_xml = f"""  <url>
@@ -650,6 +674,9 @@ def update_sitemap(posts):
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_content)
 
+# ==========================================
+# 9. 메인 실행 루틴
+# ==========================================
 def main():
     os.makedirs(POSTS_DIR, exist_ok=True)
     history_set = load_history()
@@ -704,7 +731,6 @@ def main():
                 else:
                     content_html_parts.append(f"<p>{p_text}</p>")
 
-                # 2번째 문단 뒤 인아티클 광고 (중괄호 완전 이스케이프)
                 if p_i == 1:
                     content_html_parts.append(f"""
                     <div class="ad-in-article">
@@ -745,7 +771,9 @@ def main():
             save_history(item["link"])
             time.sleep(2)
 
-    # 기존 글 복원 로직
+    # ---------------------------------------------------------
+    # posts/ 폴더의 기존 HTML 파일들을 정밀 스캔하여 복원
+    # ---------------------------------------------------------
     existing_posts = []
     new_ids = {na["id"] for na in new_articles}
 
@@ -758,28 +786,81 @@ def main():
                 fpath = os.path.join(POSTS_DIR, fname)
                 try:
                     with open(fpath, "r", encoding="utf-8") as hf:
-                        h_soup = BeautifulSoup(hf.read(), "html.parser")
-                        h1_tag = h_soup.find("h1", class_="post-title")
-                        sub_tag = h_soup.find("div", class_="post-sub")
-                        cat_tag = h_soup.find("div", class_="post-cat")
-                        meta_tag = h_soup.find("div", class_="post-meta")
-                        feat_tag = h_soup.find("div", class_="featured-img-wrap")
+                        raw_html = hf.read()
+                        h_soup = BeautifulSoup(raw_html, "html.parser")
                         
-                        rec_title = h1_tag.get_text().strip() if h1_tag else pid
-                        rec_sub = sub_tag.get_text().strip() if sub_tag else ""
-                        rec_cat = "국내" if (cat_tag and "국내" in cat_tag.get_text()) else "글로벌"
+                        rec_title = ""
+                        rec_sub = ""
+                        rec_img = ""
+                        rec_date = ""
+
+                        # 1순위: JSON-LD 스키마에서 정밀 메타데이터 추출
+                        schema_script = h_soup.find("script", type="application/ld+json")
+                        if schema_script and schema_script.string:
+                            try:
+                                schema_data = json.loads(schema_script.string.strip())
+                                rec_title = schema_data.get("headline", "")
+                                rec_sub = schema_data.get("description", "")
+                                schema_img = schema_data.get("image", [])
+                                if isinstance(schema_img, list) and len(schema_img) > 0:
+                                    rec_img = schema_img[0]
+                                elif isinstance(schema_img, str):
+                                    rec_img = schema_img
+                                if "datePublished" in schema_data:
+                                    rec_date = schema_data["datePublished"][:16].replace("T", " ")
+                            except Exception:
+                                pass
+
+                        # 2순위: HTML 태그 폴백 (제목)
+                        if not rec_title:
+                            h1 = h_soup.find("h1")
+                            if h1 and h1.get_text().strip():
+                                rec_title = h1.get_text().strip()
+                            elif h_soup.title and h_soup.title.get_text().strip():
+                                rec_title = h_soup.title.get_text().split(" - ")[0].strip()
+                            else:
+                                rec_title = pid
+
+                        # 2순위: HTML 태그 폴백 (설명)
+                        if not rec_sub:
+                            sub_elem = h_soup.find("div", class_=re.compile(r"post-sub|subtitle|desc"))
+                            if sub_elem and sub_elem.get_text().strip():
+                                rec_sub = sub_elem.get_text().strip()
+                            else:
+                                meta_desc = h_soup.find("meta", attrs={"name": "description"})
+                                if meta_desc and meta_desc.get("content"):
+                                    rec_sub = meta_desc.get("content", "").strip()
+
+                        # 2순위: HTML 태그 폴백 (썸네일 이미지)
+                        if not rec_img or any(k in rec_img.lower() for k in ["logo", "icon"]):
+                            og_img = h_soup.find("meta", property="og:image")
+                            if og_img and og_img.get("content"):
+                                rec_img = og_img.get("content", "").strip()
                         
-                        rec_img = "/assets/logo.png"
-                        if feat_tag:
-                            img_el = feat_tag.find("img")
-                            if img_el and img_el.get("src"):
-                                rec_img = img_el["src"]
-                        
-                        rec_date = get_now_kst()
-                        if meta_tag:
-                            d_match = re.search(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}', meta_tag.get_text())
-                            if d_match:
-                                rec_date = d_match.group(0)
+                        if not rec_img or any(k in rec_img.lower() for k in ["logo", "icon"]):
+                            for img in h_soup.find_all("img"):
+                                src = img.get("src") or ""
+                                if (src.startswith("http") or src.startswith("/")) and not any(k in src.lower() for k in ["logo", "icon", "banner", "btn", "favicon"]):
+                                    rec_img = src
+                                    break
+                        if not rec_img:
+                            rec_img = "/assets/logo.png"
+
+                        # 2순위: HTML 태그 폴백 (날짜)
+                        if not rec_date:
+                            meta_elem = h_soup.find("div", class_=re.compile(r"post-meta|meta|date"))
+                            search_target = meta_elem.get_text() if meta_elem else raw_html
+                            meta_match = re.search(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}', search_target)
+                            if meta_match:
+                                rec_date = meta_match.group(0)
+                            else:
+                                rec_date = get_now_kst()
+
+                        # 카테고리 추출
+                        rec_cat = "글로벌"
+                        cat_elem = h_soup.find("div", class_=re.compile(r"post-cat|category|badge"))
+                        if cat_elem and "국내" in cat_elem.get_text():
+                            rec_cat = "국내"
 
                         existing_posts.append({
                             "id": pid,
@@ -788,21 +869,24 @@ def main():
                             "category": rec_cat,
                             "source": "CARISSUE",
                             "date": rec_date,
-                            "iso_date": rec_date[:10],
+                            "iso_date": rec_date[:10] if len(rec_date) >= 10 else get_now_kst()[:10],
                             "images": [rec_img],
                             "content_html": ""
                         })
                 except Exception as err:
                     print(f"기존 기사 파일 파싱 예외 ({fname}): {err}")
 
+    # 새 글 + 기존 글 합산 후 정렬
     all_posts = new_articles + existing_posts
     all_posts.sort(key=lambda x: x.get("id", ""), reverse=True)
 
     print(f"\n>>> [스캔 완료] 총 기사 수: {len(all_posts)}개 (신규: {len(new_articles)}개, 기존 복원: {len(existing_posts)}개)")
     
+    # 신규 기사 파일만 새로 빌드
     for p in new_articles:
         build_article_page(p, all_posts)
 
+    # 전체 기사 목록으로 메인 페이지 및 sitemap.xml 빌드
     build_index_page(all_posts)
     update_sitemap(all_posts)
     print(">>> [완료] index.html 및 sitemap.xml 빌드가 성공적으로 완료되었습니다.")
