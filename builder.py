@@ -143,25 +143,38 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         html = urllib.request.urlopen(req, timeout=15).read().decode('utf-8', errors='ignore')
         soup = BeautifulSoup(html, "html.parser")
 
+        # 1. 기사 대표 이미지 (og:image 메타 태그 1순위)
+        og_img = soup.find("meta", property="og:image")
+        if og_img and og_img.get("content"):
+            c_img = og_img["content"].strip()
+            if c_img.startswith("http") and not any(x in c_img.lower() for x in ['logo', 'icon', 'banner', 'btn', 'favicon']):
+                images.append(c_img)
+
+        # RSS에서 넘어온 대표 이미지가 있고 중복이 아니면 추가
+        if feed_img and feed_img not in images:
+            images.append(feed_img)
+
+        # 2. 본문 영역 탐색
         article_elem = (
             soup.find('article') or 
-            soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content|m1-article-body', re.I)) or
+            soup.find('div', id=re.compile(r'article-view-content-div|articleBody', re.I)) or
+            soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content', re.I)) or
             soup.body
         )
-        
-        raw_imgs = []
-        if feed_img:
-            raw_imgs.append(feed_img)
 
         if article_elem:
+            # 본문 내 실제 차량 사진 추가 수집 (로고, 광고 이미지 엄격 차단)
             for img in article_elem.find_all('img'):
                 src = img.get('src') or img.get('data-src') or img.get('data-original')
                 if not src and img.get('srcset'):
                     src = img.get('srcset').split(',')[0].split(' ')[0]
                 if src and src.startswith('http'):
-                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_']):
+                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_', 'kia', 'hyundai_logo']):
                         continue
-                    raw_imgs.append(src)
+                    if src not in images:
+                        images.append(src)
+                if len(images) >= 5:
+                    break
 
             paragraphs = [p.get_text().strip() for p in article_elem.find_all(['p', 'h2', 'h3']) if len(p.get_text().strip()) > 20]
             text_content = "\n\n".join(paragraphs)
@@ -170,13 +183,6 @@ def extract_article_details(url, feed_img="", feed_desc=""):
             desc_soup = BeautifulSoup(safe_desc, "html.parser")
             text_content = desc_soup.get_text().strip()
 
-        seen = set()
-        for i in raw_imgs:
-            if i not in seen:
-                seen.add(i)
-                images.append(i)
-                if len(images) >= 5:
-                    break
     except Exception as e:
         print(f"본문 파싱 예외: {e}")
         if safe_desc:
@@ -184,7 +190,6 @@ def extract_article_details(url, feed_img="", feed_desc=""):
             text_content = desc_soup.get_text().strip()
 
     return text_content[:4000], images
-
 # ==========================================
 # 4. Gemini 기사 작성
 # ==========================================
