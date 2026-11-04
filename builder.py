@@ -78,7 +78,7 @@ def fetch_feed_items(feed_conf, history_set):
     try:
         req = urllib.request.Request(
             feed_conf["url"],
-            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'}
         )
         raw_data = urllib.request.urlopen(req, timeout=15).read()
         try:
@@ -125,28 +125,33 @@ def fetch_feed_items(feed_conf, history_set):
                 "category": feed_conf["category"],
                 "title": title,
                 "link": link,
-                "feed_img": feed_img
+                "feed_img": feed_img,
+                "feed_desc": desc
             })
     except Exception as e:
         print(f"[{feed_conf['name']}] RSS 수집 오류 발생: {e}")
         
     return items
 
-def extract_article_details(url, feed_img=""):
+def extract_article_details(url, feed_img="", feed_desc=""):
     images = []
     text_content = ""
     try:
         req = urllib.request.Request(
             url,
-            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'}
         )
         html = urllib.request.urlopen(req, timeout=15).read().decode('utf-8', errors='ignore')
         soup = BeautifulSoup(html, "html.parser")
 
-        # 본문 영역 탐색
-        article_elem = soup.find('article') or soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content')) or soup.body
+        # 본문 영역 탐색 범위 대폭 확장
+        article_elem = (
+            soup.find('article') or 
+            soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content|postContent|m1-article-body|article__body', re.I)) or
+            soup.find('div', id=re.compile(r'article-body|content|post-body', re.I)) or
+            soup.body
+        )
         
-        # 이미지 심층 수집
         raw_imgs = []
         if feed_img:
             raw_imgs.append(feed_img)
@@ -157,14 +162,20 @@ def extract_article_details(url, feed_img=""):
                 if not src and img.get('srcset'):
                     src = img.get('srcset').split(',')[0].split(' ')[0]
                 if src and src.startswith('http'):
-                    # 아이콘, 프로필, 광고성 소형 배너 필터링
                     if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_', 'advertisement']):
                         continue
                     raw_imgs.append(src)
 
-            # 본문 텍스트 추출
+            # 본문 문단 추출
             paragraphs = [p.get_text().strip() for p in article_elem.find_all(['p', 'h2', 'h3']) if len(p.get_text().strip()) > 20]
             text_content = "\n\n".join(paragraphs)
+
+        # 웹 파싱 실패 시 피드 내 description 텍스트로 보완(fallback)
+        if (not text_content or len(text_content) < 100) and feed_desc:
+            desc_soup = BeautifulSoup(feed_desc, "html.parser")
+            desc_text = desc_soup.get_text().strip()
+            if len(desc_text) > 80:
+                text_content = desc_text
 
         # 이미지 중복 제거
         seen = set()
@@ -176,6 +187,9 @@ def extract_article_details(url, feed_img=""):
                     break
     except Exception as e:
         print(f"기사 상세 파싱 예외 ({url}): {e}")
+        if feed_desc:
+            desc_soup = BeautifulSoup(feed_desc, "html.parser")
+            text_content = desc_soup.get_text().strip()
 
     return text_content[:4000], images
 
@@ -235,7 +249,6 @@ def render_header(active_nav=""):
     """
 
 def render_footer():
-    # 요청하신 미색(#f8f8fa) 배경 및 공식 제휴 메일 고정
     return f"""
     <footer class="site-footer">
         <div class="footer-inner">
@@ -334,7 +347,7 @@ def build_article_page(item_data, all_posts):
         </a>
         """
 
-    # 저작권 주석 (폰트 크기 소형화 및 본문 하단 자동 삽입)
+    # 저작권 주석 (폰트 크기 11px)
     copyright_notice = f"""
     <div class="copyright-notice">
         ※ 본 기사는 각 언론사({source} 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
@@ -379,7 +392,6 @@ def build_article_page(item_data, all_posts):
         .ad-bottom {{ margin: 40px 0; }}
         .ad-multiplex {{ margin: 35px 0; }}
 
-        /* 아주 작은 폰트의 저작권 주석 */
         .copyright-notice {{ font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }}
 
         .related-wrap {{ margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }}
@@ -536,8 +548,7 @@ def build_index_page(posts):
 
     top_hero = posts[0]
     sub_heroes = posts[1:4]
-    infeed_post = posts[4] if len(posts) > 4 else None
-    remaining_posts = posts[5:]
+    remaining_posts = posts[4:]
 
     def get_thumb(p):
         return p.get("images", ["/assets/logo.png"])[0] if p.get("images") else "/assets/logo.png"
@@ -721,8 +732,8 @@ def main():
         items = fetch_feed_items(f_conf, history_set)
         for item in items:
             print(f"\n[기사 변환 작업] 원문 분석: {item['title']}")
-            raw_text, images = extract_article_details(item["link"], item["feed_img"])
-            if not raw_text or len(raw_text) < 100:
+            raw_text, images = extract_article_details(item["link"], item["feed_img"], item.get("feed_desc", ""))
+            if not raw_text or len(raw_text) < 80:
                 print("-> 본문 추출 실패 또는 내용 부족으로 패스.")
                 continue
 
@@ -734,6 +745,7 @@ def main():
             post_title = item["title"]
             subtitle = ""
             body_lines = []
+            post_title_found = False  # 버그 수정: 변수 사전 초기화 완료
 
             for line in lines:
                 if line.startswith("# ") and not post_title_found:
