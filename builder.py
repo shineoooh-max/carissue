@@ -2,9 +2,9 @@ import os
 import re
 import time
 import json
-import random
 import urllib.request
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
 from google import genai
 
@@ -23,13 +23,20 @@ INDEX_PATH = "index.html"
 SITEMAP_PATH = "sitemap.xml"
 HISTORY_FILE = "published_links.txt"
 
+# 한국 표준시(KST, UTC+9) 고정
+KST = timezone(timedelta(hours=9))
+
+def get_now_kst():
+    return datetime.now(KST).strftime("%Y-%m-%d %H:%M")
+
 # ==========================================
 # 2. 확정된 애드센스 계정 및 고유 슬롯 번호 (불변)
 # ==========================================
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
-AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 글 사이 중간광고 (인아티클)
-AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 광고
-AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이 광고
+AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 중간 (인아티클)
+AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바
+AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이
+AD_SLOT_MULTIPLEX = "3913014950"   # 본문 최하단 멀티플렉스 (일치하는 콘텐츠)
 
 # ==========================================
 # 3. 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 5건)
@@ -59,7 +66,7 @@ def fetch_feed_items(feed_conf, history_set):
     try:
         req = urllib.request.Request(
             feed_conf["url"],
-            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
         )
         raw_data = urllib.request.urlopen(req, timeout=15).read()
         try:
@@ -90,7 +97,9 @@ def fetch_feed_items(feed_conf, history_set):
             title = title_el.text.strip() if title_el is not None and title_el.text else ""
             desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
 
-            # 다중 이미지 추출 (1장 ~ 최대 5장)
+            # ----------------------------------------------------
+            # 이미지 심층 수집: srcset, data-src, lazy-loading 모두 추적
+            # ----------------------------------------------------
             images = []
             enclosure = entry.find("enclosure")
             if enclosure is not None and enclosure.attrib.get("url"):
@@ -103,20 +112,39 @@ def fetch_feed_items(feed_conf, history_set):
                         if img_src not in images:
                             images.append(img_src)
             
-            if len(images) < 3:
-                try:
-                    sub_req = urllib.request.Request(link, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
-                    sub_html = urllib.request.urlopen(sub_req, timeout=5).read().decode('utf-8', errors='ignore')
-                    sub_soup = BeautifulSoup(sub_html, 'html.parser')
-                    for page_img in sub_soup.find_all('img'):
-                        src = page_img.get('src') or page_img.get('data-src')
-                        if src and src.startswith('http') and not any(bad in src.lower() for bad in ['logo', 'icon', 'banner', 'avatar', 'ad']):
-                            if src not in images:
-                                images.append(src)
-                        if len(images) >= 5:
-                            break
-                except Exception:
-                    pass
+            # 원문 웹페이지의 심층 이미지(본문 갤러리) 크롤링
+            try:
+                sub_req = urllib.request.Request(
+                    link, 
+                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+                )
+                sub_html = urllib.request.urlopen(sub_req, timeout=8).read().decode('utf-8', errors='ignore')
+                sub_soup = BeautifulSoup(sub_html, 'html.parser')
+
+                for img_tag in sub_soup.find_all('img'):
+                    candidates = []
+                    # srcset 우선 파싱
+                    srcset = img_tag.get('srcset') or img_tag.get('data-srcset')
+                    if srcset:
+                        parts = [p.strip().split()[0] for p in srcset.split(',') if p.strip()]
+                        if parts:
+                            candidates.append(parts[-1])
+                    
+                    src = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-original') or img_tag.get('data-lazy-src')
+                    if src:
+                        candidates.append(src)
+                        
+                    for c_url in candidates:
+                        if c_url.startswith('//'):
+                            c_url = 'https:' + c_url
+                        if c_url.startswith('http') and not any(bad in c_url.lower() for bad in ['logo', 'icon', 'avatar', 'banner', 'ad-', 'advert', 'pixel', 'button']):
+                            if c_url not in images:
+                                images.append(c_url)
+                                break
+                    if len(images) >= 5:
+                        break
+            except Exception as crawl_err:
+                pass
 
             images = images[:5]
             if not images:
@@ -134,7 +162,7 @@ def fetch_feed_items(feed_conf, history_set):
                 "image_url": images[0]
             })
             history_set.add(link)
-            print(f"-> [채택] {title[:30]}... (이미지 {len(images)}장)")
+            print(f"-> [채택] {title[:30]}... (이미지 {len(images)}장 확보)")
     except Exception as e:
         print(f"-> [수집 실패]: {e}")
 
@@ -183,7 +211,7 @@ CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
     return title, content
 
 # ==========================================
-# 4. 서브 본문 HTML 렌더링 (하단 추천 리스트 + 공유 모달 정상화)
+# 4. 서브 본문 HTML 렌더링 (멀티플렉스 3913014950 탑재 + 공유 모달)
 # ==========================================
 def build_post_html(post_id, title, content, images, date_str, category, recent_posts=None):
     paras = [p.strip() for p in content.split("\n\n") if p.strip()]
@@ -221,16 +249,13 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
     article_body_html = "".join(p_tags)
 
     # ----------------------------------------------------
-    # [추천 글 섹션 HTML 빌드 (최대 6개)]
+    # 추천 글 섹션 (하단 멀티플렉스 아래에 매칭)
     # ----------------------------------------------------
     related_html = ""
     if recent_posts:
         related_cards = ""
-        # 현재 글 제외하고 최대 6개 추천
         candidates = [p for p in recent_posts if p["id"] != post_id]
-        selected_related = candidates[:6]
-        
-        for r_post in selected_related:
+        for r_post in candidates[:6]:
             related_cards += f"""
             <a href="{r_post['id']}.html" class="related-card">
                 <div class="related-thumb"><img src="{r_post['image_url']}" alt="{r_post['title']}"></div>
@@ -262,7 +287,6 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
     schema_json = json.dumps(schema_data, ensure_ascii=False)
     current_post_url = f"{SITE_URL}/posts/{post_id}.html"
 
-    # HTML 템플릿 반환
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -276,7 +300,6 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
     
-    <!-- SEO Schema -->
     <script type="application/ld+json">
     {schema_json}
     </script>
@@ -311,10 +334,13 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
         
         .article-body p {{ font-size: 17px; line-height: 1.85; margin-bottom: 22px; color: #222; word-break: keep-all; }}
         .ad-in-article {{ margin: 35px 0; text-align: center; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; }}
-        .ad-bottom {{ margin: 40px 0; text-align: center; }}
+        .ad-bottom {{ margin: 40px 0 20px 0; text-align: center; }}
 
-        /* 본문 하단 추천 글 스타일 */
-        .related-section {{ margin-top: 50px; padding-top: 30px; border-top: 2px solid #111; }}
+        /* 본문 하단 멀티플렉스 광고 (3913014950) 슬롯 스타일 */
+        .ad-multiplex-wrap {{ margin: 30px 0 40px 0; padding: 20px 0; border-top: 1px solid #eee; }}
+        .ad-label {{ font-size: 11px; font-weight: 800; color: #aaa; text-transform: uppercase; margin-bottom: 10px; display: block; }}
+
+        .related-section {{ margin-top: 40px; padding-top: 30px; border-top: 2px solid #111; }}
         .related-title {{ font-size: 19px; font-weight: 900; margin-bottom: 20px; color: #111; letter-spacing: -0.5px; }}
         .related-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }}
         .related-card {{ display: flex; gap: 14px; background: #fff; align-items: flex-start; }}
@@ -332,7 +358,7 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
 
         footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
 
-        /* 모달 레이어 */
+        /* 모달 팝업 레이어 */
         .modal-overlay {{ display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; }}
         .modal-box {{ background: #fff; width: 90%; max-width: 380px; border-radius: 10px; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }}
         .modal-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }}
@@ -392,6 +418,7 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
                 {article_body_html}
             </div>
 
+            <!-- 본문 최하단 반응형 디스플레이 광고 (9203364457) -->
             <div class="ad-bottom">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -404,10 +431,24 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
                 </script>
             </div>
 
-            <!-- 하단 추천 기사 그리드 -->
+            <!-- 본문 최하단 멀티플렉스 그리드 광고 (3913014950) -->
+            <div class="ad-multiplex-wrap">
+                <span class="ad-label">SPONSORED RECOMMENDATION</span>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-format="autorelaxed"
+                     data-ad-client="{ADSENSE_CLIENT}"
+                     data-ad-slot="{AD_SLOT_MULTIPLEX}"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({{}});
+                </script>
+            </div>
+
+            <!-- 하단 자체 인기 추천 기사 -->
             {related_html}
         </article>
 
+        <!-- 우측 고정 사이드바 (5924062639) -->
         <aside class="sidebar">
             <div class="sidebar-sticky">
                 <div class="sidebar-title">ADVERTISEMENT</div>
@@ -422,7 +463,7 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
         </aside>
     </div>
 
-    <!-- 공유 모달 (인라인 리스너로 즉시 반응 보장) -->
+    <!-- 공유 모달 -->
     <div id="shareModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
@@ -516,7 +557,7 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
 </html>"""
 
 # ==========================================
-# 5. 기존 posts 폴더 스캔 및 전체 사이트 빌드 (추천 글 연결)
+# 5. 기존 글 스캔 및 Motor1 스타일 메인 화면 자동 빌드
 # ==========================================
 def scan_all_posts():
     posts = []
@@ -531,6 +572,9 @@ def scan_all_posts():
                 
                 h1 = soup.find("h1")
                 title = h1.text.strip() if h1 else fname.replace(".html", "")
+                
+                desc_meta = soup.find("meta", attrs={"name": "description"})
+                desc = desc_meta["content"] if desc_meta and desc_meta.get("content") else ""
                 
                 img_url = ""
                 for im in soup.find_all("img"):
@@ -557,36 +601,85 @@ def scan_all_posts():
                 posts.append({
                     "id": fname.replace(".html", ""),
                     "title": title,
+                    "desc": desc,
                     "image_url": img_url,
                     "category": cat,
                     "date_str": date_str
                 })
-            except Exception as e:
+            except Exception:
                 pass
 
     posts.sort(key=lambda x: (x["date_str"], x["id"]), reverse=True)
     return posts
 
 def rebuild_entire_site():
-    print(">>> [전체 복구] posts 폴더의 기사들을 스캔하여 메인 페이지를 재구성합니다...")
+    print(">>> [전체 복구] posts 폴더의 기사들을 스캔하여 Motor1 매거진 레이아웃을 생성합니다...")
     posts = scan_all_posts()
     print(f"-> 총 {len(posts)}개의 기사가 확인되었습니다.")
 
-    cards_html = ""
-    for post in posts:
-        cards_html += f"""
-        <article class="post-card">
-            <a href="posts/{post['id']}.html" class="thumb-wrap">
-                <img src="{post['image_url']}" alt="{post['title']}">
+    hero_html = ""
+    sub_heroes_html = ""
+    list_posts_html = ""
+
+    if posts:
+        # 1) 최상단 1개: TOP HERO
+        p0 = posts[0]
+        hero_html = f"""
+        <section class="hero-top">
+            <a href="posts/{p0['id']}.html" class="hero-link">
+                <div class="hero-card">
+                    <div class="hero-img-wrap"><img src="{p0['image_url']}" alt="{p0['title']}"></div>
+                    <div class="hero-content">
+                        <span class="hero-tag">TOP STORY &bull; CARISSUE {p0['category']}</span>
+                        <h2>{p0['title']}</h2>
+                        <p class="hero-desc">{p0['desc'][:160]}...</p>
+                        <span class="hero-date">{p0['date_str']}</span>
+                    </div>
+                </div>
             </a>
-            <span class="card-tag">CARISSUE {post['category']}</span>
-            <a href="posts/{post['id']}.html">
-                <h3>{post['title']}</h3>
-            </a>
-            <span class="date">{post['date_str']}</span>
-            <a href="posts/{post['id']}.html" class="read-more">READ MORE &rarr;</a>
-        </article>
+        </section>
         """
+
+        # 2) 그 밑 3개: 3열 서브 히어로 그리드
+        if len(posts) > 1:
+            sub_cards = ""
+            for p in posts[1:4]:
+                sub_cards += f"""
+                <article class="sub-hero-card">
+                    <a href="posts/{p['id']}.html" class="sub-hero-thumb">
+                        <img src="{p['image_url']}" alt="{p['title']}">
+                    </a>
+                    <span class="card-tag">CARISSUE {p['category']}</span>
+                    <a href="posts/{p['id']}.html">
+                        <h3>{p['title']}</h3>
+                    </a>
+                    <span class="date">{p['date_str']}</span>
+                </article>
+                """
+            sub_heroes_html = f"""
+            <section class="sub-hero-grid">
+                {sub_cards}
+            </section>
+            """
+
+        # 3) 5번째 기사부터: 좌측 썸네일+텍스트 수평 리스트
+        if len(posts) > 4:
+            for p in posts[4:]:
+                list_posts_html += f"""
+                <article class="feed-item">
+                    <a href="posts/{p['id']}.html" class="feed-thumb">
+                        <img src="{p['image_url']}" alt="{p['title']}">
+                    </a>
+                    <div class="feed-info">
+                        <span class="card-tag">CARISSUE {p['category']}</span>
+                        <a href="posts/{p['id']}.html">
+                            <h3>{p['title']}</h3>
+                        </a>
+                        <p class="feed-desc">{p['desc'][:130]}...</p>
+                        <span class="date">{p['date_str']}</span>
+                    </div>
+                </article>
+                """
 
     full_index = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -610,32 +703,70 @@ def rebuild_entire_site():
         .logo img {{ height: 32px; display: block; }}
         .nav-right {{ display: flex; align-items: center; gap: 24px; }}
         .nav-menu {{ font-size: 15px; font-weight: 800; color: #111; letter-spacing: 0.5px; }}
-        
         .sns-icons {{ display: flex; align-items: center; gap: 14px; }}
         .sns-icons svg {{ width: 17px; height: 17px; fill: #111; }}
 
-        .container {{ max-width: 1200px; margin: 30px auto; padding: 0 20px; }}
-        .section-header {{ font-size: 20px; font-weight: 900; letter-spacing: 0.5px; margin: 40px 0 20px 0; border-bottom: 2px solid #111; padding-bottom: 8px; text-transform: uppercase; }}
+        .container {{ max-width: 1200px; margin: 25px auto; padding: 0 20px; }}
+
+        /* Motor1 스타일 Top Hero (1개) */
+        .hero-top {{ margin-bottom: 30px; }}
+        .hero-card {{ display: grid; grid-template-columns: 1.3fr 1fr; background: #0e0e0e; color: #fff; border-radius: 6px; overflow: hidden; }}
+        .hero-img-wrap {{ aspect-ratio: 16 / 10; overflow: hidden; }}
+        .hero-img-wrap img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }}
+        .hero-card:hover .hero-img-wrap img {{ transform: scale(1.03); }}
+        .hero-content {{ padding: 36px 30px; display: flex; flex-direction: column; justify-content: center; }}
+        .hero-tag {{ font-size: 12px; font-weight: 900; color: #e50914; text-transform: uppercase; margin-bottom: 12px; }}
+        .hero-content h2 {{ font-size: 26px; line-height: 1.35; font-weight: 900; margin-bottom: 14px; word-break: keep-all; }}
+        .hero-desc {{ font-size: 14px; color: #bbb; line-height: 1.6; margin-bottom: 16px; word-break: keep-all; }}
+        .hero-date {{ font-size: 12px; color: #777; }}
+
+        /* 서브 히어로 (3열 그리드) */
+        .sub-hero-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }}
+        .sub-hero-card {{ display: flex; flex-direction: column; }}
+        .sub-hero-thumb {{ aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; background: #f0f0f0; margin-bottom: 12px; }}
+        .sub-hero-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }}
+        .sub-hero-card:hover img {{ transform: scale(1.03); }}
+        .sub-hero-card:hover h3 {{ color: #d32f2f; }}
+        .card-tag {{ font-size: 11px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 6px; }}
+        .sub-hero-card h3 {{ font-size: 16px; font-weight: 800; line-height: 1.4; margin-bottom: 8px; color: #111; word-break: keep-all; }}
+        .date {{ font-size: 12px; color: #888; }}
+
+        /* 중간 인피드 광고 */
+        .main-middle-ad {{ margin: 40px 0; text-align: center; padding: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }}
+
+        /* 2단 피드 리스트 (좌 70% 리스트 + 우 30% 사이드바) */
+        .main-feed-layout {{ display: grid; grid-template-columns: 1fr 320px; gap: 40px; margin-top: 20px; }}
+        .section-header {{ font-size: 20px; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 25px; border-bottom: 2px solid #111; padding-bottom: 8px; text-transform: uppercase; }}
         .section-header span {{ color: #d32f2f; }}
 
-        .article-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 24px; }}
-        .post-card {{ display: flex; flex-direction: column; background: #fff; }}
-        .post-card:hover h3 {{ color: #d32f2f; }}
-        .post-card .thumb-wrap {{ width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 4px; margin-bottom: 12px; background: #f0f0f0; }}
-        .post-card img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }}
-        .post-card:hover img {{ transform: scale(1.03); }}
-        .card-tag {{ font-size: 11px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 6px; }}
-        .post-card h3 {{ font-size: 17px; font-weight: 800; line-height: 1.4; margin-bottom: 8px; color: #111; word-break: keep-all; }}
-        .post-card .date {{ font-size: 12px; color: #888; }}
-        .read-more {{ font-size: 11px; font-weight: 800; color: #d32f2f; margin-top: 10px; display: inline-block; }}
+        .feed-list {{ display: flex; flex-direction: column; gap: 24px; }}
+        .feed-item {{ display: flex; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid #eee; align-items: flex-start; }}
+        .feed-thumb {{ width: 220px; height: 135px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #f0f0f0; }}
+        .feed-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }}
+        .feed-item:hover .feed-thumb img {{ transform: scale(1.03); }}
+        .feed-info {{ flex: 1; min-width: 0; }}
+        .feed-item:hover h3 {{ color: #d32f2f; }}
+        .feed-info h3 {{ font-size: 18px; font-weight: 800; line-height: 1.4; margin-bottom: 8px; color: #111; word-break: keep-all; }}
+        .feed-desc {{ font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
+
+        .sidebar {{ min-width: 0; }}
+        .sidebar-sticky {{ position: -webkit-sticky; position: sticky; top: 85px; }}
+        .sidebar-title {{ font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #111; padding-bottom: 6px; }}
 
         footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
 
         @media (max-width: 900px) {{
-            .article-grid {{ grid-template-columns: repeat(2, 1fr); }}
+            .hero-card {{ grid-template-columns: 1fr; }}
+            .hero-content {{ padding: 24px 20px; }}
+            .hero-content h2 {{ font-size: 20px; }}
+            .sub-hero-grid {{ grid-template-columns: repeat(2, 1fr); }}
+            .main-feed-layout {{ grid-template-columns: 1fr; gap: 0; }}
+            .sidebar {{ display: none; }}
         }}
         @media (max-width: 600px) {{
-            .article-grid {{ grid-template-columns: 1fr; }}
+            .sub-hero-grid {{ grid-template-columns: 1fr; }}
+            .feed-item {{ flex-direction: column; }}
+            .feed-thumb {{ width: 100%; height: auto; aspect-ratio: 16 / 9; }}
             .sns-icons {{ display: none; }}
             .container {{ padding: 0 16px; margin: 15px auto; }}
         }}
@@ -658,9 +789,46 @@ def rebuild_entire_site():
     </header>
 
     <main class="container">
-        <div class="section-header">LATEST STORIES <span>●</span></div>
-        <div class="article-grid" id="article-grid">
-            {cards_html}
+        <!-- 1. 최상단 대형 히어로 -->
+        {hero_html}
+
+        <!-- 2. 서브 히어로 3열 그리드 -->
+        {sub_heroes_html}
+
+        <!-- 3. 메인 가로 인피드 광고 -->
+        <div class="main-middle-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="{ADSENSE_CLIENT}"
+                 data-ad-slot="{AD_SLOT_BOTTOM}"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({{}});
+            </script>
+        </div>
+
+        <!-- 4. LATEST STORIES (좌 70% 리스트 + 우 30% 사이드바 광고) -->
+        <div class="main-feed-layout">
+            <div class="feed-main-col">
+                <div class="section-header">LATEST STORIES <span>●</span></div>
+                <div class="feed-list">
+                    {list_posts_html}
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="sidebar-sticky">
+                    <div class="sidebar-title">ADVERTISEMENT</div>
+                    <ins class="adsbygoogle"
+                         style="display:inline-block;width:300px;height:600px"
+                         data-ad-client="{ADSENSE_CLIENT}"
+                         data-ad-slot="{AD_SLOT_SIDEBAR}"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({{}});
+                    </script>
+                </div>
+            </aside>
         </div>
     </main>
 
@@ -687,7 +855,7 @@ def rebuild_entire_site():
 
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_full)
-    print("-> 메인 페이지 및 sitemap.xml 복구 완료!")
+    print("-> Motor1 레이아웃 메인 페이지 및 sitemap.xml 동기화 완료!")
 
 def main():
     print(">>> 1. 4대 공식 피드 수집 시작...")
@@ -701,8 +869,6 @@ def main():
     print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
 
     os.makedirs(POSTS_DIR, exist_ok=True)
-    
-    # 추천 글 연결을 위해 현재 쌓여 있는 과거 글 목록 우선 확보
     existing_posts = scan_all_posts()
     
     if collected:
@@ -712,9 +878,8 @@ def main():
                 t, c = generate_article(item)
                 timestamp = int(time.time()) + idx
                 post_id = f"post_{timestamp}_{idx}"
-                date_str = time.strftime("%Y-%m-%d %H:%M")
+                date_str = get_now_kst()
                 
-                # 하단 추천 글 후보(existing_posts) 넘김
                 html = build_post_html(post_id, t, c, item['images'], date_str, item['category'], existing_posts)
                 with open(os.path.join(POSTS_DIR, f"{post_id}.html"), "w", encoding="utf-8") as f:
                     f.write(html)
@@ -724,7 +889,6 @@ def main():
             except Exception as e:
                 print(f"-> [작성 실패]: {e}")
 
-    # 메인 화면 최신화 및 sitemap 갱신
     rebuild_entire_site()
     print(">>> 모든 작업 완료!")
 
