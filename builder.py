@@ -143,18 +143,19 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         html = urllib.request.urlopen(req, timeout=15).read().decode('utf-8', errors='ignore')
         soup = BeautifulSoup(html, "html.parser")
 
-        # 1. 기사 대표 이미지 (og:image 메타 태그 1순위)
+        # 1. 기사 대표 이미지 (og:image 메타 태그를 무조건 1순위 대표 이미지로 사용)
         og_img = soup.find("meta", property="og:image")
         if og_img and og_img.get("content"):
             c_img = og_img["content"].strip()
             if c_img.startswith("http") and not any(x in c_img.lower() for x in ['logo', 'icon', 'banner', 'btn', 'favicon']):
                 images.append(c_img)
 
-        # RSS에서 넘어온 대표 이미지가 있고 중복이 아니면 추가
-        if feed_img and feed_img not in images:
-            images.append(feed_img)
+        # 2. og:image가 없을 때만 feed_img를 보조 썸네일로 활용 (단, 로고/아이콘 제외)
+        if not images and feed_img and feed_img.startswith("http"):
+            if not any(x in feed_img.lower() for x in ['logo', 'icon', 'banner', 'btn', 'favicon']):
+                images.append(feed_img)
 
-        # 2. 본문 영역 탐색
+        # 3. 본문 영역 탐색 및 본문 내 실제 차량 사진 수집
         article_elem = (
             soup.find('article') or 
             soup.find('div', id=re.compile(r'article-view-content-div|articleBody', re.I)) or
@@ -163,13 +164,13 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         )
 
         if article_elem:
-            # 본문 내 실제 차량 사진 추가 수집 (로고, 광고 이미지 엄격 차단)
             for img in article_elem.find_all('img'):
                 src = img.get('src') or img.get('data-src') or img.get('data-original')
                 if not src and img.get('srcset'):
                     src = img.get('srcset').split(',')[0].split(' ')[0]
                 if src and src.startswith('http'):
-                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_', 'kia', 'hyundai_logo']):
+                    # 로고, 배너, 스폰서, 브랜드 단독 로고 이미지 필터링
+                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_', 'autoherald', 'favicon']):
                         continue
                     if src not in images:
                         images.append(src)
