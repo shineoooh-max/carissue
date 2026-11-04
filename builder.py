@@ -26,27 +26,39 @@ HISTORY_FILE = "published_links.txt"
 # 한국 표준시(KST, UTC+9) 고정
 KST = timezone(timedelta(hours=9))
 
+def get_now_kst_dt():
+    return datetime.now(KST)
+
 def get_now_kst():
-    return datetime.now(KST).strftime("%Y-%m-%d %H:%M")
+    return get_now_kst_dt().strftime("%Y-%m-%d %H:%M")
 
 # ==========================================
-# 2. 확정된 애드센스 계정 및 고유 슬롯 번호 (불변)
+# 2. 애드센스 계정 및 고유 슬롯 번호 (불변 규격)
 # ==========================================
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
 AD_SLOT_IN_ARTICLE = "4181249863"  # 본문 중간 (인아티클)
-AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바
+AD_SLOT_SIDEBAR = "5924062639"     # 우측 고정 사이드바 (300x600)
 AD_SLOT_BOTTOM = "9203364457"      # 본문 최하단 반응형 디스플레이
-AD_SLOT_MULTIPLEX = "3913014950"   # 본문 최하단 멀티플렉스 (일치하는 콘텐츠)
+AD_SLOT_MULTIPLEX = "3913014950"   # 본문 하단 멀티플렉스 (일치하는 콘텐츠)
 
 # ==========================================
-# 3. 4대 공식 피드 배분 (국내 2 + 글로벌 3 = 5건)
+# 3. 오전(국내 5) / 오후(해외 5) 피드 배분 정의
 # ==========================================
-FEEDS = [
-    {"name": "모터그래프", "category": "국내", "url": "https://www.motorgraph.com/rss/allArticle.xml", "target_count": 1},
-    {"name": "오토헤럴드", "category": "국내", "url": "http://www.autoherald.co.kr/rss/allArticle.xml", "target_count": 1},
-    {"name": "Motor1", "category": "글로벌", "url": "https://www.motor1.com/rss/news/all/", "target_count": 2},
-    {"name": "Carscoops", "category": "글로벌", "url": "https://www.carscoops.com/feed/", "target_count": 1}
-]
+def get_current_feeds():
+    now = get_now_kst_dt()
+    # KST 기준 12시 이전: 오전 국내 기사 5건 (오토헤럴드)
+    if now.hour < 12:
+        print(f">>> [피드 분기] 오전 스케줄 적용: 국내 기사 5건 (KST 현재시각: {now.strftime('%H:%M')})")
+        return [
+            {"name": "오토헤럴드", "category": "국내", "url": "http://www.autoherald.co.kr/rss/allArticle.xml", "target_count": 5}
+        ]
+    # KST 기준 12시 이후: 오후 글로벌 기사 5건 (Motor1 3건 + Carscoops 2건)
+    else:
+        print(f">>> [피드 분기] 오후 스케줄 적용: 해외 기사 5건 (KST 현재시각: {now.strftime('%H:%M')})")
+        return [
+            {"name": "Motor1", "category": "글로벌", "url": "https://www.motor1.com/rss/news/all/", "target_count": 3},
+            {"name": "Carscoops", "category": "글로벌", "url": "https://www.carscoops.com/feed/", "target_count": 2}
+        ]
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
@@ -61,7 +73,7 @@ def save_history(link):
 def fetch_feed_items(feed_conf, history_set):
     items = []
     target = feed_conf["target_count"]
-    print(f"\n[{feed_conf['name']}] 피드 수집 ({feed_conf['category']} - 목표: {target}건)")
+    print(f"\n[{feed_conf['name']}] 피드 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
     
     try:
         req = urllib.request.Request(
@@ -76,7 +88,7 @@ def fetch_feed_items(feed_conf, history_set):
             
         root = ET.fromstring(xml_text)
         entries = root.findall(".//item")
-        print(f"-> 발견된 기사 수: {len(entries)}개")
+        print(f"-> 수집된 원문 엔트리: {len(entries)}개")
 
         for entry in entries:
             if len(items) >= target:
@@ -96,329 +108,318 @@ def fetch_feed_items(feed_conf, history_set):
             desc_el = entry.find("description")
             title = title_el.text.strip() if title_el is not None and title_el.text else ""
             desc = desc_el.text.strip() if desc_el is not None and desc_el.text else ""
-
-            # ----------------------------------------------------
-            # 이미지 심층 수집: srcset, data-src, lazy-loading 모두 추적
-            # ----------------------------------------------------
-            images = []
-            enclosure = entry.find("enclosure")
-            if enclosure is not None and enclosure.attrib.get("url"):
-                images.append(enclosure.attrib.get("url"))
-
-            if desc:
-                found_imgs = re.findall(r'src=["\']([^"\']+)["\']', desc)
-                for img_src in found_imgs:
-                    if img_src.startswith("http") and not any(ext in img_src.lower() for ext in ['logo', 'icon', 'advert', 'tracker']):
-                        if img_src not in images:
-                            images.append(img_src)
             
-            # 원문 웹페이지의 심층 이미지(본문 갤러리) 크롤링
-            try:
-                sub_req = urllib.request.Request(
-                    link, 
-                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
-                )
-                sub_html = urllib.request.urlopen(sub_req, timeout=8).read().decode('utf-8', errors='ignore')
-                sub_soup = BeautifulSoup(sub_html, 'html.parser')
-
-                for img_tag in sub_soup.find_all('img'):
-                    candidates = []
-                    # srcset 우선 파싱
-                    srcset = img_tag.get('srcset') or img_tag.get('data-srcset')
-                    if srcset:
-                        parts = [p.strip().split()[0] for p in srcset.split(',') if p.strip()]
-                        if parts:
-                            candidates.append(parts[-1])
-                    
-                    src = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-original') or img_tag.get('data-lazy-src')
-                    if src:
-                        candidates.append(src)
-                        
-                    for c_url in candidates:
-                        if c_url.startswith('//'):
-                            c_url = 'https:' + c_url
-                        if c_url.startswith('http') and not any(bad in c_url.lower() for bad in ['logo', 'icon', 'avatar', 'banner', 'ad-', 'advert', 'pixel', 'button']):
-                            if c_url not in images:
-                                images.append(c_url)
-                                break
-                    if len(images) >= 5:
-                        break
-            except Exception as crawl_err:
-                pass
-
-            images = images[:5]
-            if not images:
-                images = ["https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"]
-
-            clean_desc = re.sub(r'<[^>]+>', '', desc).strip()
+            # 피드 내부 이미지 추출 보조
+            feed_img = ""
+            enc = entry.find("enclosure")
+            if enc is not None and enc.attrib.get("url"):
+                feed_img = enc.attrib["url"]
+            elif desc:
+                d_soup = BeautifulSoup(desc, "html.parser")
+                img_tag = d_soup.find("img")
+                if img_tag and img_tag.get("src"):
+                    feed_img = img_tag["src"]
 
             items.append({
-                "category": feed_conf["category"],
                 "source": feed_conf["name"],
+                "category": feed_conf["category"],
                 "title": title,
                 "link": link,
-                "desc": clean_desc[:500],
-                "images": images,
-                "image_url": images[0]
+                "feed_img": feed_img
             })
-            history_set.add(link)
-            print(f"-> [채택] {title[:30]}... (이미지 {len(images)}장 확보)")
     except Exception as e:
-        print(f"-> [수집 실패]: {e}")
-
+        print(f"[{feed_conf['name']}] RSS 수집 오류 발생: {e}")
+        
     return items
 
-def generate_article(item):
-    prompt = f"""
-당신은 대한민국 1위 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 기자입니다.
-아래 뉴스 브리핑 정보를 바탕으로 독자들의 관심과 몰입도를 극대화하는 심층 분석 기사를 작성해주세요.
+def extract_article_details(url, feed_img=""):
+    images = []
+    text_content = ""
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+        )
+        html = urllib.request.urlopen(req, timeout=15).read().decode('utf-8', errors='ignore')
+        soup = BeautifulSoup(html, "html.parser")
 
-[구분]: {item['category']} 자동차 이슈 ({item['source']})
-[주제 헤드라인]: {item['title']}
-[핵심 내용]: {item['desc']}
-
-[기사 작성 지침]
-1. 제목: 클릭을 부르는 품격 있는 뉴스 헤드라인 (따옴표 적극 활용)
-2. 분량: 공백 제외 800자 내외
-3. 본문 구성:
-   - 도입부: 이 소식이 국내외 자동차 시장에서 뜨거운 화제가 되는 이유
-   - 본문: 디자인, 기술 혁신, 성능 스펙 및 파워트레인 분석
-   - 맺음말: 경쟁 모델과의 상품성 비교 및 국내 소비자 출시/구매 가이드 전망
-4. 문체: 정돈되고 신뢰감 있는 언론사 전문 기사체 (~했습니다, ~전망됩니다)
-5. 독창성: 단순 전재가 아닌 에디터의 독창적 시각과 분석 코멘터리 포함
-
-[출력 형식 - 반드시 준수]
-TITLE: [기사 제목]
-CONTENT: [본문 내용 (각 문단은 빈 줄로 구분)]
-"""
-    interaction = client.interactions.create(
-        model="gemini-3.8-flash",
-        input=prompt
-    )
-    txt = interaction.output_text.strip()
-    
-    title = ""
-    content = ""
-    if "TITLE:" in txt and "CONTENT:" in txt:
-        parts = txt.split("CONTENT:")
-        title = parts[0].replace("TITLE:", "").strip()
-        content = parts[1].strip()
-    else:
-        lines = [l for l in txt.split("\n") if l.strip()]
-        title = lines[0].replace("#", "").strip()
-        content = "\n\n".join(lines[1:]).strip()
+        # 본문 영역 탐색
+        article_elem = soup.find('article') or soup.find('div', class_=re.compile(r'article-body|entry-content|content|post-body|view-content')) or soup.body
         
-    return title, content
+        # 이미지 심층 수집
+        raw_imgs = []
+        if feed_img:
+            raw_imgs.append(feed_img)
+
+        if article_elem:
+            for img in article_elem.find_all('img'):
+                src = img.get('src') or img.get('data-src') or img.get('data-original')
+                if not src and img.get('srcset'):
+                    src = img.get('srcset').split(',')[0].split(' ')[0]
+                if src and src.startswith('http'):
+                    # 아이콘, 프로필, 광고성 소형 배너 필터링
+                    if any(x in src.lower() for x in ['logo', 'icon', 'banner', 'btn', 'avatar', 'ad_', 'advertisement']):
+                        continue
+                    raw_imgs.append(src)
+
+            # 본문 텍스트 추출
+            paragraphs = [p.get_text().strip() for p in article_elem.find_all(['p', 'h2', 'h3']) if len(p.get_text().strip()) > 20]
+            text_content = "\n\n".join(paragraphs)
+
+        # 이미지 중복 제거
+        seen = set()
+        for i in raw_imgs:
+            if i not in seen:
+                seen.add(i)
+                images.append(i)
+                if len(images) >= 5:
+                    break
+    except Exception as e:
+        print(f"기사 상세 파싱 예외 ({url}): {e}")
+
+    return text_content[:4000], images
 
 # ==========================================
-# 4. 서브 본문 HTML 렌더링 (멀티플렉스 3913014950 탑재 + 공유 모달)
+# 4. Gemini 프롬프트 및 기사 재작성
 # ==========================================
-def build_post_html(post_id, title, content, images, date_str, category, recent_posts=None):
-    paras = [p.strip() for p in content.split("\n\n") if p.strip()]
-    main_image = images[0] if images else "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
-    extra_images = images[1:]
+def generate_article_content(source, category, original_title, raw_text):
+    prompt = f"""
+당신은 국내 최고의 프리미엄 자동차 전문 웹진 '카이슈(CARISSUE)'의 수석 자동차 전문 에디터입니다.
+아래 제공된 출처({source}, 분류: {category})의 자동차 뉴스/원문을 바탕으로 독자들의 몰입감을 극대화하는 매력적인 한국어 자동차 매거진 기사를 작성해주세요.
 
-    in_article_ad = f"""
-    <div class="ad-in-article">
-        <ins class="adsbygoogle"
-             style="display:block; text-align:center;"
-             data-ad-layout="in-article"
-             data-ad-format="fluid"
-             data-ad-client="{ADSENSE_CLIENT}"
-             data-ad-slot="{AD_SLOT_IN_ARTICLE}"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({{}});
-        </script>
-    </div>
+[원문 정보]
+원문 제목: {original_title}
+원문 내용:
+{raw_text}
+
+[작성 및 출력 가이드라인 - 반드시 준수]
+1. 제목:
+   - 독자의 클릭을 유도하는 전문적이고 세련된 한국어 헤드라인 1개.
+   - 첫 줄에 `# 제목` 형식으로 출력하세요.
+2. 부제목(서브헤드):
+   - 기사의 핵심을 찌르는 임팩트 있는 요약 1줄.
+   - `## 부제목` 형식으로 제목 바로 아래에 출력하세요.
+3. 본문 구조:
+   - 본문은 자연스러운 4~5개 단락으로 깊이 있게 구성하세요.
+   - 외신 기사의 경우 단순 직역을 지양하고, 한국 소비자의 시선과 시장 맥락(국내 출시 가능성, 경쟁 모델과의 비교, 가격 정책 등)을 결합해 분석적으로 재해석하세요.
+   - 각 단락 시작 전 `### 소제목`을 달아 가독성을 극대화하세요.
+   - 마크다운(Markdown) 포맷으로만 정갈하게 출력하세요.
+"""
+    try:
+        interaction = client.interactions.create(
+            model="gemini-3.8-flash",
+            input=prompt
+        )
+        return interaction.output_text.strip()
+    except Exception as e:
+        print(f"Gemini API 호출 에러: {e}")
+        return None
+
+# ==========================================
+# 5. HTML 빌드 헬퍼 (공유 모달, 푸터, 주석)
+# ==========================================
+def render_header(active_nav=""):
+    return f"""
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo">
+                <img src="/assets/logo.png" alt="CARISSUE" />
+            </a>
+            <nav class="main-nav">
+                <a href="/" class="nav-item {'active' if not active_nav else ''}">최신뉴스</a>
+                <a href="/category_domestic.html" class="nav-item {'active' if active_nav == '국내' else ''}">국내신차</a>
+                <a href="/category_global.html" class="nav-item {'active' if active_nav == '글로벌' else ''}">글로벌이슈</a>
+            </nav>
+        </div>
+    </header>
     """
 
-    p_tags = []
-    img_idx = 0
-    for i, p in enumerate(paras):
-        p_tags.append(f"<p>{p}</p>")
-        if i == 0:
-            p_tags.append(in_article_ad)
-        elif img_idx < len(extra_images):
-            p_tags.append(f'<div class="article-sub-img"><img src="{extra_images[img_idx]}" alt="{title} 상세 이미지 {img_idx+1}"></div>')
-            img_idx += 1
-
-    while img_idx < len(extra_images):
-        p_tags.append(f'<div class="article-sub-img"><img src="{extra_images[img_idx]}" alt="{title} 상세 이미지 {img_idx+1}"></div>')
-        img_idx += 1
-
-    article_body_html = "".join(p_tags)
-
-    # ----------------------------------------------------
-    # 추천 글 섹션 (하단 멀티플렉스 아래에 매칭)
-    # ----------------------------------------------------
-    related_html = ""
-    if recent_posts:
-        related_cards = ""
-        candidates = [p for p in recent_posts if p["id"] != post_id]
-        for r_post in candidates[:6]:
-            related_cards += f"""
-            <a href="{r_post['id']}.html" class="related-card">
-                <div class="related-thumb"><img src="{r_post['image_url']}" alt="{r_post['title']}"></div>
-                <div class="related-info">
-                    <span class="related-cat">{r_post.get('category', '이슈')}</span>
-                    <h4>{r_post['title']}</h4>
-                    <span class="related-date">{r_post['date_str'][:10]}</span>
-                </div>
-            </a>
-            """
-        related_html = f"""
-        <div class="related-section">
-            <div class="related-title">당신이 놓치지 말아야 할 인기 자동차 이슈</div>
-            <div class="related-grid">
-                {related_cards}
+def render_footer():
+    # 요청하신 미색(#f8f8fa) 배경 및 공식 제휴 메일 고정
+    return f"""
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="/privacy.html">개인정보처리방침</a> &bull;
+                <a href="/terms.html">이용약관</a> &bull;
+                <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
             </div>
+            <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
-        """
+    </footer>
+    """
 
-    schema_data = {
+def get_base_css():
+    return """
+    :root {
+        --primary: #d32f2f;
+        --dark: #121212;
+        --text: #222222;
+        --text-sub: #666666;
+        --border: #e5e5e5;
+        --bg-footer: #f8f8fa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; height: auto; display: block; }
+    
+    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
+    .logo img { height: 38px; width: auto; }
+    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
+    .nav-item:hover, .nav-item.active { color: var(--primary); }
+
+    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
+    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
+    .copyright { font-size: 13px; color: #888; }
+
+    /* 공유 모달 */
+    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
+    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
+    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    """
+
+# ==========================================
+# 6. 기사 상세 페이지 생성 및 리빌드
+# ==========================================
+def build_article_page(item_data, all_posts):
+    post_id = item_data["id"]
+    title = item_data["title"]
+    subtitle = item_data.get("subtitle", "")
+    content_html = item_data["content_html"]
+    images = item_data.get("images", [])
+    featured_img = images[0] if images else "/assets/logo.png"
+    date_str = item_data.get("date", get_now_kst())
+    category = item_data.get("category", "국내")
+    source = item_data.get("source", "CARISSUE")
+
+    # SEO JSON-LD
+    schema_ld = {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
         "headline": title,
+        "description": subtitle or title,
         "image": images,
-        "datePublished": f"{date_str[:10]}T{date_str[11:]}:00+09:00",
-        "dateModified": f"{date_str[:10]}T{date_str[11:]}:00+09:00",
-        "author": [{"@type": "Organization", "name": "CARISSUE", "url": SITE_URL}]
+        "datePublished": item_data.get("iso_date", datetime.now(timezone.utc).isoformat()),
+        "author": [{
+            "@type": "Organization",
+            "name": "CARISSUE",
+            "url": SITE_URL
+        }],
+        "publisher": {
+            "@type": "Organization",
+            "name": "CARISSUE",
+            "logo": {
+                "@type": "ImageObject",
+                "url": f"{SITE_URL}/assets/logo.png"
+            }
+        }
     }
-    schema_json = json.dumps(schema_data, ensure_ascii=False)
-    current_post_url = f"{SITE_URL}/posts/{post_id}.html"
 
-    return f"""<!DOCTYPE html>
+    # 추천 기사 (최신 3개)
+    related_html = ""
+    for r in [p for p in all_posts if p["id"] != post_id][:3]:
+        r_img = r.get("images", ["/assets/logo.png"])[0] if r.get("images") else "/assets/logo.png"
+        related_html += f"""
+        <a href="/posts/{r['id']}.html" class="rel-card">
+            <div class="rel-thumb"><img src="{r_img}" alt="{r['title']}" loading="lazy"></div>
+            <div class="rel-title">{r['title']}</div>
+        </a>
+        """
+
+    # 저작권 주석 (폰트 크기 소형화 및 본문 하단 자동 삽입)
+    copyright_notice = f"""
+    <div class="copyright-notice">
+        ※ 본 기사는 각 언론사({source} 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+    </div>
+    """
+
+    page_html = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - CARISSUE</title>
-    <meta name="description" content="{paras[0][:120] if paras else title}">
-    
+    <meta name="description" content="{subtitle or title}">
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
-    
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
-    
+    <link rel="canonical" href="{SITE_URL}/posts/{post_id}.html">
     <script type="application/ld+json">
-    {schema_json}
+    {json.dumps(schema_ld, ensure_ascii=False, indent=2)}
     </script>
-    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
     <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff; color: #111; line-height: 1.8; }}
-        a {{ text-decoration: none; color: inherit; }}
-
-        header {{ background: #fff; border-bottom: 3px solid #111; position: sticky; top: 0; z-index: 1000; }}
-        .header-inner {{ max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }}
-        .logo img {{ height: 32px; display: block; }}
-        .nav-right {{ display: flex; align-items: center; gap: 24px; }}
-        .nav-menu {{ font-size: 15px; font-weight: 800; color: #111; letter-spacing: 0.5px; }}
-        .sns-icons {{ display: flex; align-items: center; gap: 14px; }}
-        .sns-icons svg {{ width: 17px; height: 17px; fill: #111; }}
-
-        .main-wrapper {{ max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 320px; gap: 40px; }}
-        .content-area {{ min-width: 0; }}
-        .badge {{ display: inline-block; background: #d32f2f; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 2px; text-transform: uppercase; margin-bottom: 12px; }}
-        h1 {{ font-size: 32px; line-height: 1.35; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 15px; word-break: keep-all; }}
+        {get_base_css()}
+        .post-layout {{ max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }}
+        @media(max-width: 900px) {{ .post-layout {{ grid-template-columns: 1fr; }} .sidebar-wrap {{ display: none; }} }}
         
-        .meta-bar {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }}
-        .meta-info {{ font-size: 13px; color: #777; }}
-        .share-btn {{ display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; font-weight: 700; color: #222; cursor: pointer; transition: all 0.2s; }}
-        .share-btn:hover {{ background: #e9ecef; border-color: #999; }}
-        .share-btn svg {{ width: 14px; height: 14px; fill: #333; }}
+        .post-cat {{ color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }}
+        .post-title {{ font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }}
+        .post-sub {{ font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }}
+        .post-meta {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }}
+        .share-btn {{ background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }}
+        .share-btn:hover {{ background: #f5f5f5; border-color: #999; }}
 
-        .featured-img {{ width: 100%; border-radius: 4px; margin-bottom: 25px; object-fit: cover; max-height: 520px; }}
-        .article-sub-img {{ margin: 30px 0; }}
-        .article-sub-img img {{ width: 100%; border-radius: 4px; object-fit: cover; max-height: 520px; display: block; }}
-        
-        .article-body p {{ font-size: 17px; line-height: 1.85; margin-bottom: 22px; color: #222; word-break: keep-all; }}
-        .ad-in-article {{ margin: 35px 0; text-align: center; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; }}
-        .ad-bottom {{ margin: 40px 0 20px 0; text-align: center; }}
+        .featured-img-wrap {{ margin-bottom: 30px; border-radius: 8px; overflow: hidden; }}
+        .featured-img-wrap img {{ width: 100%; height: auto; }}
 
-        /* 본문 하단 멀티플렉스 광고 (3913014950) 슬롯 스타일 */
-        .ad-multiplex-wrap {{ margin: 30px 0 40px 0; padding: 20px 0; border-top: 1px solid #eee; }}
-        .ad-label {{ font-size: 11px; font-weight: 800; color: #aaa; text-transform: uppercase; margin-bottom: 10px; display: block; }}
+        .post-content {{ font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }}
+        .post-content p {{ margin-bottom: 22px; word-break: keep-all; }}
+        .post-content h3 {{ font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }}
+        .content-img {{ margin: 30px 0; border-radius: 6px; overflow: hidden; }}
+        .content-img img {{ width: 100%; height: auto; }}
 
-        .related-section {{ margin-top: 40px; padding-top: 30px; border-top: 2px solid #111; }}
-        .related-title {{ font-size: 19px; font-weight: 900; margin-bottom: 20px; color: #111; letter-spacing: -0.5px; }}
-        .related-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }}
-        .related-card {{ display: flex; gap: 14px; background: #fff; align-items: flex-start; }}
-        .related-card:hover h4 {{ color: #d32f2f; }}
-        .related-thumb {{ width: 110px; height: 75px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #f0f0f0; }}
-        .related-thumb img {{ width: 100%; height: 100%; object-fit: cover; }}
-        .related-info {{ flex: 1; min-width: 0; }}
-        .related-cat {{ font-size: 10px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 4px; display: inline-block; }}
-        .related-info h4 {{ font-size: 14px; font-weight: 700; line-height: 1.4; color: #222; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-        .related-date {{ font-size: 11px; color: #999; }}
+        .ad-in-article {{ margin: 35px 0; text-align: center; }}
+        .ad-bottom {{ margin: 40px 0; }}
+        .ad-multiplex {{ margin: 35px 0; }}
 
-        .sidebar {{ min-width: 0; }}
-        .sidebar-sticky {{ position: -webkit-sticky; position: sticky; top: 85px; }}
-        .sidebar-title {{ font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #111; padding-bottom: 6px; }}
+        /* 아주 작은 폰트의 저작권 주석 */
+        .copyright-notice {{ font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }}
 
-        footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
+        .related-wrap {{ margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }}
+        .related-title {{ font-size: 20px; font-weight: 800; margin-bottom: 20px; }}
+        .related-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }}
+        @media(max-width: 600px) {{ .related-grid {{ grid-template-columns: 1fr; }} }}
+        .rel-card {{ display: block; }}
+        .rel-thumb {{ border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }}
+        .rel-thumb img {{ width: 100%; height: 100%; object-fit: cover; }}
+        .rel-title {{ font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }}
 
-        /* 모달 팝업 레이어 */
-        .modal-overlay {{ display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; }}
-        .modal-box {{ background: #fff; width: 90%; max-width: 380px; border-radius: 10px; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }}
-        .modal-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }}
-        .modal-title {{ font-size: 17px; font-weight: 800; color: #111; }}
-        .modal-close {{ font-size: 26px; line-height: 1; color: #888; cursor: pointer; border: none; background: none; }}
-        .share-icons {{ display: flex; justify-content: space-around; margin-bottom: 22px; }}
-        .share-icon-btn {{ display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; font-size: 11px; font-weight: 600; color: #444; border: none; background: none; }}
-        .share-icon-btn div {{ width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: 900; font-size: 15px; }}
-        .url-box {{ display: flex; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: #f8f9fa; }}
-        .url-input {{ flex: 1; border: none; background: transparent; padding: 10px 12px; font-size: 12px; color: #555; outline: none; }}
-        .copy-btn {{ background: #222; color: #fff; border: none; padding: 0 16px; font-size: 12px; font-weight: 700; cursor: pointer; }}
-        .copy-btn:hover {{ background: #000; }}
-        .toast-msg {{ display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 22px; border-radius: 30px; font-size: 13px; z-index: 100000; font-weight: 600; }}
-
-        @media (max-width: 768px) {{
-            .main-wrapper {{ grid-template-columns: 1fr; gap: 0; margin: 15px auto; padding: 0 16px; }}
-            h1 {{ font-size: 24px; line-height: 1.35; }}
-            .article-body p {{ font-size: 16px; line-height: 1.75; margin-bottom: 18px; }}
-            .sidebar {{ display: none; }}
-            .sns-icons {{ display: none; }}
-            .related-grid {{ grid-template-columns: 1fr; gap: 16px; }}
-        }}
+        .sidebar-sticky {{ position: sticky; top: 80px; width: 300px; height: 600px; }}
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo.png" alt="CARISSUE"></a>
-            <div class="nav-right">
-                <a href="/" class="nav-menu">NEWS</a>
-                <div class="sns-icons">
-                    <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                    <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-                    <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-wrapper">
-        <article class="content-area">
-            <span class="badge">{category} 이슈</span>
-            <h1>{title}</h1>
+    {render_header(category)}
+    
+    <div class="post-layout">
+        <main class="post-main">
+            <div class="post-cat">{category} 뉴스 &bull; {source}</div>
+            <h1 class="post-title">{title}</h1>
+            {f'<div class="post-sub">{subtitle}</div>' if subtitle else ''}
             
-            <div class="meta-bar">
-                <div class="meta-info">발행일: {date_str} | CARISSUE 편집국</div>
-                <button type="button" class="share-btn" id="openShareModalBtn">
-                    <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-                    공유
-                </button>
-            </div>
-            
-            <img src="{main_image}" alt="{title}" class="featured-img">
-            
-            <div class="article-body">
-                {article_body_html}
+            <div class="post-meta">
+                <span>발행: {date_str} (KST)</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
             </div>
 
-            <!-- 본문 최하단 반응형 디스플레이 광고 (9203364457) -->
+            <div class="featured-img-wrap">
+                <img src="{featured_img}" alt="{title}">
+            </div>
+
+            <article class="post-content">
+                {content_html}
+            </article>
+
+            <!-- 본문 최하단 저작권 및 출처 주석 -->
+            {copyright_notice}
+
+            <!-- 구글 애드센스 하단 디스플레이 -->
             <div class="ad-bottom">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -426,471 +427,410 @@ def build_post_html(post_id, title, content, images, date_str, category, recent_
                      data-ad-slot="{AD_SLOT_BOTTOM}"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({{}});
-                </script>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
 
-            <!-- 본문 최하단 멀티플렉스 그리드 광고 (3913014950) -->
-            <div class="ad-multiplex-wrap">
-                <span class="ad-label">SPONSORED RECOMMENDATION</span>
+            <!-- 구글 애드센스 멀티플렉스 (일치하는 콘텐츠) -->
+            <div class="ad-multiplex">
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-format="autorelaxed"
                      data-ad-client="{ADSENSE_CLIENT}"
                      data-ad-slot="{AD_SLOT_MULTIPLEX}"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({{}});
-                </script>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
 
-            <!-- 하단 자체 인기 추천 기사 -->
-            {related_html}
-        </article>
+            <div class="related-wrap">
+                <div class="related-title">CARISSUE 주요 추천 뉴스</div>
+                <div class="related-grid">
+                    {related_html}
+                </div>
+            </div>
+        </main>
 
-        <!-- 우측 고정 사이드바 (5924062639) -->
-        <aside class="sidebar">
+        <aside class="sidebar-wrap">
             <div class="sidebar-sticky">
-                <div class="sidebar-title">ADVERTISEMENT</div>
+                <!-- 우측 고정 사이드바 300x600 -->
                 <ins class="adsbygoogle"
                      style="display:inline-block;width:300px;height:600px"
                      data-ad-client="{ADSENSE_CLIENT}"
                      data-ad-slot="{AD_SLOT_SIDEBAR}"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({{}});
-                </script>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
         </aside>
     </div>
 
-    <!-- 공유 모달 -->
-    <div id="shareModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title">공유하기</div>
-                <button type="button" class="modal-close" id="closeShareModalBtn">&times;</button>
+    <!-- 공유 모달 팝업 -->
+    <div id="shareModal" class="share-modal">
+        <div class="share-modal-content">
+            <div class="share-title">기사 공유하기</div>
+            <div class="share-btn-grid">
+                <button type="button" class="share-act-btn" id="shareX">X (트위터)</button>
+                <button type="button" class="share-act-btn" id="shareFB">페이스북</button>
+                <button type="button" class="share-act-btn" id="copyUrl">URL 복사</button>
             </div>
-            <div class="share-icons">
-                <button type="button" class="share-icon-btn" id="shareXBtn">
-                    <div style="background:#111;">X</div>
-                    <span>X(트위터)</span>
-                </button>
-                <button type="button" class="share-icon-btn" id="shareFBBtn">
-                    <div style="background:#1877F2;">f</div>
-                    <span>페이스북</span>
-                </button>
-                <button type="button" class="share-icon-btn" id="shareKakaoBtn">
-                    <div style="background:#FEE500; color:#111;">talk</div>
-                    <span>카카오스토리</span>
-                </button>
-            </div>
-            <div class="url-box">
-                <input type="text" id="shareUrlInput" class="url-input" value="{current_post_url}" readonly>
-                <button type="button" class="copy-btn" id="copyUrlBtn">복사</button>
-            </div>
+            <button type="button" class="share-close-btn" id="closeShareModalBtn">닫기</button>
         </div>
     </div>
 
-    <div id="toastMsg" class="toast-msg">기사 주소가 복사되었습니다.</div>
-
-    <footer>
-        &copy; CARISSUE. All rights reserved.
-    </footer>
+    {render_footer()}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {{
-            var modal = document.getElementById('shareModal');
-            var openBtn = document.getElementById('openShareModalBtn');
-            var closeBtn = document.getElementById('closeShareModalBtn');
-            var copyBtn = document.getElementById('copyUrlBtn');
-            var toast = document.getElementById('toastMsg');
-            var urlInput = document.getElementById('shareUrlInput');
-            var currentUrl = "{current_post_url}";
-            var currentTitle = "{title}";
+            const modal = document.getElementById('shareModal');
+            const openBtn = document.getElementById('openShareModalBtn');
+            const closeBtn = document.getElementById('closeShareModalBtn');
+            const pageUrl = window.location.href;
+            const pageTitle = document.title;
 
-            if (openBtn) {{
-                openBtn.onclick = function() {{
-                    if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {{
-                        navigator.share({{ title: currentTitle, url: currentUrl }}).catch(function(){{}});
-                    }} else {{
-                        modal.style.display = 'flex';
-                    }}
-                }};
+            if (openBtn && modal) {{
+                openBtn.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    modal.style.display = 'flex';
+                }});
             }}
 
-            if (closeBtn) {{
-                closeBtn.onclick = function() {{
+            if (closeBtn && modal) {{
+                closeBtn.addEventListener('click', function() {{
                     modal.style.display = 'none';
-                }};
+                }});
             }}
 
-            modal.onclick = function(e) {{
+            window.addEventListener('click', function(e) {{
                 if (e.target === modal) {{
                     modal.style.display = 'none';
                 }}
-            }};
+            }});
 
-            if (copyBtn) {{
-                copyBtn.onclick = function() {{
-                    urlInput.select();
-                    navigator.clipboard.writeText(currentUrl).then(function() {{
-                        toast.style.display = 'block';
-                        setTimeout(function() {{ toast.style.display = 'none'; }}, 2500);
-                    }});
-                }};
-            }}
+            document.getElementById('shareX').addEventListener('click', function() {{
+                window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(pageTitle) + '&url=' + encodeURIComponent(pageUrl), '_blank');
+            }});
 
-            document.getElementById('shareXBtn').onclick = function() {{
-                window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(currentTitle) + '&url=' + encodeURIComponent(currentUrl), '_blank');
-            }};
+            document.getElementById('shareFB').addEventListener('click', function() {{
+                window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl), '_blank');
+            }});
 
-            document.getElementById('shareFBBtn').onclick = function() {{
-                window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(currentUrl), '_blank');
-            }};
-
-            document.getElementById('shareKakaoBtn').onclick = function() {{
-                window.open('https://story.kakao.com/share?url=' + encodeURIComponent(currentUrl), '_blank');
-            }};
+            document.getElementById('copyUrl').addEventListener('click', function() {{
+                navigator.clipboard.writeText(pageUrl).then(function() {{
+                    alert('기사 주소가 클립보드에 복사되었습니다.');
+                    modal.style.display = 'none';
+                }}).catch(function() {{
+                    prompt('아래 URL을 복사하세요:', pageUrl);
+                }});
+            }});
         }});
     </script>
 </body>
-</html>"""
+</html>
+"""
+    file_path = os.path.join(POSTS_DIR, f"{post_id}.html")
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(page_html)
 
 # ==========================================
-# 5. 기존 글 스캔 및 Motor1 스타일 메인 화면 자동 빌드
+# 7. 메인 화면 (Motor1 스타일 레이아웃) 빌드
 # ==========================================
-def scan_all_posts():
-    posts = []
-    if os.path.exists(POSTS_DIR):
-        for fname in os.listdir(POSTS_DIR):
-            if not fname.endswith(".html"):
-                continue
-            fpath = os.path.join(POSTS_DIR, fname)
-            try:
-                with open(fpath, "r", encoding="utf-8") as f:
-                    soup = BeautifulSoup(f.read(), "html.parser")
-                
-                h1 = soup.find("h1")
-                title = h1.text.strip() if h1 else fname.replace(".html", "")
-                
-                desc_meta = soup.find("meta", attrs={"name": "description"})
-                desc = desc_meta["content"] if desc_meta and desc_meta.get("content") else ""
-                
-                img_url = ""
-                for im in soup.find_all("img"):
-                    src = im.get("src") or ""
-                    if src.startswith("http") and not any(bad in src.lower() for bad in ["logo", "favicon", "icon", "advert"]):
-                        img_url = src
-                        break
+def build_index_page(posts):
+    if not posts:
+        return
 
-                if not img_url:
-                    img_url = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
-                
-                badge = soup.find("span", class_="badge")
-                cat = badge.text.replace("이슈", "").strip() if badge else "이슈"
-                
-                meta = soup.find("div", class_="meta-info") or soup.find("div", class_="meta")
-                date_str = ""
-                if meta:
-                    m = re.search(r'\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}', meta.text)
-                    if m:
-                        date_str = m.group(0)
-                if not date_str:
-                    date_str = time.strftime("%Y-%m-%d %H:%M", time.localtime(os.path.getmtime(fpath)))
-                    
-                posts.append({
-                    "id": fname.replace(".html", ""),
-                    "title": title,
-                    "desc": desc,
-                    "image_url": img_url,
-                    "category": cat,
-                    "date_str": date_str
-                })
-            except Exception:
-                pass
+    top_hero = posts[0]
+    sub_heroes = posts[1:4]
+    infeed_post = posts[4] if len(posts) > 4 else None
+    remaining_posts = posts[5:]
 
-    posts.sort(key=lambda x: (x["date_str"], x["id"]), reverse=True)
-    return posts
+    def get_thumb(p):
+        return p.get("images", ["/assets/logo.png"])[0] if p.get("images") else "/assets/logo.png"
 
-def rebuild_entire_site():
-    print(">>> [전체 복구] posts 폴더의 기사들을 스캔하여 Motor1 매거진 레이아웃을 생성합니다...")
-    posts = scan_all_posts()
-    print(f"-> 총 {len(posts)}개의 기사가 확인되었습니다.")
+    # Top Hero HTML
+    top_hero_html = f"""
+    <a href="/posts/{top_hero['id']}.html" class="top-hero-card">
+        <div class="top-hero-thumb">
+            <img src="{get_thumb(top_hero)}" alt="{top_hero['title']}">
+            <div class="top-hero-overlay">
+                <span class="badge">{top_hero.get('category','국내')}</span>
+                <h2>{top_hero['title']}</h2>
+                <p>{top_hero.get('subtitle','')}</p>
+            </div>
+        </div>
+    </a>
+    """
 
-    hero_html = ""
+    # Sub Heroes HTML (3열 그리드)
     sub_heroes_html = ""
-    list_posts_html = ""
-
-    if posts:
-        # 1) 최상단 1개: TOP HERO
-        p0 = posts[0]
-        hero_html = f"""
-        <section class="hero-top">
-            <a href="posts/{p0['id']}.html" class="hero-link">
-                <div class="hero-card">
-                    <div class="hero-img-wrap"><img src="{p0['image_url']}" alt="{p0['title']}"></div>
-                    <div class="hero-content">
-                        <span class="hero-tag">TOP STORY &bull; CARISSUE {p0['category']}</span>
-                        <h2>{p0['title']}</h2>
-                        <p class="hero-desc">{p0['desc'][:160]}...</p>
-                        <span class="hero-date">{p0['date_str']}</span>
-                    </div>
-                </div>
-            </a>
-        </section>
+    for sh in sub_heroes:
+        sub_heroes_html += f"""
+        <a href="/posts/{sh['id']}.html" class="sub-hero-card">
+            <div class="sub-hero-thumb">
+                <img src="{get_thumb(sh)}" alt="{sh['title']}" loading="lazy">
+                <span class="badge">{sh.get('category','글로벌')}</span>
+            </div>
+            <div class="sub-hero-info">
+                <h3>{sh['title']}</h3>
+                <span class="date">{sh.get('date','')}</span>
+            </div>
+        </a>
         """
 
-        # 2) 그 밑 3개: 3열 서브 히어로 그리드
-        if len(posts) > 1:
-            sub_cards = ""
-            for p in posts[1:4]:
-                sub_cards += f"""
-                <article class="sub-hero-card">
-                    <a href="posts/{p['id']}.html" class="sub-hero-thumb">
-                        <img src="{p['image_url']}" alt="{p['title']}">
-                    </a>
-                    <span class="card-tag">CARISSUE {p['category']}</span>
-                    <a href="posts/{p['id']}.html">
-                        <h3>{p['title']}</h3>
-                    </a>
-                    <span class="date">{p['date_str']}</span>
-                </article>
-                """
-            sub_heroes_html = f"""
-            <section class="sub-hero-grid">
-                {sub_cards}
-            </section>
-            """
+    # 메인 하단 리스트 HTML
+    list_html = ""
+    for lp in remaining_posts:
+        list_html += f"""
+        <a href="/posts/{lp['id']}.html" class="feed-item">
+            <div class="feed-thumb">
+                <img src="{get_thumb(lp)}" alt="{lp['title']}" loading="lazy">
+            </div>
+            <div class="feed-text">
+                <span class="badge-sm">{lp.get('category','국내')}</span>
+                <h4>{lp['title']}</h4>
+                <p class="feed-desc">{lp.get('subtitle','')}</p>
+                <span class="date">{lp.get('date','')}</span>
+            </div>
+        </a>
+        """
 
-        # 3) 5번째 기사부터: 좌측 썸네일+텍스트 수평 리스트
-        if len(posts) > 4:
-            for p in posts[4:]:
-                list_posts_html += f"""
-                <article class="feed-item">
-                    <a href="posts/{p['id']}.html" class="feed-thumb">
-                        <img src="{p['image_url']}" alt="{p['title']}">
-                    </a>
-                    <div class="feed-info">
-                        <span class="card-tag">CARISSUE {p['category']}</span>
-                        <a href="posts/{p['id']}.html">
-                            <h3>{p['title']}</h3>
-                        </a>
-                        <p class="feed-desc">{p['desc'][:130]}...</p>
-                        <span class="date">{p['date_str']}</span>
-                    </div>
-                </article>
-                """
-
-    full_index = f"""<!DOCTYPE html>
+    index_html = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CARISSUE - 글로벌 &amp; 국내 자동차 매거진</title>
-    <meta name="description" content="글로벌 및 국내 최신 자동차 뉴스, 신차 스펙, 시승기 및 심층 분석 매거진">
+    <title>CARISSUE - 글로벌 & 국내 자동차 전문 매거진</title>
+    <meta name="description" content="신차 출시, 스파이샷, 업계 동향 및 시승기 등 가장 빠르고 정확한 프리미엄 자동차 뉴스 포털">
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
-    
-    <!-- Google AdSense -->
+    <link rel="canonical" href="{SITE_URL}/">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>
-
     <style>
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff; color: #111; line-height: 1.6; }}
-        a {{ text-decoration: none; color: inherit; }}
+        {get_base_css()}
+        .main-container {{ max-width: 1200px; margin: 24px auto; padding: 0 20px; }}
+        
+        .top-hero-card {{ display: block; margin-bottom: 24px; border-radius: 10px; overflow: hidden; position: relative; background: #000; }}
+        .top-hero-thumb {{ position: relative; aspect-ratio: 21/9; width: 100%; }}
+        .top-hero-thumb img {{ width: 100%; height: 100%; object-fit: cover; opacity: 0.88; }}
+        .top-hero-overlay {{ position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); color: #fff; }}
+        .top-hero-overlay h2 {{ font-size: 28px; font-weight: 800; line-height: 1.3; margin: 8px 0; }}
+        .top-hero-overlay p {{ font-size: 15px; color: #ddd; }}
 
-        header {{ background: #fff; border-bottom: 3px solid #111; position: sticky; top: 0; z-index: 1000; }}
-        .header-inner {{ max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }}
-        .logo img {{ height: 32px; display: block; }}
-        .nav-right {{ display: flex; align-items: center; gap: 24px; }}
-        .nav-menu {{ font-size: 15px; font-weight: 800; color: #111; letter-spacing: 0.5px; }}
-        .sns-icons {{ display: flex; align-items: center; gap: 14px; }}
-        .sns-icons svg {{ width: 17px; height: 17px; fill: #111; }}
+        .sub-heroes-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 35px; }}
+        @media(max-width: 800px) {{ .sub-heroes-grid {{ grid-template-columns: 1fr; }} .top-hero-thumb {{ aspect-ratio: 16/9; }} .top-hero-overlay h2 {{ font-size: 20px; }} }}
+        
+        .sub-hero-card {{ display: block; border-radius: 8px; overflow: hidden; background: #fff; border: 1px solid var(--border); }}
+        .sub-hero-thumb {{ position: relative; aspect-ratio: 16/10; }}
+        .sub-hero-thumb img {{ width: 100%; height: 100%; object-fit: cover; }}
+        .sub-hero-info {{ padding: 14px; }}
+        .sub-hero-info h3 {{ font-size: 16px; font-weight: 700; line-height: 1.4; color: #111; }}
 
-        .container {{ max-width: 1200px; margin: 25px auto; padding: 0 20px; }}
+        .badge {{ background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-block; }}
+        .badge-sm {{ color: var(--primary); font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 4px; }}
+        .date {{ font-size: 12px; color: #888; display: block; margin-top: 6px; }}
 
-        /* Motor1 스타일 Top Hero (1개) */
-        .hero-top {{ margin-bottom: 30px; }}
-        .hero-card {{ display: grid; grid-template-columns: 1.3fr 1fr; background: #0e0e0e; color: #fff; border-radius: 6px; overflow: hidden; }}
-        .hero-img-wrap {{ aspect-ratio: 16 / 10; overflow: hidden; }}
-        .hero-img-wrap img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }}
-        .hero-card:hover .hero-img-wrap img {{ transform: scale(1.03); }}
-        .hero-content {{ padding: 36px 30px; display: flex; flex-direction: column; justify-content: center; }}
-        .hero-tag {{ font-size: 12px; font-weight: 900; color: #e50914; text-transform: uppercase; margin-bottom: 12px; }}
-        .hero-content h2 {{ font-size: 26px; line-height: 1.35; font-weight: 900; margin-bottom: 14px; word-break: keep-all; }}
-        .hero-desc {{ font-size: 14px; color: #bbb; line-height: 1.6; margin-bottom: 16px; word-break: keep-all; }}
-        .hero-date {{ font-size: 12px; color: #777; }}
+        .infeed-ad-wrap {{ margin: 30px 0; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; }}
 
-        /* 서브 히어로 (3열 그리드) */
-        .sub-hero-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }}
-        .sub-hero-card {{ display: flex; flex-direction: column; }}
-        .sub-hero-thumb {{ aspect-ratio: 16 / 9; border-radius: 4px; overflow: hidden; background: #f0f0f0; margin-bottom: 12px; }}
-        .sub-hero-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }}
-        .sub-hero-card:hover img {{ transform: scale(1.03); }}
-        .sub-hero-card:hover h3 {{ color: #d32f2f; }}
-        .card-tag {{ font-size: 11px; font-weight: 800; color: #d32f2f; text-transform: uppercase; margin-bottom: 6px; }}
-        .sub-hero-card h3 {{ font-size: 16px; font-weight: 800; line-height: 1.4; margin-bottom: 8px; color: #111; word-break: keep-all; }}
-        .date {{ font-size: 12px; color: #888; }}
+        .feed-layout {{ display: grid; grid-template-columns: 1fr 300px; gap: 40px; margin-top: 30px; }}
+        @media(max-width: 900px) {{ .feed-layout {{ grid-template-columns: 1fr; }} .side-box {{ display: none; }} }}
 
-        /* 중간 인피드 광고 */
-        .main-middle-ad {{ margin: 40px 0; text-align: center; padding: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }}
-
-        /* 2단 피드 리스트 (좌 70% 리스트 + 우 30% 사이드바) */
-        .main-feed-layout {{ display: grid; grid-template-columns: 1fr 320px; gap: 40px; margin-top: 20px; }}
-        .section-header {{ font-size: 20px; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 25px; border-bottom: 2px solid #111; padding-bottom: 8px; text-transform: uppercase; }}
-        .section-header span {{ color: #d32f2f; }}
-
-        .feed-list {{ display: flex; flex-direction: column; gap: 24px; }}
-        .feed-item {{ display: flex; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid #eee; align-items: flex-start; }}
-        .feed-thumb {{ width: 220px; height: 135px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #f0f0f0; }}
-        .feed-thumb img {{ width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }}
-        .feed-item:hover .feed-thumb img {{ transform: scale(1.03); }}
-        .feed-info {{ flex: 1; min-width: 0; }}
-        .feed-item:hover h3 {{ color: #d32f2f; }}
-        .feed-info h3 {{ font-size: 18px; font-weight: 800; line-height: 1.4; margin-bottom: 8px; color: #111; word-break: keep-all; }}
-        .feed-desc {{ font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-
-        .sidebar {{ min-width: 0; }}
-        .sidebar-sticky {{ position: -webkit-sticky; position: sticky; top: 85px; }}
-        .sidebar-title {{ font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #111; padding-bottom: 6px; }}
-
-        footer {{ border-top: 1px solid #eee; background: #fafafa; padding: 40px 20px; text-align: center; font-size: 13px; color: #888; margin-top: 60px; }}
-
-        @media (max-width: 900px) {{
-            .hero-card {{ grid-template-columns: 1fr; }}
-            .hero-content {{ padding: 24px 20px; }}
-            .hero-content h2 {{ font-size: 20px; }}
-            .sub-hero-grid {{ grid-template-columns: repeat(2, 1fr); }}
-            .main-feed-layout {{ grid-template-columns: 1fr; gap: 0; }}
-            .sidebar {{ display: none; }}
-        }}
-        @media (max-width: 600px) {{
-            .sub-hero-grid {{ grid-template-columns: 1fr; }}
-            .feed-item {{ flex-direction: column; }}
-            .feed-thumb {{ width: 100%; height: auto; aspect-ratio: 16 / 9; }}
-            .sns-icons {{ display: none; }}
-            .container {{ padding: 0 16px; margin: 15px auto; }}
-        }}
+        .feed-item {{ display: grid; grid-template-columns: 220px 1fr; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--border); }}
+        @media(max-width: 600px) {{ .feed-item {{ grid-template-columns: 110px 1fr; gap: 12px; }} }}
+        .feed-thumb {{ border-radius: 6px; overflow: hidden; aspect-ratio: 16/10; background: #eee; }}
+        .feed-thumb img {{ width: 100%; height: 100%; object-fit: cover; }}
+        .feed-text h4 {{ font-size: 17px; font-weight: 700; line-height: 1.4; color: #111; margin-bottom: 6px; }}
+        .feed-desc {{ font-size: 13px; color: #666; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-inner">
-            <a href="/" class="logo"><img src="/assets/logo.png" alt="CARISSUE"></a>
-            <div class="nav-right">
-                <a href="/" class="nav-menu">NEWS</a>
-                <div class="sns-icons">
-                    <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                    <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-                    <a href="#" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-                </div>
-            </div>
+    {render_header()}
+    
+    <div class="main-container">
+        {top_hero_html}
+
+        <div class="sub-heroes-grid">
+            {sub_heroes_html}
         </div>
-    </header>
 
-    <main class="container">
-        <!-- 1. 최상단 대형 히어로 -->
-        {hero_html}
-
-        <!-- 2. 서브 히어로 3열 그리드 -->
-        {sub_heroes_html}
-
-        <!-- 3. 메인 가로 인피드 광고 -->
-        <div class="main-middle-ad">
+        <!-- 인피드 광고 영역 -->
+        <div class="infeed-ad-wrap">
             <ins class="adsbygoogle"
                  style="display:block"
                  data-ad-client="{ADSENSE_CLIENT}"
                  data-ad-slot="{AD_SLOT_BOTTOM}"
                  data-ad-format="auto"
                  data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({{}});
-            </script>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
         </div>
 
-        <!-- 4. LATEST STORIES (좌 70% 리스트 + 우 30% 사이드바 광고) -->
-        <div class="main-feed-layout">
-            <div class="feed-main-col">
-                <div class="section-header">LATEST STORIES <span>●</span></div>
-                <div class="feed-list">
-                    {list_posts_html}
-                </div>
+        <div class="feed-layout">
+            <div class="feed-list">
+                {list_html}
             </div>
-
-            <aside class="sidebar">
-                <div class="sidebar-sticky">
-                    <div class="sidebar-title">ADVERTISEMENT</div>
+            <aside class="side-box">
+                <div style="position: sticky; top: 80px; width: 300px; height: 600px;">
                     <ins class="adsbygoogle"
                          style="display:inline-block;width:300px;height:600px"
                          data-ad-client="{ADSENSE_CLIENT}"
                          data-ad-slot="{AD_SLOT_SIDEBAR}"></ins>
-                    <script>
-                         (adsbygoogle = window.adsbygoogle || []).push({{}});
-                    </script>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
                 </div>
             </aside>
         </div>
-    </main>
+    </div>
 
-    <footer>
-        &copy; CARISSUE. All rights reserved.
-    </footer>
+    {render_footer()}
 </body>
-</html>"""
-
+</html>
+"""
     with open(INDEX_PATH, "w", encoding="utf-8") as f:
-        f.write(full_index)
+        f.write(index_html)
 
-    sitemap_entries = ""
-    for post in posts:
-        sitemap_entries += f"  <url>\n    <loc>{SITE_URL}/posts/{post['id']}.html</loc>\n    <lastmod>{post['date_str'][:10]}</lastmod>\n    <priority>0.8</priority>\n  </url>\n"
-        
-    sitemap_full = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
+# ==========================================
+# 8. Sitemap.xml 실시간 동기화
+# ==========================================
+def update_sitemap(posts):
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    urls_xml = f"""  <url>
     <loc>{SITE_URL}/</loc>
+    <lastmod>{now_iso}</lastmod>
     <priority>1.0</priority>
   </url>
-{sitemap_entries}</urlset>"""
-
+"""
+    for p in posts:
+        p_iso = p.get("iso_date", now_iso)
+        if len(p_iso) > 10:
+            p_iso = p_iso[:10]
+        urls_xml += f"""  <url>
+    <loc>{SITE_URL}/posts/{p['id']}.html</loc>
+    <lastmod>{p_iso}</lastmod>
+    <priority>0.8</priority>
+  </url>
+"""
+    sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{urls_xml}</urlset>
+"""
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
-        f.write(sitemap_full)
-    print("-> Motor1 레이아웃 메인 페이지 및 sitemap.xml 동기화 완료!")
+        f.write(sitemap_content)
 
+# ==========================================
+# 9. 메인 실행 파이프라인
+# ==========================================
 def main():
-    print(">>> 1. 4대 공식 피드 수집 시작...")
-    history_set = load_history()
-    collected = []
-    
-    for feed in FEEDS:
-        items = fetch_feed_items(feed, history_set)
-        collected.extend(items)
-        
-    print(f"\n>>> 수집 완료: 총 {len(collected)}개 기사 확보됨")
-
     os.makedirs(POSTS_DIR, exist_ok=True)
-    existing_posts = scan_all_posts()
-    
-    if collected:
-        for idx, item in enumerate(collected):
-            print(f"\n[{idx+1}/{len(collected)}] 기사 생성 중: [{item['source']}] {item['title'][:25]}...")
-            try:
-                t, c = generate_article(item)
-                timestamp = int(time.time()) + idx
-                post_id = f"post_{timestamp}_{idx}"
-                date_str = get_now_kst()
-                
-                html = build_post_html(post_id, t, c, item['images'], date_str, item['category'], existing_posts)
-                with open(os.path.join(POSTS_DIR, f"{post_id}.html"), "w", encoding="utf-8") as f:
-                    f.write(html)
-                    
-                save_history(item['link'])
-                time.sleep(3)
-            except Exception as e:
-                print(f"-> [작성 실패]: {e}")
+    history_set = load_history()
+    feeds = get_current_feeds()
 
-    rebuild_entire_site()
-    print(">>> 모든 작업 완료!")
+    new_articles = []
+    for f_conf in feeds:
+        items = fetch_feed_items(f_conf, history_set)
+        for item in items:
+            print(f"\n[기사 변환 작업] 원문 분석: {item['title']}")
+            raw_text, images = extract_article_details(item["link"], item["feed_img"])
+            if not raw_text or len(raw_text) < 100:
+                print("-> 본문 추출 실패 또는 내용 부족으로 패스.")
+                continue
+
+            generated_md = generate_article_content(item["source"], item["category"], item["title"], raw_text)
+            if not generated_md:
+                continue
+
+            lines = generated_md.split("\n")
+            post_title = item["title"]
+            subtitle = ""
+            body_lines = []
+
+            for line in lines:
+                if line.startswith("# ") and not post_title_found:
+                    post_title = line.replace("# ", "").strip()
+                    post_title_found = True
+                elif line.startswith("## ") and not subtitle:
+                    subtitle = line.replace("## ", "").strip()
+                else:
+                    body_lines.append(line)
+
+            # 마크다운 문단을 HTML로 변환하며 다중 이미지 분산 배치 및 중간 광고 삽입
+            paragraphs = []
+            cur_p = []
+            for bl in body_lines:
+                if bl.strip() == "":
+                    if cur_p:
+                        paragraphs.append("\n".join(cur_p))
+                        cur_p = []
+                else:
+                    cur_p.append(bl)
+            if cur_p:
+                paragraphs.append("\n".join(cur_p))
+
+            content_html_parts = []
+            img_idx = 1
+            for p_i, p_text in enumerate(paragraphs):
+                if p_text.startswith("### "):
+                    h3_text = p_text.replace("### ", "").strip()
+                    content_html_parts.append(f"<h3>{h3_text}</h3>")
+                else:
+                    content_html_parts.append(f"<p>{p_text}</p>")
+
+                # 2번째 문단 뒤 인아티클 광고 삽입
+                if p_i == 1:
+                    content_html_parts.append(f"""
+                    <div class="ad-in-article">
+                        <ins class="adsbygoogle"
+                             style="display:block; text-align:center;"
+                             data-ad-layout="in-article"
+                             data-ad-format="fluid"
+                             data-ad-client="{ADSENSE_CLIENT}"
+                             data-ad-slot="{AD_SLOT_IN_ARTICLE}"></ins>
+                        <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+                    </div>
+                    """)
+
+                # 본문 중간 이미지 분산 배치
+                if p_i in [0, 2, 4] and img_idx < len(images):
+                    content_html_parts.append(f"""
+                    <div class="content-img">
+                        <img src="{images[img_idx]}" alt="{post_title}" loading="lazy">
+                    </div>
+                    """)
+                    img_idx += 1
+
+            post_id = f"post_{int(time.time())}_{len(new_articles)}"
+            now_dt = get_now_kst_dt()
+            
+            article_record = {
+                "id": post_id,
+                "title": post_title,
+                "subtitle": subtitle,
+                "category": item["category"],
+                "source": item["source"],
+                "date": now_dt.strftime("%Y-%m-%d %H:%M"),
+                "iso_date": now_dt.isoformat(),
+                "images": images,
+                "content_html": "\n".join(content_html_parts)
+            }
+
+            new_articles.append(article_record)
+            save_history(item["link"])
+            time.sleep(2)
+
+    # 기존 DB 동기화 및 전체 리빌드
+    data_file = "posts_data.json"
+    existing_posts = []
+    if os.path.exists(data_file):
+        try:
+            with open(data_file, "r", encoding="utf-8") as f:
+                existing_posts = json.load(f)
+        except Exception:
+            existing_posts = []
+
+    all_posts = new_articles + existing_posts
+    with open(data_file, "w", encoding="utf-8") as f:
+        json.dump(all_posts, f, ensure_ascii=False, indent=2)
+
+    print(f"\n>>> 전체 기사 수: {len(all_posts)}개 (신규 생성: {len(new_articles)}개)")
+    
+    # 기존 글까지 포함하여 최신 스크립트(모달, 주석, 푸터)로 일괄 리빌드
+    for p in all_posts:
+        build_article_page(p, all_posts)
+
+    build_index_page(all_posts)
+    update_sitemap(all_posts)
+    print(">>> [완료] index.html, sitemap.xml 및 기사 전체 리빌드가 성공적으로 완료되었습니다.")
 
 if __name__ == "__main__":
     main()
