@@ -198,6 +198,8 @@ def build_article_page(item_data, all_posts, article_tpl):
 
     html = article_tpl
     replacements = {
+        "{{SITE_HEADER}}": load_template("header.html"),
+        "{{SITE_FOOTER}}": load_template("footer.html"),
         "{{SITE_URL}}": config.SITE_URL,
         "{{ADSENSE_CLIENT}}": config.ADSENSE_CLIENT,
         "{{AD_SLOT_BOTTOM}}": config.AD_SLOTS["bottom"],
@@ -287,6 +289,8 @@ def build_index_page(posts, index_tpl):
 
     html = index_tpl
     replacements = {
+        "{{SITE_HEADER}}": load_template("header.html"),
+        "{{SITE_FOOTER}}": load_template("footer.html"),
         "{{SITE_URL}}": config.SITE_URL,
         "{{ADSENSE_CLIENT}}": config.ADSENSE_CLIENT,
         "{{AD_SLOT_BOTTOM}}": config.AD_SLOTS["bottom"],
