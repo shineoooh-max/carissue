@@ -290,6 +290,35 @@
         .footer-links a { color: #e4e4e7; margin: 0 8px; }
         .footer-links a:hover { color: var(--accent-gold); }
         .copyright { font-size: 13px; color: #71717a; }
+
+        /* 상단 핵심 요약 박스 (왼쪽 이어지는 빨간 세로 라인) */
+        .article-summary-box {
+            border-left: 3px solid #e11d48;
+            padding: 4px 0 4px 16px;
+            margin: 0 0 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .summary-line {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.45;
+            letter-spacing: -0.02em;
+        }
+
+        /* 추천 뉴스 3칸 x 2줄 (총 6개) 그리드 */
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 16px;
+        }
+        @media (max-width: 768px) {
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
