@@ -325,7 +325,8 @@ def scan_existing_posts(exclude_ids):
                 raw_html = hf.read()
                 h_soup = BeautifulSoup(raw_html, "html.parser")
 
-                rec_title, rec_sub, rec_img, rec_date = "", "", "", ""
+                rec_title, rec_sub, rec_date = "", "", ""
+                rec_images = []
                 schema_script = h_soup.find("script", type="application/ld+json")
                 if schema_script and schema_script.string:
                     try:
@@ -333,7 +334,10 @@ def scan_existing_posts(exclude_ids):
                         rec_title = s_data.get("headline", "")
                         rec_sub = s_data.get("description", "")
                         s_img = s_data.get("image", [])
-                        rec_img = s_img[0] if isinstance(s_img, list) and s_img else (s_img if isinstance(s_img, str) else "")
+                        if isinstance(s_img, list):
+                            rec_images = [i for i in s_img if i]
+                        elif isinstance(s_img, str) and s_img:
+                            rec_images = [s_img]
                         if "datePublished" in s_data:
                             rec_date = s_data["datePublished"][:16].replace("T", " ")
                     except Exception:
@@ -343,12 +347,12 @@ def scan_existing_posts(exclude_ids):
                     h1 = h_soup.find("h1")
                     rec_title = h1.get_text().strip() if h1 else pid
 
-                if not rec_img or any(k in rec_img.lower() for k in ["logo", "icon"]):
+                if not rec_images:
                     og_img = h_soup.find("meta", property="og:image")
                     if og_img and og_img.get("content"):
-                        rec_img = og_img["content"].strip()
-                if not rec_img:
-                    rec_img = "/assets/logo.png"
+                        rec_images = [og_img["content"].strip()]
+                if not rec_images:
+                    rec_images = ["/assets/logo.png"]
 
                 if not rec_date:
                     m = re.search(r"\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}", raw_html)
@@ -359,6 +363,25 @@ def scan_existing_posts(exclude_ids):
                 if cat_el and "국내" in cat_el.get_text():
                     rec_cat = "국내 이슈"
 
+                # 기존 본문 HTML 추출 및 폰트 크기 버그(h1/h2 등) 교정
+                article_el = h_soup.find("article", class_="post-content") or h_soup.find("article")
+                cleaned_body_parts = []
+                if article_el:
+                    for child in article_el.children:
+                        if getattr(child, "name", None) in ["h1", "h2", "h3", "h4"]:
+                            t = child.get_text().strip()
+                            if t:
+                                cleaned_body_parts.append(f"<h3>{t}</h3>")
+                        elif getattr(child, "name", None) == "p":
+                            # 인라인 스타일(font-size 등) 제거하고 순수 텍스트/강조만 유지
+                            t_html = child.decode_contents().strip()
+                            if t_html:
+                                cleaned_body_parts.append(f"<p>{t_html}</p>")
+                        elif getattr(child, "name", None) == "div" and "content-img" in child.get("class", []):
+                            cleaned_body_parts.append(str(child))
+                        elif getattr(child, "name", None) == "div" and "ad-in-article" in child.get("class", []):
+                            cleaned_body_parts.append(str(child))
+
                 existing_posts.append({
                     "id": pid,
                     "title": rec_title,
@@ -367,8 +390,8 @@ def scan_existing_posts(exclude_ids):
                     "source": config.SITE_NAME,
                     "date": rec_date,
                     "iso_date": rec_date[:10],
-                    "images": [rec_img],
-                    "content_html": ""
+                    "images": rec_images,
+                    "content_html": "\n".join(cleaned_body_parts)
                 })
         except Exception as err:
             print(f"기존 기사 파싱 예외 ({fname}): {err}")
@@ -429,7 +452,7 @@ def main():
                 save_history(item["link"])
                 time.sleep(2)
     else:
-        print(">>> [디자인 전용 모드] AI 기사 생성을 건너뛰고 기존 기사로 레이아웃만 갱신합니다. (토큰 소모 0원)")
+        print(">>> [디자인 전용 모드] AI 기사 생성을 건너뛰고 기존 기사 전체에 새 디자인을 일괄 적용합니다. (토큰 소모 0원)")
 
     new_ids = {na["id"] for na in new_articles}
     existing_posts = scan_existing_posts(new_ids)
@@ -438,12 +461,15 @@ def main():
 
     print(f"\n>>> [스캔 완료] 총 기사 수: {len(all_posts)}개 (신규: {len(new_articles)}개, 기존 복원: {len(existing_posts)}개)")
 
-    for p in new_articles:
-        build_article_page(p, all_posts, article_tpl)
+    # 신규 기사는 무조건 빌드, 디자인 전용 모드일 때는 기존 기사까지 전부 새 article.html로 일괄 재빌드
+    target_build_posts = all_posts if design_only else new_articles
+    for p in target_build_posts:
+        if p.get("content_html"):
+            build_article_page(p, all_posts, article_tpl)
 
     build_index_page(all_posts, index_tpl)
     update_sitemap(all_posts)
-    print(">>> [완료] 새 템플릿 기반 index.html 및 sitemap.xml 빌드가 완료되었습니다.")
+    print(">>> [완료] 새 템플릿 기반 전체 페이지 및 sitemap.xml 빌드가 완료되었습니다.")
 
 
 if __name__ == "__main__":
