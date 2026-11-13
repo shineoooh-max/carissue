@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '0 23,9 * * *'
   workflow_dispatch:
+    inputs:
+      design_only:
+        description: '디자인만 반영 (체크 시 AI 기사 생성 안 함 / 토큰 비용 0원)'
+        required: false
+        default: 'true'
+        type: boolean
 
 permissions:
   contents: write
@@ -30,7 +36,9 @@ jobs:
       - name: Run Builder Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DESIGN_ONLY: ${{ github.event.inputs.design_only || 'false' }}
         run: |
+          python -m py_compile config.py parser.py builder.py
           python builder.py
 
       - name: Commit and Push Changes
@@ -41,6 +49,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Auto: publish 5 new articles"
+            git commit -m "Auto: build site and articles"
             git push origin main
           fi
