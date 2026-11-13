@@ -363,23 +363,28 @@ def scan_existing_posts(exclude_ids):
                 if cat_el and "국내" in cat_el.get_text():
                     rec_cat = "국내 이슈"
 
-                # 기존 본문 HTML 추출 및 폰트 크기 버그(h1/h2 등) 교정
+                # 기존 본문 HTML 추출 및 긴 문장이 소제목(h3)으로 뭉치는 현상 교정
                 article_el = h_soup.find("article", class_="post-content") or h_soup.find("article")
                 cleaned_body_parts = []
                 if article_el:
                     for child in article_el.children:
-                        if getattr(child, "name", None) in ["h1", "h2", "h3", "h4"]:
+                        tag_name = getattr(child, "name", None)
+                        if tag_name in ["h1", "h2", "h3", "h4"]:
                             t = child.get_text().strip()
-                            if t:
+                            if not t:
+                                continue
+                            # 45자 초과 시 소제목이 아닌 일반 본문 문단(<p>)으로 교정
+                            if len(t) > 45:
+                                cleaned_body_parts.append(f"<p>{t}</p>")
+                            else:
                                 cleaned_body_parts.append(f"<h3>{t}</h3>")
-                        elif getattr(child, "name", None) == "p":
-                            # 인라인 스타일(font-size 등) 제거하고 순수 텍스트/강조만 유지
+                        elif tag_name == "p":
                             t_html = child.decode_contents().strip()
                             if t_html:
                                 cleaned_body_parts.append(f"<p>{t_html}</p>")
-                        elif getattr(child, "name", None) == "div" and "content-img" in child.get("class", []):
+                        elif tag_name == "div" and "content-img" in child.get("class", []):
                             cleaned_body_parts.append(str(child))
-                        elif getattr(child, "name", None) == "div" and "ad-in-article" in child.get("class", []):
+                        elif tag_name == "div" and "ad-in-article" in child.get("class", []):
                             cleaned_body_parts.append(str(child))
 
                 existing_posts.append({
