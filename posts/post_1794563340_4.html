@@ -18,7 +18,7 @@
     "https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/intro-1794393293.jpg",
     "https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/shrinking-the-s-fr-to-kei-size-1794393294.jpg"
   ],
-  "datePublished": "2026-11-13T18:49:00.755823+09:00",
+  "datePublished": "2026-11-13",
   "author": [
     {
       "@type": "Organization",
@@ -316,21 +316,51 @@
         .footer-links a { color: #e4e4e7; margin: 0 8px; }
         .footer-links a:hover { color: var(--accent-gold); }
         .copyright { font-size: 13px; color: #71717a; }
+
+        /* 상단 핵심 요약 박스 (왼쪽 이어지는 빨간 세로 라인) */
+        .article-summary-box {
+            border-left: 3px solid #e11d48;
+            padding: 4px 0 4px 16px;
+            margin: 0 0 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .summary-line {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.45;
+            letter-spacing: -0.02em;
+        }
+
+        /* 추천 뉴스 3칸 x 2줄 (총 6개) 그리드 */
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 16px;
+        }
+        @media (max-width: 768px) {
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
     <header class="site-header">
-        <div class="header-inner">
-            <a href="/" class="logo">
-                <img src="/assets/logo.png?v=2" alt="CARISSUE" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
-            </a>
-            <nav class="main-nav">
-                <a href="/" class="nav-item">최신뉴스</a>
-                <a href="/about.html" class="nav-item">소개</a>
-            </nav>
-        </div>
-    </header>
+    <div class="header-inner" style="padding: 4px 20px; min-height: 62px;">
+        <a href="/" class="logo" style="display: flex; align-items: center;">
+            <img src="/assets/logo.png?v=3" alt="CARISSUE" style="height: 52px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
+        </a>
+        <nav class="main-nav">
+            <a href="/" class="nav-item">최신뉴스</a>
+            <a href="/about.html" class="nav-item">소개</a>
+        </nav>
+    </div>
+</header>
+
 
     <div class="post-layout">
         <main class="post-main">
@@ -349,22 +379,15 @@
 
             <article class="post-content">
                 <h3>잊혀진 콘셉트카의 귀환</h3>
-<div class="content-img"><img src="https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/intro-1794393293.jpg" alt="잊혀진 콘셉트카의 귀환" loading="lazy"></div>
+<div class="content-img"><img alt="잊혀진 콘셉트카의 귀환" loading="lazy" src="https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/intro-1794393293.jpg"/></div>
 <p>토요타 고성능 GR 라인업의 전설적인 모델들이 부활을 준비하는 가운데 색다른 소식이 전해졌습니다. 일본 현지 매체에 따르면 토요타가 2015년 공개했던 소형 쿠페 콘셉트카 S-FR의 양산 프로젝트를 다시 검토하고 있습니다.</p>
 <p>원래는 마쓰다 MX-5와 경쟁할 콤팩트 스포츠카로 기획되었으나 최근 흐름은 전혀 다른 방향을 가리킵니다. 토요타가 다이하쓰와 손을 잡고 일본 경차 규격에 맞춘 초소형 후륜구동 쿠페를 준비 중이라는 관측입니다.</p>
-
-                <div class="ad-in-article">
-                    <ins class="adsbygoogle"
-                         style="display:block; text-align:center;"
-                         data-ad-layout="in-article"
-                         data-ad-format="fluid"
-                         data-ad-client="ca-pub-4793184080983542"
-                         data-ad-slot="4181249863"></ins>
-                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                </div>
-                
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>다이하쓰와의 영리한 동맹</h3>
-<div class="content-img"><img src="https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/shrinking-the-s-fr-to-kei-size-1794393294.jpg" alt="다이하쓰와의 영리한 동맹" loading="lazy"></div>
+<div class="content-img"><img alt="다이하쓰와의 영리한 동맹" loading="lazy" src="https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/shrinking-the-s-fr-to-kei-size-1794393294.jpg"/></div>
 <p>이번 프로젝트의 핵심 열쇠는 토요타 산하 경차 전문 브랜드인 다이하쓰가 쥐고 있습니다. 올해 생산을 마친 2세대 코펜의 후속 모델 플랫폼을 두 회사가 공동으로 활용한다는 구상입니다.</p>
 <p>다이하쓰가 선보인 콘셉트카를 기반으로 공동 개발을 진행하면 규모의 경제를 쉽게 달성할 수 있습니다. 토요타는 개발 비용을 낮추면서도 엔트리급 스포츠카 라인업을 단숨에 보강할 기회를 얻게 됩니다.</p>
 <h3>경차 규격 맞춘 파격 다이어트</h3>
@@ -380,7 +403,7 @@
 
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Carscoops 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
@@ -422,6 +445,21 @@
             <div class="rel-title">람보르기니가 준비하는 차세대 광기, '아트레비도'와 '델리리오' 상표 출원</div>
         </a>
         
+        <a href="/posts/post_1794563257_0.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/zx0XQE/s3/aston-martin-and-star-wars-announce-collaboration.jpg" alt="제국의 품격을 입은 슈퍼카: 애스턴마틴, '스타워즈' 50주년 맞손" loading="lazy"></div>
+            <div class="rel-title">제국의 품격을 입은 슈퍼카: 애스턴마틴, '스타워즈' 50주년 맞손</div>
+        </a>
+        
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
+        </a>
+        
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
+        </a>
+        
                 </div>
             </div>
         </main>
@@ -450,16 +488,17 @@
     </div>
 
     <footer class="site-footer">
-        <div class="footer-inner">
-            <div class="footer-links">
-                <a href="/about.html">매체소개</a> &bull;
-                <a href="/privacy.html">개인정보처리방침</a> &bull;
-                <a href="/terms.html">이용약관</a> &bull;
-                <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
-            </div>
-            <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
+    <div class="footer-inner">
+        <div class="footer-links">
+            <a href="/about.html">About Us</a> &bull;
+            <a href="/privacy.html">개인정보처리방침</a> &bull;
+            <a href="/terms.html">이용약관</a> &bull;
+            <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
         </div>
-    </footer>
+        <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
+    </div>
+</footer>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -314,21 +314,51 @@
         .footer-links a { color: #e4e4e7; margin: 0 8px; }
         .footer-links a:hover { color: var(--accent-gold); }
         .copyright { font-size: 13px; color: #71717a; }
+
+        /* 상단 핵심 요약 박스 (왼쪽 이어지는 빨간 세로 라인) */
+        .article-summary-box {
+            border-left: 3px solid #e11d48;
+            padding: 4px 0 4px 16px;
+            margin: 0 0 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .summary-line {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.45;
+            letter-spacing: -0.02em;
+        }
+
+        /* 추천 뉴스 3칸 x 2줄 (총 6개) 그리드 */
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 16px;
+        }
+        @media (max-width: 768px) {
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
     <header class="site-header">
-        <div class="header-inner">
-            <a href="/" class="logo">
-                <img src="/assets/logo.png?v=2" alt="CARISSUE" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
-            </a>
-            <nav class="main-nav">
-                <a href="/" class="nav-item">최신뉴스</a>
-                <a href="/about.html" class="nav-item">소개</a>
-            </nav>
-        </div>
-    </header>
+    <div class="header-inner" style="padding: 4px 20px; min-height: 62px;">
+        <a href="/" class="logo" style="display: flex; align-items: center;">
+            <img src="/assets/logo.png?v=3" alt="CARISSUE" style="height: 52px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
+        </a>
+        <nav class="main-nav">
+            <a href="/" class="nav-item">최신뉴스</a>
+            <a href="/about.html" class="nav-item">소개</a>
+        </nav>
+    </div>
+</header>
+
 
     <div class="post-layout">
         <main class="post-main">
@@ -389,19 +419,34 @@ BMW의 위기는 고립된 개별 기업의 문제가 아닌, '독일 자동차 
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
+        <a href="/posts/post_1794563340_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/a-kei-sized-rwd-coupe-by-toyota-sounds-like-a-treat/l-intro-1794393293.jpg" alt="토요타 S-FR의 부활? 초소형 후륜구동 경형 쿠페 탄생할까" loading="lazy"></div>
+            <div class="rel-title">토요타 S-FR의 부활? 초소형 후륜구동 경형 쿠페 탄생할까</div>
+        </a>
+        
+        <a href="/posts/post_1794563317_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/ultra-wide-r32-and-r34-gt-rs-bring-back-nfs-underground-nostalgia/l-intro-1794561064.jpg" alt="'니드포스피드' 감성의 부활… 쿨 레이싱, 울트라 와이드 R32·R34 GT-R 공개" loading="lazy"></div>
+            <div class="rel-title">'니드포스피드' 감성의 부활… 쿨 레이싱, 울트라 와이드 R32·R34 GT-R 공개</div>
+        </a>
+        
+        <a href="/posts/post_1794563293_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/7ZoBPq/s3/tesla-cybercab-robotaxi.jpg" alt=""빨간불 무시하고 늦게 멈췄다"… 제러미 클락슨, 테슬라 사이버캡 결함 폭로" loading="lazy"></div>
+            <div class="rel-title">"빨간불 무시하고 늦게 멈췄다"… 제러미 클락슨, 테슬라 사이버캡 결함 폭로</div>
+        </a>
+        
+        <a href="/posts/post_1794563277_1.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/Ak2MpL/s3/lamborghini-revuelto---foto---2023.jpg" alt="람보르기니가 준비하는 차세대 광기, '아트레비도'와 '델리리오' 상표 출원" loading="lazy"></div>
+            <div class="rel-title">람보르기니가 준비하는 차세대 광기, '아트레비도'와 '델리리오' 상표 출원</div>
+        </a>
+        
+        <a href="/posts/post_1794563257_0.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/zx0XQE/s3/aston-martin-and-star-wars-announce-collaboration.jpg" alt="제국의 품격을 입은 슈퍼카: 애스턴마틴, '스타워즈' 50주년 맞손" loading="lazy"></div>
+            <div class="rel-title">제국의 품격을 입은 슈퍼카: 애스턴마틴, '스타워즈' 50주년 맞손</div>
+        </a>
+        
         <a href="/posts/post_1794526265_4.html" class="rel-card">
             <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
             <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
-        </a>
-        
-        <a href="/posts/post_1794526239_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
-            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
-        </a>
-        
-        <a href="/posts/post_1794526214_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
-            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -432,16 +477,17 @@ BMW의 위기는 고립된 개별 기업의 문제가 아닌, '독일 자동차 
     </div>
 
     <footer class="site-footer">
-        <div class="footer-inner">
-            <div class="footer-links">
-                <a href="/about.html">매체소개</a> &bull;
-                <a href="/privacy.html">개인정보처리방침</a> &bull;
-                <a href="/terms.html">이용약관</a> &bull;
-                <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
-            </div>
-            <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
+    <div class="footer-inner">
+        <div class="footer-links">
+            <a href="/about.html">About Us</a> &bull;
+            <a href="/privacy.html">개인정보처리방침</a> &bull;
+            <a href="/terms.html">이용약관</a> &bull;
+            <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
         </div>
-    </footer>
+        <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
+    </div>
+</footer>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

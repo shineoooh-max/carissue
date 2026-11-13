@@ -323,17 +323,18 @@
 </head>
 <body>
     <header class="site-header">
-        <div class="header-inner">
-            <a href="/" class="logo">
-                <img src="/assets/logo.png?v=2" alt="CARISSUE" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
-            </a>
-            <nav class="main-nav">
-                <a href="/" class="nav-item active">최신뉴스</a>
-                <a href="/about.html" class="nav-item">소개</a>
-            </nav>
-        </div>
-    </header>
+    <div class="header-inner" style="padding: 4px 20px; min-height: 62px;">
+        <a href="/" class="logo" style="display: flex; align-items: center;">
+            <img src="/assets/logo.png?v=3" alt="CARISSUE" style="height: 52px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
+        </a>
+        <nav class="main-nav">
+            <a href="/" class="nav-item">최신뉴스</a>
+            <a href="/about.html" class="nav-item">소개</a>
+        </nav>
+    </div>
+</header>
+
 
     <div class="main-container">
         <!-- 상단 60:40 스플릿 메인 기사 -->
@@ -2540,15 +2541,16 @@
     </div>
 
     <footer class="site-footer">
-        <div class="footer-inner">
-            <div class="footer-links">
-                <a href="/about.html">매체소개</a> &bull;
-                <a href="/privacy.html">개인정보처리방침</a> &bull;
-                <a href="/terms.html">이용약관</a> &bull;
-                <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
-            </div>
-            <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
+    <div class="footer-inner">
+        <div class="footer-links">
+            <a href="/about.html">About Us</a> &bull;
+            <a href="/privacy.html">개인정보처리방침</a> &bull;
+            <a href="/terms.html">이용약관</a> &bull;
+            <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
         </div>
-    </footer>
+        <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
+    </div>
+</footer>
+
 </body>
 </html>
