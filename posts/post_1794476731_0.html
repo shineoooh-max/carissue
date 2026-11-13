@@ -16,7 +16,7 @@
   "image": [
     "https://cdn.motor1.com/images/mgl/E6XVJz/s3/bentley-bentayga-ewb-artenara-poppy-car.jpg"
   ],
-  "datePublished": "2026-11-12T18:45:31.792449+09:00",
+  "datePublished": "2026-11-12",
   "author": [
     {
       "@type": "Organization",
@@ -36,101 +36,300 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
     <style>
-        
-    :root {
-        --primary: #d32f2f;
-        --dark: #121212;
-        --text: #222222;
-        --text-sub: #666666;
-        --border: #e5e5e5;
-        --bg-footer: #f8f8fa;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; height: auto; display: block; }
-    
-    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-    .logo img { height: 38px; width: auto; }
-    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
-    .nav-item:hover, .nav-item.active { color: var(--primary); }
+        :root {
+            --bg-dark: #111215;
+            --accent-red: #e11d48;
+            --accent-gold: #d97706;
+            --text-main: #18181b;
+            --text-body: #27272a;
+            --text-sub: #52525b;
+            --border: #e4e4e7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+            color: var(--text-main);
+            background: #ffffff;
+            line-height: 1.6;
+            letter-spacing: -0.02em;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
 
-    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
-    .footer-inner { max-width: 1200px; margin: 0 auto; }
-    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
-    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-    .copyright { font-size: 13px; color: #888; }
+        /* 다크 매거진 헤더 */
+        .site-header {
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #ffffff;
+        }
+        .logo-text span { color: var(--accent-red); }
+        .main-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-item { color: #e4e4e7; font-size: 15px; font-weight: 700; }
+        .nav-item:hover { color: var(--accent-gold); }
 
-    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
-    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
-    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-    
-        .post-layout { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-        @media(max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .sidebar-wrap { display: none; } }
-        
-        .post-cat { color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .post-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }
-        .post-sub { font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
-        .post-meta { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }
-        .share-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .share-btn:hover { background: #f5f5f5; border-color: #999; }
+        /* 기사 레이아웃 */
+        .post-layout {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 44px;
+        }
+        @media (max-width: 920px) {
+            .post-layout { grid-template-columns: 1fr; }
+            .sidebar-wrap { display: none; }
+        }
 
-        .featured-img-wrap { margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        /* 기사 헤더 타이포그래피 위계 */
+        .badge-red {
+            display: inline-block;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.32;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            word-break: keep-all;
+        }
+        @media (max-width: 600px) {
+            .post-title { font-size: 25px; }
+        }
+        .post-sub {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: #71717a;
+        }
+        .share-btn {
+            background: #f4f4f5;
+            border: 1px solid #d4d4d8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .share-btn:hover { background: #e4e4e7; }
+
+        /* 대표 이미지 */
+        .featured-img-wrap {
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .featured-img-wrap img { width: 100%; height: auto; }
 
-        .post-content { font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }
-        .post-content p { margin-bottom: 22px; word-break: keep-all; }
-        .post-content h3 { font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }
-        .content-img { margin: 30px 0; border-radius: 6px; overflow: hidden; }
+        /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
+        .post-content {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.85;
+            color: var(--text-body);
+            margin-bottom: 40px;
+        }
+        .post-content p {
+            font-size: 17px !important;
+            font-weight: 400 !important;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+        .post-content h3 {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin: 38px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-red);
+            word-break: keep-all;
+        }
+        .content-img {
+            margin: 26px 0 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .content-img img { width: 100%; height: auto; }
 
-        .ad-in-article { margin: 35px 0; text-align: center; }
+        .ad-in-article { margin: 34px 0; text-align: center; }
         .ad-bottom { margin: 40px 0; }
-        .ad-multiplex { margin: 35px 0; }
-        .copyright-notice { font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }
+        .ad-multiplex { margin: 36px 0; }
 
-        .related-wrap { margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }
-        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-        .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+        .copyright-notice {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            background: #fafafa;
+            border: 1px solid #f4f4f5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 36px 0 24px;
+        }
+
+        /* 추천 기사 */
+        .related-wrap {
+            margin-top: 44px;
+            border-top: 2px solid var(--bg-dark);
+            padding-top: 24px;
+        }
+        .related-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .related-grid { grid-template-columns: 1fr; }
+        }
         .rel-card { display: block; }
-        .rel-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }
+        .rel-thumb {
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            margin-bottom: 10px;
+            background: #f4f4f5;
+        }
         .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .rel-title { font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }
+        .rel-title {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.42;
+            color: var(--text-main);
+        }
+        .rel-card:hover .rel-title { color: var(--accent-red); }
 
-        .sidebar-sticky { position: sticky; top: 80px; width: 300px; height: 600px; }
+        .sidebar-sticky {
+            position: sticky;
+            top: 84px;
+            width: 300px;
+            height: 600px;
+        }
+
+        /* 공유 모달 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .share-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+        .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+        .share-act-btn {
+            border: 1px solid #d4d4d8;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .share-act-btn:hover { background: #f4f4f5; }
+        .share-close-btn {
+            background: var(--bg-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 다크 푸터 */
+        .site-footer {
+            background: var(--bg-dark);
+            color: #a1a1aa;
+            padding: 40px 20px;
+            margin-top: 70px;
+            text-align: center;
+            border-top: 3px solid var(--accent-gold);
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-links { font-size: 14px; margin-bottom: 14px; }
+        .footer-links a { color: #e4e4e7; margin: 0 8px; }
+        .footer-links a:hover { color: var(--accent-gold); }
+        .copyright { font-size: 13px; color: #71717a; }
     </style>
 </head>
 <body>
-    
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" />
+                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
-                <a href="/" class="nav-item ">최신뉴스</a>
-                <a href="/category_domestic.html" class="nav-item ">국내신차</a>
-                <a href="/category_global.html" class="nav-item active">글로벌이슈</a>
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
             </nav>
         </div>
     </header>
-    
-    
+
     <div class="post-layout">
         <main class="post-main">
-            <div class="post-cat">글로벌 뉴스 &bull; Motor1</div>
+            <span class="badge-red">글로벌 뉴스</span>
             <h1 class="post-title">붉은 양귀비꽃과 시(詩)를 품은 럭셔리, 벤틀리 '리멤버런스 카'의 숭고한 울림</h1>
             <div class="post-sub">참전용사를 기리는 존 맥크레의 시구와 상징을 담아낸 벤타이가 EWB와 슈퍼스포츠의 특별한 헌정</div>
-            
+
             <div class="post-meta">
-                <span>발행: 2026-11-12 18:45 (KST)</span>
-                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
+                <span>발행: 2026-11-12 18:45 | CARISSUE 편집국</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
             <div class="featured-img-wrap">
@@ -142,17 +341,10 @@
 영국 크루(Crewe)의 유서 깊은 럭셔리 하우스 벤틀리가 가슴 뭉클한 서사를 품은 아주 특별한 에디션을 공개했습니다. 제1차 세계대전 종전일(11월 11일)을 기점으로 전 세계 영연방 국가들이 이어오고 있는 전몰장병 추모(Remembrance)의 전통을 기리기 위해, 벤틀리가 브랜드의 상징적인 모델들을 캔버스 삼아 숭고한 헌정을 완성한 것입니다. 이번에 베일을 벗은 모델들은 단순한 쇼카나 한정판의 범주를 넘어, 시대를 관통하는 역사적 무게와 평화를 향한 염원을 고스란히 담아내며 전 세계 자동차 애호가들의 시선을 단숨에 사로잡았습니다.</h3>
 <h3>벤타이가 EWB와 슈퍼스포츠, 장인정신으로 빚어낸 추모의 예술
 이번 헌정 프로젝트의 주인공은 웅장한 존재감과 안락함을 자랑하는 플래그십 SUV '벤타이가 익스텐디드 휠베이스(EWB)'와 궁극의 퍼포먼스를 상징하는 '슈퍼스포츠(Supersports)' 모델입니다. 차량의 외관과 실내 곳곳에는 제1차 세계대전 당시 전장의 비극과 희생을 노래한 존 맥크레(John McCrae) 중령의 불후의 명시, ‘플랑드르 들판에서(In Flanders Fields)’의 시구가 섬세하게 새겨졌습니다. 여기에 추모의 상징인 붉은 양귀비(Poppy) 꽃 모티프가 벤틀리 장인들의 정교한 붓 터치와 비스포크 디테일로 녹아들어, 최고급 코치빌딩의 기품과 묵직한 감동을 동시에 자아냅니다.</h3>
-
-                    <div class="ad-in-article">
-                        <ins class="adsbygoogle"
-                             style="display:block; text-align:center;"
-                             data-ad-layout="in-article"
-                             data-ad-format="fluid"
-                             data-ad-client="ca-pub-4793184080983542"
-                             data-ad-slot="4181249863"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>사내 참전용사 네트워크 ‘비레디(BeReady)’와의 진정성 있는 협업
 이번 리멤버런스 카가 여타의 스페셜 에디션과 궤를 달리하는 가장 결정적인 이유는 바로 진정성에 있습니다. 단순한 디자인 부서의 아이디어에 그치지 않고, 벤틀리 사내 군 복무 경험자 및 예비역 네트워크인 ‘비레디(BeReady)’와의 긴밀한 협업을 통해 탄생했기 때문입니다. 크루 공장에서 자동차를 빚어내는 실제 참전용사 출신 임직원들의 목소리와 경험이 디자인 전반에 투영되었으며, 이들의 헌신적인 참여 덕분에 차량의 모든 라인과 레터링 하나하나에 타협 없는 진심과 존경의 의미가 깃들 수 있었습니다.</h3>
 <h3>하늘에서 지상으로 이어진 100여 년의 군사 헤리티지
@@ -163,7 +355,7 @@
 
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Motor1 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
@@ -190,19 +382,19 @@
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
-        <a href="/posts/post_1794476833_4.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/cupras-terramar-vz5-is-getting-the-rs3s-epic-five-cylinder/l-intro-1794440841.jpg" alt="아우디 RS3의 심장을 품다… 쿠프라 테라마르 VZ5, 5기통 괴물 SUV의 탄생" loading="lazy"></div>
-            <div class="rel-title">아우디 RS3의 심장을 품다… 쿠프라 테라마르 VZ5, 5기통 괴물 SUV의 탄생</div>
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
         </a>
         
-        <a href="/posts/post_1794476814_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/no-panda-no-problem-fiats-new-argo-x-smooths-out-its-doors/l-intro-1794474707.jpg" alt=""판다는 잊어라"… 피아트, 남미 감성 입힌 도심형 크로스오버 '아르고 X' 공개" loading="lazy"></div>
-            <div class="rel-title">"판다는 잊어라"… 피아트, 남미 감성 입힌 도심형 크로스오버 '아르고 X' 공개</div>
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
         </a>
         
-        <a href="/posts/post_1794476783_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/6ZOV7k/s3/2027-nascar-cup-series-ford-racing-mustang.jpg" alt=""공도에서 오벌 트랙으로 직행하다" 포드, 다크호스의 야성을 품은 2027 나스카 머스탱 공개" loading="lazy"></div>
-            <div class="rel-title">"공도에서 오벌 트랙으로 직행하다" 포드, 다크호스의 야성을 품은 2027 나스카 머스탱 공개</div>
+        <a href="/posts/post_1794526214_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
+            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -232,10 +424,10 @@
         </div>
     </div>
 
-    
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-links">
+                <a href="/about.html">매체소개</a> &bull;
                 <a href="/privacy.html">개인정보처리방침</a> &bull;
                 <a href="/terms.html">이용약관</a> &bull;
                 <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
@@ -243,7 +435,6 @@
             <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
     </footer>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -265,9 +456,7 @@
                 });
             }
             window.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (e.target === modal) modal.style.display = 'none';
             });
 
             document.getElementById('shareX').addEventListener('click', function() {

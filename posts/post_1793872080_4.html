@@ -18,7 +18,7 @@
     "https://www.carscoops.com/img/gallery/mercedes-smart-rear-window-delivers-passive-aggressive-messages-to-the-people-behind-you/intro-1793827844.jpg",
     "https://www.carscoops.com/img/gallery/mercedes-smart-rear-window-delivers-passive-aggressive-messages-to-the-people-behind-you/what-else-is-mercedes-cooking-up-1793827845.jpg"
   ],
-  "datePublished": "2026-11-05T18:48:00.452535+09:00",
+  "datePublished": "2026-11-05",
   "author": [
     {
       "@type": "Organization",
@@ -38,101 +38,300 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
     <style>
-        
-    :root {
-        --primary: #d32f2f;
-        --dark: #121212;
-        --text: #222222;
-        --text-sub: #666666;
-        --border: #e5e5e5;
-        --bg-footer: #f8f8fa;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; height: auto; display: block; }
-    
-    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-    .logo img { height: 38px; width: auto; }
-    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
-    .nav-item:hover, .nav-item.active { color: var(--primary); }
+        :root {
+            --bg-dark: #111215;
+            --accent-red: #e11d48;
+            --accent-gold: #d97706;
+            --text-main: #18181b;
+            --text-body: #27272a;
+            --text-sub: #52525b;
+            --border: #e4e4e7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+            color: var(--text-main);
+            background: #ffffff;
+            line-height: 1.6;
+            letter-spacing: -0.02em;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
 
-    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
-    .footer-inner { max-width: 1200px; margin: 0 auto; }
-    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
-    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-    .copyright { font-size: 13px; color: #888; }
+        /* 다크 매거진 헤더 */
+        .site-header {
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #ffffff;
+        }
+        .logo-text span { color: var(--accent-red); }
+        .main-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-item { color: #e4e4e7; font-size: 15px; font-weight: 700; }
+        .nav-item:hover { color: var(--accent-gold); }
 
-    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
-    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
-    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-    
-        .post-layout { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-        @media(max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .sidebar-wrap { display: none; } }
-        
-        .post-cat { color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .post-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }
-        .post-sub { font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
-        .post-meta { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }
-        .share-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .share-btn:hover { background: #f5f5f5; border-color: #999; }
+        /* 기사 레이아웃 */
+        .post-layout {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 44px;
+        }
+        @media (max-width: 920px) {
+            .post-layout { grid-template-columns: 1fr; }
+            .sidebar-wrap { display: none; }
+        }
 
-        .featured-img-wrap { margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        /* 기사 헤더 타이포그래피 위계 */
+        .badge-red {
+            display: inline-block;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.32;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            word-break: keep-all;
+        }
+        @media (max-width: 600px) {
+            .post-title { font-size: 25px; }
+        }
+        .post-sub {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: #71717a;
+        }
+        .share-btn {
+            background: #f4f4f5;
+            border: 1px solid #d4d4d8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .share-btn:hover { background: #e4e4e7; }
+
+        /* 대표 이미지 */
+        .featured-img-wrap {
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .featured-img-wrap img { width: 100%; height: auto; }
 
-        .post-content { font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }
-        .post-content p { margin-bottom: 22px; word-break: keep-all; }
-        .post-content h3 { font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }
-        .content-img { margin: 30px 0; border-radius: 6px; overflow: hidden; }
+        /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
+        .post-content {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.85;
+            color: var(--text-body);
+            margin-bottom: 40px;
+        }
+        .post-content p {
+            font-size: 17px !important;
+            font-weight: 400 !important;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+        .post-content h3 {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin: 38px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-red);
+            word-break: keep-all;
+        }
+        .content-img {
+            margin: 26px 0 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .content-img img { width: 100%; height: auto; }
 
-        .ad-in-article { margin: 35px 0; text-align: center; }
+        .ad-in-article { margin: 34px 0; text-align: center; }
         .ad-bottom { margin: 40px 0; }
-        .ad-multiplex { margin: 35px 0; }
-        .copyright-notice { font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }
+        .ad-multiplex { margin: 36px 0; }
 
-        .related-wrap { margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }
-        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-        .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+        .copyright-notice {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            background: #fafafa;
+            border: 1px solid #f4f4f5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 36px 0 24px;
+        }
+
+        /* 추천 기사 */
+        .related-wrap {
+            margin-top: 44px;
+            border-top: 2px solid var(--bg-dark);
+            padding-top: 24px;
+        }
+        .related-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .related-grid { grid-template-columns: 1fr; }
+        }
         .rel-card { display: block; }
-        .rel-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }
+        .rel-thumb {
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            margin-bottom: 10px;
+            background: #f4f4f5;
+        }
         .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .rel-title { font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }
+        .rel-title {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.42;
+            color: var(--text-main);
+        }
+        .rel-card:hover .rel-title { color: var(--accent-red); }
 
-        .sidebar-sticky { position: sticky; top: 80px; width: 300px; height: 600px; }
+        .sidebar-sticky {
+            position: sticky;
+            top: 84px;
+            width: 300px;
+            height: 600px;
+        }
+
+        /* 공유 모달 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .share-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+        .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+        .share-act-btn {
+            border: 1px solid #d4d4d8;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .share-act-btn:hover { background: #f4f4f5; }
+        .share-close-btn {
+            background: var(--bg-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 다크 푸터 */
+        .site-footer {
+            background: var(--bg-dark);
+            color: #a1a1aa;
+            padding: 40px 20px;
+            margin-top: 70px;
+            text-align: center;
+            border-top: 3px solid var(--accent-gold);
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-links { font-size: 14px; margin-bottom: 14px; }
+        .footer-links a { color: #e4e4e7; margin: 0 8px; }
+        .footer-links a:hover { color: var(--accent-gold); }
+        .copyright { font-size: 13px; color: #71717a; }
     </style>
 </head>
 <body>
-    
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" />
+                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
-                <a href="/" class="nav-item ">최신뉴스</a>
-                <a href="/category_domestic.html" class="nav-item ">국내신차</a>
-                <a href="/category_global.html" class="nav-item active">글로벌이슈</a>
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
             </nav>
         </div>
     </header>
-    
-    
+
     <div class="post-layout">
         <main class="post-main">
-            <div class="post-cat">글로벌 뉴스 &bull; Carscoops</div>
+            <span class="badge-red">글로벌 뉴스</span>
             <h1 class="post-title">“상향등 끄고, 거리 벌리세요”… 벤츠가 선보인 가장 우아한 ‘뒤차 참교육’</h1>
             <div class="post-sub">미니 LED로 뒤차와 소통하는 ‘스마트 리어 윈도우’부터 앞유리 전체를 덮는 홀로그램 디스플레이까지</div>
-            
+
             <div class="post-meta">
-                <span>발행: 2026-11-05 18:48 (KST)</span>
-                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
+                <span>발행: 2026-11-05 18:48 | CARISSUE 편집국</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
             <div class="featured-img-wrap">
@@ -142,44 +341,33 @@
             <article class="post-content">
                 <h3>범퍼 스티커의 디지털 진화, 벤츠가 구상한 ‘말하는 뒷유리’
 1946년 포레스트 P. 길(Forest P. Gill)이 접착식 종이로 사상 첫 ‘범퍼 스티커’를 발명한 이래, 운전자들은 줄곧 뒤따르는 차량을 향해 끊임없이 무언가를 외쳐왔습니다. “아이가 타고 있어요” 같은 감성적인 문구부터 유머러스한 협박에 이르기까지 그 형태도 다양했죠. 그런데 메르세데스-벤츠가 이 아날로그적 소통 방식을 첨단 디지털 기술로 재해석하려는 움직임을 보이고 있습니다. 리어 윈도우(뒷유리) 자체를 거대한 픽셀 메시지 보드로 변신시키는 기술입니다.</h3>
-
-                    <div class="content-img">
-                        <img src="https://www.carscoops.com/img/gallery/mercedes-smart-rear-window-delivers-passive-aggressive-messages-to-the-people-behind-you/intro-1793827844.jpg" alt="“상향등 끄고, 거리 벌리세요”… 벤츠가 선보인 가장 우아한 ‘뒤차 참교육’" loading="lazy">
-                    </div>
-                    
-<p>벤츠의 구상은 리어 글래스 내부에 초소형 미니 LED를 촘촘히 내장하는 방식입니다. 평상시에는 완전히 투명한 상태를 유지해 운전자의 후방 시야를 전혀 방해하지 않다가, 특정 상황이 발생하면 선명한 그래픽과 텍스트를 점등시켜 뒤차에 직접적인 신호를 보냅니다. </p>
-
-                    <div class="ad-in-article">
-                        <ins class="adsbygoogle"
-                             style="display:block; text-align:center;"
-                             data-ad-layout="in-article"
-                             data-ad-format="fluid"
-                             data-ad-client="ca-pub-4793184080983542"
-                             data-ad-slot="4181249863"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    
+<div class="content-img">
+<img alt="“상향등 끄고, 거리 벌리세요”… 벤츠가 선보인 가장 우아한 ‘뒤차 참교육’" loading="lazy" src="https://www.carscoops.com/img/gallery/mercedes-smart-rear-window-delivers-passive-aggressive-messages-to-the-people-behind-you/intro-1793827844.jpg"/>
+</div>
+<p>벤츠의 구상은 리어 글래스 내부에 초소형 미니 LED를 촘촘히 내장하는 방식입니다. 평상시에는 완전히 투명한 상태를 유지해 운전자의 후방 시야를 전혀 방해하지 않다가, 특정 상황이 발생하면 선명한 그래픽과 텍스트를 점등시켜 뒤차에 직접적인 신호를 보냅니다.</p>
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>“눈뽕 금지, 차간거리 유지”… 품격 있지만 뼈 때리는 경고
 그렇다면 벤츠의 뒷유리는 뒤차에 어떤 말을 건넬까요? 브랜드의 품격에 걸맞게 저속한 욕설이나 노골적인 비난 대신, 철저히 안전에 초점을 맞춘 지극히 ‘정중하면서도 뼈를 때리는’ 메시지들로 채워집니다.</h3>
-
-                    <div class="content-img">
-                        <img src="https://www.carscoops.com/img/gallery/mercedes-smart-rear-window-delivers-passive-aggressive-messages-to-the-people-behind-you/what-else-is-mercedes-cooking-up-1793827845.jpg" alt="“상향등 끄고, 거리 벌리세요”… 벤츠가 선보인 가장 우아한 ‘뒤차 참교육’" loading="lazy">
-                    </div>
-                    
-<p>야간에 뒤차가 눈이 멀 정도로 상향등(하이빔)을 켜고 달려온다면, 커다란 붉은색 취소선이 그어진 헤드라이트 그래픽을 띄워 상향등을 끄라고 요구합니다. 뒤차가 차간거리를 지키지 않고 범퍼에 바짝 따라붙는 테일게이팅(Tailgating) 상황에서는 “Keep Distance(안전거리 유지)”라는 메시지를 차분하게 출력해 물러서라는 무언의 압박을 전하죠. 이 밖에도 전방 보행자 횡단 안내, 전방 사고 경고, 혹은 주차 공간으로의 후진 진입 신호 등 도로 위의 다양한 변수를 후방 차량에 실시간으로 브리핑할 수 있습니다. </p>
+<div class="content-img">
+<img alt="“상향등 끄고, 거리 벌리세요”… 벤츠가 선보인 가장 우아한 ‘뒤차 참교육’" loading="lazy" src="https://www.carscoops.com/img/gallery/mercedes-smart-rear-window-delivers-passive-aggressive-messages-to-the-people-behind-you/what-else-is-mercedes-cooking-up-1793827845.jpg"/>
+</div>
+<p>야간에 뒤차가 눈이 멀 정도로 상향등(하이빔)을 켜고 달려온다면, 커다란 붉은색 취소선이 그어진 헤드라이트 그래픽을 띄워 상향등을 끄라고 요구합니다. 뒤차가 차간거리를 지키지 않고 범퍼에 바짝 따라붙는 테일게이팅(Tailgating) 상황에서는 “Keep Distance(안전거리 유지)”라는 메시지를 차분하게 출력해 물러서라는 무언의 압박을 전하죠. 이 밖에도 전방 보행자 횡단 안내, 전방 사고 경고, 혹은 주차 공간으로의 후진 진입 신호 등 도로 위의 다양한 변수를 후방 차량에 실시간으로 브리핑할 수 있습니다.</p>
 <p>현재로서는 벤츠가 사전에 공식 승인한 정형화된 메시지만 출력할 수 있도록 제한될 가능성이 큽니다. 만약 운전자가 자유롭게 텍스트를 입력할 수 있다면 도로 위가 순식간에 난장판이 될 것이 자명하기 때문입니다. 물론, 기술이 상용화되고 나면 수완 좋은 해커들이 시스템을 뚫고 뒤따르는 경쟁사 차량에 도발적인 문구를 띄우는 진풍경이 벌어질지도 모를 일입니다.</p>
 <h3>윈드실드 전체가 스크린으로… 홀로그래픽 광학 소자(HOE)의 마법
 벤츠의 ‘유리창 디스플레이’ 야심은 리어 윈도우에 머물지 않습니다. 엔지니어들은 차량의 측면 유리는 물론 앞유리(윈드실드) 전체를 거대한 커뮤니케이션 면으로 탈바꿈시키는 차세대 기술을 동시에 개발하고 있습니다. 헤드업 디스플레이(HUD)가 등장한 지 20여 년이 흘렀지만, 벤츠는 운전자 앞 좁은 영역에 갇혀 있던 그래픽을 앞유리 전체로 확장하겠다는 계획입니다.</h3>
 <p>작동 원리는 정교합니다. 대시보드 상단에 숨겨진 프로젝터가 위쪽으로 콘텐츠를 투사하면, 유리 사이에 샌드위치처럼 라미네이팅된 특수 투명 필름이 ‘홀로그래픽 광학 소자(HOE, Holographic Optical Elements)’를 통해 특정 파장의 빛만 굴절·반사해 선명한 상을 맺히게 합니다. 지난해 현대차그룹 등 유수의 완성차 업체들도 유사한 차세대 디스플레이 콘셉트를 제시한 바 있죠. 이 방식은 빛을 고도로 집속하기 때문에 대낮의 강렬한 직사광선 아래에서도 화면이 흐려지지 않는 뛰어난 시인성을 자랑합니다.</p>
 <h3>운전 방해 없는 엔터테인먼트, 그리고 미래 자동차 커머스의 청사진
 더욱 흥미로운 점은 지능적인 시야각 제어 기술입니다. 조수석 유리창에 투사되는 영상은 운전석 쪽에서는 철저히 보이지 않도록 차단됩니다. 이는 곧 주행 중에도 동승자가 앞유리를 통해 영화나 OTT 시리즈를 마음껏 감상할 수 있음을 의미합니다. 최근 프리미엄 브랜드들이 대시보드 조수석에 고가의 전용 스크린을 잇달아 탑재하고 있지만 실사용률이 떨어진다는 지적이 많았던 만큼, 이 새로운 투사형 디스플레이가 훨씬 자연스럽고 몰입감 높은 대안이 될 수 있습니다.</h3>
-<p>벤츠는 엔터테인먼트 외에도 주행 중 화상 회의를 진행하거나 경로 상의 주요 명소(POI, Point of Interest)를 증강현실로 안내하는 등 무궁무진한 확장성을 예고했습니다. 윈드실드 위에 인근 유명 레스토랑, 호텔, 관광지 정보가 직관적으로 오버레이되고, 기업들이 차량 내 광고 스폰서로 참여하는 새로운 모빌리티 커머스 생태계까지 내다보고 있는 것입니다. </p>
+<p>벤츠는 엔터테인먼트 외에도 주행 중 화상 회의를 진행하거나 경로 상의 주요 명소(POI, Point of Interest)를 증강현실로 안내하는 등 무궁무진한 확장성을 예고했습니다. 윈드실드 위에 인근 유명 레스토랑, 호텔, 관광지 정보가 직관적으로 오버레이되고, 기업들이 차량 내 광고 스폰서로 참여하는 새로운 모빌리티 커머스 생태계까지 내다보고 있는 것입니다.</p>
 <p>메르세데스-벤츠는 아직 구체적인 양산 시점을 밝히지 않았지만, 콘셉트 수준을 넘어 실제 구현 기술을 적극적으로 공개하고 있는 만큼 2020년대 후반이면 도로 위에서 이 ‘말하는 창문’들을 마주하게 될 가능성이 높습니다. 뒤차의 무례한 운전에 우아한 디지털 경고를 날릴 날이 머지않았습니다.</p>
             </article>
 
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Carscoops 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
@@ -206,19 +394,19 @@
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
-        <a href="/posts/post_1793872050_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/chinas-buick-electra-gs-is-a-stylish-hybrid-america-cant-have/l-intro-1793832542.jpg" alt=""미국엔 없는 그림의 떡"… 뷰익, 매혹적인 PHEV 세단 '일렉트라 GS' 깜짝 공개" loading="lazy"></div>
-            <div class="rel-title">"미국엔 없는 그림의 떡"… 뷰익, 매혹적인 PHEV 세단 '일렉트라 GS' 깜짝 공개</div>
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
         </a>
         
-        <a href="/posts/post_1793872029_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/bgO7Pk/s3/sherp-amphibious-off-road-vehicle-in-saskatchewan.jpg" alt="세상 모든 험로를 비웃는 괴물, 수륙양용 오프로더 '셰르프(Sherp)'의 극한 질주" loading="lazy"></div>
-            <div class="rel-title">세상 모든 험로를 비웃는 괴물, 수륙양용 오프로더 '셰르프(Sherp)'의 극한 질주</div>
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
         </a>
         
-        <a href="/posts/post_1793872004_1.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/P3VNBK/s3/kia-pv5-weekender-camper-van-by-kombi-life.jpg" alt=""스프린터는 잊어라"… 작고 완벽한 기아 전기 캠퍼밴의 등장" loading="lazy"></div>
-            <div class="rel-title">"스프린터는 잊어라"… 작고 완벽한 기아 전기 캠퍼밴의 등장</div>
+        <a href="/posts/post_1794526214_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
+            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -248,10 +436,10 @@
         </div>
     </div>
 
-    
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-links">
+                <a href="/about.html">매체소개</a> &bull;
                 <a href="/privacy.html">개인정보처리방침</a> &bull;
                 <a href="/terms.html">이용약관</a> &bull;
                 <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
@@ -259,7 +447,6 @@
             <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
     </footer>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -281,9 +468,7 @@
                 });
             }
             window.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (e.target === modal) modal.style.display = 'none';
             });
 
             document.getElementById('shareX').addEventListener('click', function() {

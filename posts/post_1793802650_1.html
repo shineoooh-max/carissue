@@ -16,7 +16,7 @@
   "image": [
     "https://cdn.motor1.com/images/mgl/RqKWRe/s3/mercedes-benz-glc-ev-illuminated-grille.jpg"
   ],
-  "datePublished": "2026-11-04T23:30:50.796450+09:00",
+  "datePublished": "2026-11-04",
   "author": [
     {
       "@type": "Organization",
@@ -36,103 +36,300 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
     <style>
-        
-    :root {
-        --primary: #d32f2f;
-        --dark: #121212;
-        --text: #222222;
-        --text-sub: #666666;
-        --border: #e5e5e5;
-        --bg-footer: #f8f8fa;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; height: auto; display: block; }
-    
-    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-    .logo img { height: 38px; width: auto; }
-    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
-    .nav-item:hover, .nav-item.active { color: var(--primary); }
+        :root {
+            --bg-dark: #111215;
+            --accent-red: #e11d48;
+            --accent-gold: #d97706;
+            --text-main: #18181b;
+            --text-body: #27272a;
+            --text-sub: #52525b;
+            --border: #e4e4e7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+            color: var(--text-main);
+            background: #ffffff;
+            line-height: 1.6;
+            letter-spacing: -0.02em;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
 
-    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
-    .footer-inner { max-width: 1200px; margin: 0 auto; }
-    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
-    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-    .copyright { font-size: 13px; color: #888; }
+        /* 다크 매거진 헤더 */
+        .site-header {
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #ffffff;
+        }
+        .logo-text span { color: var(--accent-red); }
+        .main-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-item { color: #e4e4e7; font-size: 15px; font-weight: 700; }
+        .nav-item:hover { color: var(--accent-gold); }
 
-    /* 공유 모달 */
-    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
-    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
-    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-    
-        .post-layout { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-        @media(max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .sidebar-wrap { display: none; } }
-        
-        .post-cat { color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .post-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }
-        .post-sub { font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
-        .post-meta { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }
-        .share-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .share-btn:hover { background: #f5f5f5; border-color: #999; }
+        /* 기사 레이아웃 */
+        .post-layout {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 44px;
+        }
+        @media (max-width: 920px) {
+            .post-layout { grid-template-columns: 1fr; }
+            .sidebar-wrap { display: none; }
+        }
 
-        .featured-img-wrap { margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        /* 기사 헤더 타이포그래피 위계 */
+        .badge-red {
+            display: inline-block;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.32;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            word-break: keep-all;
+        }
+        @media (max-width: 600px) {
+            .post-title { font-size: 25px; }
+        }
+        .post-sub {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: #71717a;
+        }
+        .share-btn {
+            background: #f4f4f5;
+            border: 1px solid #d4d4d8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .share-btn:hover { background: #e4e4e7; }
+
+        /* 대표 이미지 */
+        .featured-img-wrap {
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .featured-img-wrap img { width: 100%; height: auto; }
 
-        .post-content { font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }
-        .post-content p { margin-bottom: 22px; word-break: keep-all; }
-        .post-content h3 { font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }
-        .content-img { margin: 30px 0; border-radius: 6px; overflow: hidden; }
+        /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
+        .post-content {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.85;
+            color: var(--text-body);
+            margin-bottom: 40px;
+        }
+        .post-content p {
+            font-size: 17px !important;
+            font-weight: 400 !important;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+        .post-content h3 {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin: 38px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-red);
+            word-break: keep-all;
+        }
+        .content-img {
+            margin: 26px 0 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .content-img img { width: 100%; height: auto; }
 
-        .ad-in-article { margin: 35px 0; text-align: center; }
+        .ad-in-article { margin: 34px 0; text-align: center; }
         .ad-bottom { margin: 40px 0; }
-        .ad-multiplex { margin: 35px 0; }
+        .ad-multiplex { margin: 36px 0; }
 
-        .copyright-notice { font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }
+        .copyright-notice {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            background: #fafafa;
+            border: 1px solid #f4f4f5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 36px 0 24px;
+        }
 
-        .related-wrap { margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }
-        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-        .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+        /* 추천 기사 */
+        .related-wrap {
+            margin-top: 44px;
+            border-top: 2px solid var(--bg-dark);
+            padding-top: 24px;
+        }
+        .related-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .related-grid { grid-template-columns: 1fr; }
+        }
         .rel-card { display: block; }
-        .rel-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }
+        .rel-thumb {
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            margin-bottom: 10px;
+            background: #f4f4f5;
+        }
         .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .rel-title { font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }
+        .rel-title {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.42;
+            color: var(--text-main);
+        }
+        .rel-card:hover .rel-title { color: var(--accent-red); }
 
-        .sidebar-sticky { position: sticky; top: 80px; width: 300px; height: 600px; }
+        .sidebar-sticky {
+            position: sticky;
+            top: 84px;
+            width: 300px;
+            height: 600px;
+        }
+
+        /* 공유 모달 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .share-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+        .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+        .share-act-btn {
+            border: 1px solid #d4d4d8;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .share-act-btn:hover { background: #f4f4f5; }
+        .share-close-btn {
+            background: var(--bg-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 다크 푸터 */
+        .site-footer {
+            background: var(--bg-dark);
+            color: #a1a1aa;
+            padding: 40px 20px;
+            margin-top: 70px;
+            text-align: center;
+            border-top: 3px solid var(--accent-gold);
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-links { font-size: 14px; margin-bottom: 14px; }
+        .footer-links a { color: #e4e4e7; margin: 0 8px; }
+        .footer-links a:hover { color: var(--accent-gold); }
+        .copyright { font-size: 13px; color: #71717a; }
     </style>
 </head>
 <body>
-    
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" />
+                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
-                <a href="/" class="nav-item ">최신뉴스</a>
-                <a href="/category_domestic.html" class="nav-item ">국내신차</a>
-                <a href="/category_global.html" class="nav-item active">글로벌이슈</a>
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
             </nav>
         </div>
     </header>
-    
-    
+
     <div class="post-layout">
         <main class="post-main">
-            <div class="post-cat">글로벌 뉴스 &bull; Motor1</div>
+            <span class="badge-red">글로벌 뉴스</span>
             <h1 class="post-title">메르세데스-벤츠, 베스트셀러 ‘GLC’ 美 현지 생산 2030년으로 전격 연기… 관세 부담 장기화 불가피</h1>
             <div class="post-sub">2027년 목표였던 앨라배마 공장 양산 3년 유예, 전동화 속도 조절과 글로벌 공급망 셈법이 낳은 파장</div>
-            
+
             <div class="post-meta">
-                <span>발행: 2026-11-04 23:30 (KST)</span>
-                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
+                <span>발행: 2026-11-04 23:30 | CARISSUE 편집국</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
             <div class="featured-img-wrap">
@@ -144,17 +341,10 @@
 메르세데스-벤츠의 글로벌 볼륨을 견인하는 핵심 기둥이자 중형 럭셔리 SUV 세그먼트의 절대강자인 ‘GLC’의 미국 현지 생산 계획이 전격 연기됐다. 당초 벤츠는 오는 2027년부터 미국 앨라배마주 밴스(Vance) 공장에서 차세대 GLC의 조립을 시작할 예정이었으나, 이를 3년 뒤인 2030년 5월로 대폭 늦추기로 결정했다. 브랜드 내에서 가장 높은 판매고를 올리는 핵심 차종의 현지화가 돌연 미뤄지면서, 글로벌 완성차 업계는 물론 북미 시장 공략 로드맵 전반에 적잖은 파장이 일고 있다.</h3>
 <h3>발목 잡힌 수입 관세 리스크, 흔들리는 수익성 방어선
 이번 결정의 가장 뼈아픈 대목은 지속적인 ‘관세 리스크’ 노출이다. 미국은 거대한 프리미엄 SUV 수요를 자랑하는 최대 격전지이지만, 현지 생산이 불발됨에 따라 벤츠는 향후 수년간 독일 브레멘 등 유럽 공장에서 전량 수입해 판매하는 구조를 이어가야 한다. 이는 운송비 상승과 환율 변동성뿐만 아니라, 통상 압박에 따른 수입 관세 부담을 고스란히 떠안아야 함을 의미한다. 현지 생산을 통해 원가 경쟁력을 극대화하고 마진율을 끌어올리려던 벤츠의 수익성 방어 전략에 상당한 균열이 불가피해졌다.</h3>
-
-                    <div class="ad-in-article">
-                        <ins class="adsbygoogle"
-                             style="display:block; text-align:center;"
-                             data-ad-layout="in-article"
-                             data-ad-format="fluid"
-                             data-ad-client="ca-pub-4793184080983542"
-                             data-ad-slot="4181249863"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>전기차 캐즘과 내연기관의 공존, 꼬여버린 공장 로드맵
 업계에서는 이번 연기 결정의 배경으로 ‘전동화 전환 속도 조절’을 지목한다. 앨라배마 밴스 공장은 벤츠의 대형 전기 SUV인 EQS SUV와 EQE SUV를 생산하며 전동화 전진기지 역할을 맡아왔다. 그러나 최근 글로벌 전기차 수요 둔화(캐즘)가 본격화되면서, 벤츠는 100% 전동화 전환 목표를 전면 수정하고 내연기관 및 플러그인 하이브리드(PHEV) 라인업의 수명을 연장하는 결단을 내렸다. 이 과정에서 한정된 공장 설비의 라인 재편, 플랫폼 통합 투자, 내연기관과 순수 전기차 혼류 생산에 대한 우선순위가 뒤바뀌며 GLC 투입 시점이 뒤로 밀린 것으로 분석된다.</h3>
 <h3>글로벌 수급망의 나비효과… 한국 시장에 미칠 영향은?
@@ -163,14 +353,12 @@
 수익성의 상징인 베스트셀링 모델의 현지 생산을 3년이나 늦춘 것은 메르세데스-벤츠 입장에서도 뼈를 깎는 선택이다. 관세 지출을 감수하면서까지 공장 라인 전환을 미룬 것은 그만큼 현재 완성차 시장을 둘러싼 파워트레인 전환기가 혼란스럽다는 방증이기도 하다. 막대한 관세 부담을 안은 채 2030년까지 북미 시장의 수익성을 어떻게 방어해낼지, 그리고 이 결정이 글로벌 공급망 전체의 밸런스에 어떤 연쇄 반응을 일으킬지 올라 칼레니우스 회장이 이끄는 삼각별의 위기관리 능력이 시험대에 올랐다.</h3>
             </article>
 
-            <!-- 본문 최하단 저작권 및 출처 주석 -->
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Motor1 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
-            <!-- 구글 애드센스 하단 디스플레이 -->
             <div class="ad-bottom">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -181,7 +369,6 @@
                 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
 
-            <!-- 구글 애드센스 멀티플렉스 (일치하는 콘텐츠) -->
             <div class="ad-multiplex">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -195,19 +382,19 @@
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
-        <a href="/posts/post_1793802624_0.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/xqnGWz/s3/aryton-senna-s-honda-nsx.jpg" alt=""신화가 남긴 붉은 불꽃"… 아일톤 세나의 1991년식 혼다 NSX, 23억 원 경매 최고가 경신" loading="lazy"></div>
-            <div class="rel-title">"신화가 남긴 붉은 불꽃"… 아일톤 세나의 1991년식 혼다 NSX, 23억 원 경매 최고가 경신</div>
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
         </a>
         
-        <a href="/posts/post_1793802683_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/0ep8o9/s3/eneos-porsche-911-v8-conversions-for-sema.jpg" alt=""포르쉐 수평대향의 신화는 잊어라"… SEMA에서 마주한 두 대의 911 V8 스왑 괴물들" loading="lazy"></div>
-            <div class="rel-title">"포르쉐 수평대향의 신화는 잊어라"… SEMA에서 마주한 두 대의 911 V8 스왑 괴물들</div>
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
         </a>
         
-        <a href="/posts/post_1793802717_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/this-tacoma-based-lexus-pickup-makes-a-strong-case-for-an-official-luxury-truck/l-intro-1793800120.jpg" alt=""렉서스가 만들지 않으니 직접 만들었다"… 신형 GX의 얼굴을 품은 럭셔리 픽업 '렉서스 TX1'" loading="lazy"></div>
-            <div class="rel-title">"렉서스가 만들지 않으니 직접 만들었다"… 신형 GX의 얼굴을 품은 럭셔리 픽업 '렉서스 TX1'</div>
+        <a href="/posts/post_1794526214_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
+            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -216,7 +403,6 @@
 
         <aside class="sidebar-wrap">
             <div class="sidebar-sticky">
-                <!-- 우측 고정 사이드바 300x600 -->
                 <ins class="adsbygoogle"
                      style="display:inline-block;width:300px;height:600px"
                      data-ad-client="ca-pub-4793184080983542"
@@ -226,7 +412,6 @@
         </aside>
     </div>
 
-    <!-- 공유 모달 팝업 -->
     <div id="shareModal" class="share-modal">
         <div class="share-modal-content">
             <div class="share-title">기사 공유하기</div>
@@ -239,10 +424,10 @@
         </div>
     </div>
 
-    
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-links">
+                <a href="/about.html">매체소개</a> &bull;
                 <a href="/privacy.html">개인정보처리방침</a> &bull;
                 <a href="/terms.html">이용약관</a> &bull;
                 <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
@@ -250,7 +435,6 @@
             <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
     </footer>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -266,27 +450,21 @@
                     modal.style.display = 'flex';
                 });
             }
-
             if (closeBtn && modal) {
                 closeBtn.addEventListener('click', function() {
                     modal.style.display = 'none';
                 });
             }
-
             window.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (e.target === modal) modal.style.display = 'none';
             });
 
             document.getElementById('shareX').addEventListener('click', function() {
                 window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(pageTitle) + '&url=' + encodeURIComponent(pageUrl), '_blank');
             });
-
             document.getElementById('shareFB').addEventListener('click', function() {
                 window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl), '_blank');
             });
-
             document.getElementById('copyUrl').addEventListener('click', function() {
                 navigator.clipboard.writeText(pageUrl).then(function() {
                     alert('기사 주소가 클립보드에 복사되었습니다.');

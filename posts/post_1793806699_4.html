@@ -16,7 +16,7 @@
   "image": [
     "https://cdn.autoherald.co.kr/news/photo/202611/62080_119907_203.jpg"
   ],
-  "datePublished": "2026-11-05T00:38:19.627311+09:00",
+  "datePublished": "2026-11-05",
   "author": [
     {
       "@type": "Organization",
@@ -36,101 +36,300 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
     <style>
-        
-    :root {
-        --primary: #d32f2f;
-        --dark: #121212;
-        --text: #222222;
-        --text-sub: #666666;
-        --border: #e5e5e5;
-        --bg-footer: #f8f8fa;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; height: auto; display: block; }
-    
-    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-    .logo img { height: 38px; width: auto; }
-    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
-    .nav-item:hover, .nav-item.active { color: var(--primary); }
+        :root {
+            --bg-dark: #111215;
+            --accent-red: #e11d48;
+            --accent-gold: #d97706;
+            --text-main: #18181b;
+            --text-body: #27272a;
+            --text-sub: #52525b;
+            --border: #e4e4e7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+            color: var(--text-main);
+            background: #ffffff;
+            line-height: 1.6;
+            letter-spacing: -0.02em;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
 
-    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
-    .footer-inner { max-width: 1200px; margin: 0 auto; }
-    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
-    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-    .copyright { font-size: 13px; color: #888; }
+        /* 다크 매거진 헤더 */
+        .site-header {
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #ffffff;
+        }
+        .logo-text span { color: var(--accent-red); }
+        .main-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-item { color: #e4e4e7; font-size: 15px; font-weight: 700; }
+        .nav-item:hover { color: var(--accent-gold); }
 
-    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
-    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
-    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-    
-        .post-layout { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-        @media(max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .sidebar-wrap { display: none; } }
-        
-        .post-cat { color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .post-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }
-        .post-sub { font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
-        .post-meta { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }
-        .share-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .share-btn:hover { background: #f5f5f5; border-color: #999; }
+        /* 기사 레이아웃 */
+        .post-layout {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 44px;
+        }
+        @media (max-width: 920px) {
+            .post-layout { grid-template-columns: 1fr; }
+            .sidebar-wrap { display: none; }
+        }
 
-        .featured-img-wrap { margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        /* 기사 헤더 타이포그래피 위계 */
+        .badge-red {
+            display: inline-block;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.32;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            word-break: keep-all;
+        }
+        @media (max-width: 600px) {
+            .post-title { font-size: 25px; }
+        }
+        .post-sub {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: #71717a;
+        }
+        .share-btn {
+            background: #f4f4f5;
+            border: 1px solid #d4d4d8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .share-btn:hover { background: #e4e4e7; }
+
+        /* 대표 이미지 */
+        .featured-img-wrap {
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .featured-img-wrap img { width: 100%; height: auto; }
 
-        .post-content { font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }
-        .post-content p { margin-bottom: 22px; word-break: keep-all; }
-        .post-content h3 { font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }
-        .content-img { margin: 30px 0; border-radius: 6px; overflow: hidden; }
+        /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
+        .post-content {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.85;
+            color: var(--text-body);
+            margin-bottom: 40px;
+        }
+        .post-content p {
+            font-size: 17px !important;
+            font-weight: 400 !important;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+        .post-content h3 {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin: 38px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-red);
+            word-break: keep-all;
+        }
+        .content-img {
+            margin: 26px 0 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .content-img img { width: 100%; height: auto; }
 
-        .ad-in-article { margin: 35px 0; text-align: center; }
+        .ad-in-article { margin: 34px 0; text-align: center; }
         .ad-bottom { margin: 40px 0; }
-        .ad-multiplex { margin: 35px 0; }
-        .copyright-notice { font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }
+        .ad-multiplex { margin: 36px 0; }
 
-        .related-wrap { margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }
-        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-        .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+        .copyright-notice {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            background: #fafafa;
+            border: 1px solid #f4f4f5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 36px 0 24px;
+        }
+
+        /* 추천 기사 */
+        .related-wrap {
+            margin-top: 44px;
+            border-top: 2px solid var(--bg-dark);
+            padding-top: 24px;
+        }
+        .related-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .related-grid { grid-template-columns: 1fr; }
+        }
         .rel-card { display: block; }
-        .rel-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }
+        .rel-thumb {
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            margin-bottom: 10px;
+            background: #f4f4f5;
+        }
         .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .rel-title { font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }
+        .rel-title {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.42;
+            color: var(--text-main);
+        }
+        .rel-card:hover .rel-title { color: var(--accent-red); }
 
-        .sidebar-sticky { position: sticky; top: 80px; width: 300px; height: 600px; }
+        .sidebar-sticky {
+            position: sticky;
+            top: 84px;
+            width: 300px;
+            height: 600px;
+        }
+
+        /* 공유 모달 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .share-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+        .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+        .share-act-btn {
+            border: 1px solid #d4d4d8;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .share-act-btn:hover { background: #f4f4f5; }
+        .share-close-btn {
+            background: var(--bg-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 다크 푸터 */
+        .site-footer {
+            background: var(--bg-dark);
+            color: #a1a1aa;
+            padding: 40px 20px;
+            margin-top: 70px;
+            text-align: center;
+            border-top: 3px solid var(--accent-gold);
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-links { font-size: 14px; margin-bottom: 14px; }
+        .footer-links a { color: #e4e4e7; margin: 0 8px; }
+        .footer-links a:hover { color: var(--accent-gold); }
+        .copyright { font-size: 13px; color: #71717a; }
     </style>
 </head>
 <body>
-    
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" />
+                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
-                <a href="/" class="nav-item ">최신뉴스</a>
-                <a href="/category_domestic.html" class="nav-item active">국내신차</a>
-                <a href="/category_global.html" class="nav-item ">글로벌이슈</a>
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
             </nav>
         </div>
     </header>
-    
-    
+
     <div class="post-layout">
         <main class="post-main">
-            <div class="post-cat">국내 뉴스 &bull; 오토헤럴드</div>
+            <span class="badge-red">국내 이슈</span>
             <h1 class="post-title">"2만 5천 유로의 기적"… 폭스바겐 'ID. 폴로', 독일 올해의 차 '경제형 1위' 등극</h1>
             <div class="post-sub">르노 등 7개 라이벌 제압… 헤리티지 품은 MEB+ 플랫폼과 뛰어난 실용성으로 유럽을 홀리다</div>
-            
+
             <div class="post-meta">
-                <span>발행: 2026-11-05 00:38 (KST)</span>
-                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
+                <span>발행: 2026-11-05 00:38 | CARISSUE 편집국</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
             <div class="featured-img-wrap">
@@ -142,17 +341,10 @@
 폭스바겐이 전동화 시대의 진정한 '엔트리 게임체인저'를 완성해냈다. 폭스바겐의 새로운 순수 전기 소형 해치백 ‘ID. 폴로(ID. Polo)’가 권위 있는 ‘2027 독일 올해의 차(German Car of the Year, GCOTY)’ 경제형 자동차(Budget) 부문에서 당당히 1위에 올랐다. 글로벌 및 독일 자동차 전문기자 47명으로 구성된 독립 심사위원단이 최근 1년간 출시된 신차를 대상으로 디자인, 주행 성능, 안전성, 실용성, 혁신성 등을 엄격히 심사한 결과다. 특히 이번 수상은 독일 현지 기준 2만 5,000유로(약 3,700만 원) 미만의 쟁쟁한 엔트리 신차들이 맞붙은 가운데, 르노의 대표 주자인 트윙고와 클리오를 포함한 7개 경쟁 모델을 압도하며 따낸 성과라는 점에서 그 의미가 더욱 남다르다.</h3>
 <h3>2,000만 대 헤리티지와 전동화의 영리한 결합
 ID. 폴로는 전 세계 누적 2,000만 대 이상 판매되며 폭스바겐의 든든한 허리 역할을 해온 소형차 '폴로'의 유서 깊은 DNA를 그대로 계승했다. ‘IAA 모빌리티 2025’에서 프로토타입으로 첫선을 보인 이래, 내연기관 시절의 상징적인 차명을 순수 전기차 라인업인 ‘ID. 패밀리’에 이식하는 폭스바겐의 새로운 네이밍 전략이 최초로 적용된 모델이기도 하다. 올해 4월 양산형이 세계 최초로 공개된 후 독일 현지 사전 판매에 돌입하자마자 시장의 뜨거운 관심을 한 몸에 받았으며, 반세기에 걸친 '국민 해치백'의 신뢰도가 전동화 파워트레인과 결합해 완벽한 시너지를 냈다는 평가를 이끌어냈다.</h3>
-
-                    <div class="ad-in-article">
-                        <ins class="adsbygoogle"
-                             style="display:block; text-align:center;"
-                             data-ad-layout="in-article"
-                             data-ad-format="fluid"
-                             data-ad-client="ca-pub-4793184080983542"
-                             data-ad-slot="4181249863"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>5개 핵심 평가 항목 중 4개 1위, 감성과 이성을 모두 홀리다
 심사위원단의 채점표는 ID. 폴로의 완성도가 단순히 '저렴한 가격'에만 머물지 않음을 명백히 보여준다. ID. 폴로는 5개 핵심 평가 항목 중 무려 4개 부문에서 경쟁 모델을 제치고 최고점을 획득했다. ‘디자인 및 운전의 즐거움’ 부문에서 만점 대비 85.8%라는 압도적인 수치를 기록한 것을 비롯해, ‘안전 및 환경’(84.2%), ‘중요성 및 혁신’(83.8%), ‘편안함 및 실용성’(82.0%) 등 자동차의 본질을 묻는 전 영역에서 고르게 최상위 점수를 휩쓸었다. 여기에 전 차급을 대상으로 한 디자인 특별 평가에서도 ‘최고의 실내 디자인’ 2위, ‘최고의 외관 디자인’ 3위에 오르며 보급형 모델의 한계를 뛰어넘는 미학적 완성도까지 입증했다.</h3>
 <h3>'기본기'로 회귀한 실내와 MEB+ 플랫폼의 공간 마법
@@ -163,7 +355,7 @@ ID. 폴로의 독일 현지 판매 시작 가격은 2만 4,995유로부터 시�
 
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(오토헤럴드 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
@@ -190,19 +382,19 @@ ID. 폴로의 독일 현지 판매 시작 가격은 2만 4,995유로부터 시�
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
-        <a href="/posts/post_1793806670_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/photo/202611/62085_119925_3557.jpeg" alt="마이바흐를 정조준하다… BMW 7시리즈의 품격을 뛰어넘을 ‘차세대 알피나’의 서막" loading="lazy"></div>
-            <div class="rel-title">마이바흐를 정조준하다… BMW 7시리즈의 품격을 뛰어넘을 ‘차세대 알피나’의 서막</div>
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
         </a>
         
-        <a href="/posts/post_1793806644_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/photo/202611/62088_119929_5136.jpg" alt="하이브리드 날개 달고 美 질주… 현대차·기아, 10월 15만 대 돌파 ‘역대 최고 기록’" loading="lazy"></div>
-            <div class="rel-title">하이브리드 날개 달고 美 질주… 현대차·기아, 10월 15만 대 돌파 ‘역대 최고 기록’</div>
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
         </a>
         
-        <a href="/posts/post_1793806616_1.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/photo/202611/62087_119931_5926.jpg" alt="'철옹성' 독일 빅3마저 휘청… BMW 실적 하향이 던진 묵직한 경고장" loading="lazy"></div>
-            <div class="rel-title">'철옹성' 독일 빅3마저 휘청… BMW 실적 하향이 던진 묵직한 경고장</div>
+        <a href="/posts/post_1794526214_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
+            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -232,10 +424,10 @@ ID. 폴로의 독일 현지 판매 시작 가격은 2만 4,995유로부터 시�
         </div>
     </div>
 
-    
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-links">
+                <a href="/about.html">매체소개</a> &bull;
                 <a href="/privacy.html">개인정보처리방침</a> &bull;
                 <a href="/terms.html">이용약관</a> &bull;
                 <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
@@ -243,7 +435,6 @@ ID. 폴로의 독일 현지 판매 시작 가격은 2만 4,995유로부터 시�
             <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
     </footer>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -265,9 +456,7 @@ ID. 폴로의 독일 현지 판매 시작 가격은 2만 4,995유로부터 시�
                 });
             }
             window.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (e.target === modal) modal.style.display = 'none';
             });
 
             document.getElementById('shareX').addEventListener('click', function() {

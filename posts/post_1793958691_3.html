@@ -18,7 +18,7 @@
     "https://www.carscoops.com/img/gallery/hondas-new-suv-brings-fresh-styling-and-next-gen-hybrid-tech/intro-1793950951.jpg",
     "https://www.carscoops.com/img/gallery/hondas-new-suv-brings-fresh-styling-and-next-gen-hybrid-tech/debuting-the-new-honda-hybrid-powertrain-1793950952.jpg"
   ],
-  "datePublished": "2026-11-06T18:51:31.348378+09:00",
+  "datePublished": "2026-11-06",
   "author": [
     {
       "@type": "Organization",
@@ -38,101 +38,300 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
     <style>
-        
-    :root {
-        --primary: #d32f2f;
-        --dark: #121212;
-        --text: #222222;
-        --text-sub: #666666;
-        --border: #e5e5e5;
-        --bg-footer: #f8f8fa;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; height: auto; display: block; }
-    
-    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-    .logo img { height: 38px; width: auto; }
-    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
-    .nav-item:hover, .nav-item.active { color: var(--primary); }
+        :root {
+            --bg-dark: #111215;
+            --accent-red: #e11d48;
+            --accent-gold: #d97706;
+            --text-main: #18181b;
+            --text-body: #27272a;
+            --text-sub: #52525b;
+            --border: #e4e4e7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+            color: var(--text-main);
+            background: #ffffff;
+            line-height: 1.6;
+            letter-spacing: -0.02em;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
 
-    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
-    .footer-inner { max-width: 1200px; margin: 0 auto; }
-    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
-    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-    .copyright { font-size: 13px; color: #888; }
+        /* 다크 매거진 헤더 */
+        .site-header {
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #ffffff;
+        }
+        .logo-text span { color: var(--accent-red); }
+        .main-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-item { color: #e4e4e7; font-size: 15px; font-weight: 700; }
+        .nav-item:hover { color: var(--accent-gold); }
 
-    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
-    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
-    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-    
-        .post-layout { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-        @media(max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .sidebar-wrap { display: none; } }
-        
-        .post-cat { color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .post-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }
-        .post-sub { font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
-        .post-meta { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }
-        .share-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .share-btn:hover { background: #f5f5f5; border-color: #999; }
+        /* 기사 레이아웃 */
+        .post-layout {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 44px;
+        }
+        @media (max-width: 920px) {
+            .post-layout { grid-template-columns: 1fr; }
+            .sidebar-wrap { display: none; }
+        }
 
-        .featured-img-wrap { margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        /* 기사 헤더 타이포그래피 위계 */
+        .badge-red {
+            display: inline-block;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.32;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            word-break: keep-all;
+        }
+        @media (max-width: 600px) {
+            .post-title { font-size: 25px; }
+        }
+        .post-sub {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: #71717a;
+        }
+        .share-btn {
+            background: #f4f4f5;
+            border: 1px solid #d4d4d8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .share-btn:hover { background: #e4e4e7; }
+
+        /* 대표 이미지 */
+        .featured-img-wrap {
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .featured-img-wrap img { width: 100%; height: auto; }
 
-        .post-content { font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }
-        .post-content p { margin-bottom: 22px; word-break: keep-all; }
-        .post-content h3 { font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }
-        .content-img { margin: 30px 0; border-radius: 6px; overflow: hidden; }
+        /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
+        .post-content {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.85;
+            color: var(--text-body);
+            margin-bottom: 40px;
+        }
+        .post-content p {
+            font-size: 17px !important;
+            font-weight: 400 !important;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+        .post-content h3 {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin: 38px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-red);
+            word-break: keep-all;
+        }
+        .content-img {
+            margin: 26px 0 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .content-img img { width: 100%; height: auto; }
 
-        .ad-in-article { margin: 35px 0; text-align: center; }
+        .ad-in-article { margin: 34px 0; text-align: center; }
         .ad-bottom { margin: 40px 0; }
-        .ad-multiplex { margin: 35px 0; }
-        .copyright-notice { font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }
+        .ad-multiplex { margin: 36px 0; }
 
-        .related-wrap { margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }
-        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-        .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+        .copyright-notice {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            background: #fafafa;
+            border: 1px solid #f4f4f5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 36px 0 24px;
+        }
+
+        /* 추천 기사 */
+        .related-wrap {
+            margin-top: 44px;
+            border-top: 2px solid var(--bg-dark);
+            padding-top: 24px;
+        }
+        .related-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .related-grid { grid-template-columns: 1fr; }
+        }
         .rel-card { display: block; }
-        .rel-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }
+        .rel-thumb {
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            margin-bottom: 10px;
+            background: #f4f4f5;
+        }
         .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .rel-title { font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }
+        .rel-title {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.42;
+            color: var(--text-main);
+        }
+        .rel-card:hover .rel-title { color: var(--accent-red); }
 
-        .sidebar-sticky { position: sticky; top: 80px; width: 300px; height: 600px; }
+        .sidebar-sticky {
+            position: sticky;
+            top: 84px;
+            width: 300px;
+            height: 600px;
+        }
+
+        /* 공유 모달 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .share-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+        .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+        .share-act-btn {
+            border: 1px solid #d4d4d8;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .share-act-btn:hover { background: #f4f4f5; }
+        .share-close-btn {
+            background: var(--bg-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 다크 푸터 */
+        .site-footer {
+            background: var(--bg-dark);
+            color: #a1a1aa;
+            padding: 40px 20px;
+            margin-top: 70px;
+            text-align: center;
+            border-top: 3px solid var(--accent-gold);
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-links { font-size: 14px; margin-bottom: 14px; }
+        .footer-links a { color: #e4e4e7; margin: 0 8px; }
+        .footer-links a:hover { color: var(--accent-gold); }
+        .copyright { font-size: 13px; color: #71717a; }
     </style>
 </head>
 <body>
-    
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" />
+                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
-                <a href="/" class="nav-item ">최신뉴스</a>
-                <a href="/category_domestic.html" class="nav-item ">국내신차</a>
-                <a href="/category_global.html" class="nav-item active">글로벌이슈</a>
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
             </nav>
         </div>
     </header>
-    
-    
+
     <div class="post-layout">
         <main class="post-main">
-            <div class="post-cat">글로벌 뉴스 &bull; Carscoops</div>
+            <span class="badge-red">글로벌 뉴스</span>
             <h1 class="post-title">CR-V 윗급 노리는 3열 중형 SUV… 혼다, 차세대 전동화 품은 ‘신형 아반시아’ 기습 공개</h1>
             <div class="post-sub">기존 e:HEV를 뛰어넘는 차세대 하이브리드 시스템과 날렵한 디자인 언어로 글로벌 패밀리카 시장 정조준</div>
-            
+
             <div class="post-meta">
-                <span>발행: 2026-11-06 18:51 (KST)</span>
-                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
+                <span>발행: 2026-11-06 18:51 | CARISSUE 편집국</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
             <div class="featured-img-wrap">
@@ -142,38 +341,27 @@
             <article class="post-content">
                 <h3>전설의 이름표 부활, CR-V 한계 넘어서는 패밀리 3열 SUV
 혼다가 브랜드의 허리를 책임지는 대표 중형 SUV 라인업에 강력한 한 방을 더합니다. 혼다 오스트레일리아는 최근 차세대 중형 SUV ‘아반시아(Avancier)’의 첫 공식 티저를 전격 공개하며 글로벌 팬들의 이목을 집중시켰습니다. 1999년 어코드 기반의 왜건으로 출발해 2016년 중국 시장 전용 크로스오버로 명맥을 이어왔던 아반시아가, 이번에는 CR-V의 윗급이자 본격적인 3열 7인승 구조를 갖춘 글로벌 전략 SUV로 완벽히 탈바꿈합니다. 늘어나는 다인승 패밀리카 수요에 발맞춰 체급과 실용성을 동시에 끌어올린 구성입니다.</h3>
-
-                    <div class="content-img">
-                        <img src="https://www.carscoops.com/img/gallery/hondas-new-suv-brings-fresh-styling-and-next-gen-hybrid-tech/intro-1793950951.jpg" alt="CR-V 윗급 노리는 3열 중형 SUV… 혼다, 차세대 전동화 품은 ‘신형 아반시아’ 기습 공개" loading="lazy">
-                    </div>
-                    
+<div class="content-img">
+<img alt="CR-V 윗급 노리는 3열 중형 SUV… 혼다, 차세대 전동화 품은 ‘신형 아반시아’ 기습 공개" loading="lazy" src="https://www.carscoops.com/img/gallery/hondas-new-suv-brings-fresh-styling-and-next-gen-hybrid-tech/intro-1793950951.jpg"/>
+</div>
 <h3>레인지로버가 스치는 파격미, 차세대 혼다를 정의할 디자인 큐
 어둠 속에서 드러난 실루엣은 기존 혼다의 단정한 인상과는 궤를 달리합니다. 테일게이트 중앙에는 간결하게 다듬어진 신규 혼다 엠블럼과 아반시아 레터링이 자리하며, 이를 감싸는 입체적인 수평·수직 LED 테일램프가 시선을 사로잡습니다. 특히 날렵하게 뻗은 루프 스포일러와 함께 전면부의 슬림한 헤드라이트는 보닛 라인과 절묘하게 맞물려 레인지로버 이보크를 연상시킬 만큼 도회적이고 강렬한 존재감을 뿜어냅니다. 감각적인 스타팅 시퀀스를 품은 이 얇은 눈매와 날카로운 그린하우스 라인은 향후 등장할 차세대 시빅과 어코드 등 혼다의 미래 라인업 전반으로 확장될 예정입니다.</h3>
-
-                    <div class="ad-in-article">
-                        <ins class="adsbygoogle"
-                             style="display:block; text-align:center;"
-                             data-ad-layout="in-article"
-                             data-ad-format="fluid"
-                             data-ad-client="ca-pub-4793184080983542"
-                             data-ad-slot="4181249863"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>‘e:HEV’ 지우고 혁신 택했다… 효율과 원가 다 잡은 ‘혼다 하이브리드’
 진짜 핵심은 껍데기 아래 숨겨진 심장에 있습니다. 티저 영상 속 차체 후면에는 2020년부터 혼다의 전동화를 상징해 온 ‘e:HEV’ 대신 직관적인 ‘혼다 하이브리드(Honda Hybrid)’ 레터링이 선명히 새겨졌습니다. 이는 아반시아가 오는 2027년 상용화를 목표로 개발 중인 혼다의 차세대 자체 충전식 하이브리드 파워트레인을 최초로 탑재하는 주자 중 하나가 될 것임을 강력히 시사합니다. 신규 시스템은 개선된 2.0리터 4기통 가솔린 엔진을 기반으로 프렐류드 콘셉트에서 예고된 ‘S+ 시프트’ 기술을 흡수해, 기존 대비 10% 이상의 연비 향상과 30%의 생산 단가 절감을 동시에 달성할 것으로 기대를 모읍니다.</h3>
-
-                    <div class="content-img">
-                        <img src="https://www.carscoops.com/img/gallery/hondas-new-suv-brings-fresh-styling-and-next-gen-hybrid-tech/debuting-the-new-honda-hybrid-powertrain-1793950952.jpg" alt="CR-V 윗급 노리는 3열 중형 SUV… 혼다, 차세대 전동화 품은 ‘신형 아반시아’ 기습 공개" loading="lazy">
-                    </div>
-                    
+<div class="content-img">
+<img alt="CR-V 윗급 노리는 3열 중형 SUV… 혼다, 차세대 전동화 품은 ‘신형 아반시아’ 기습 공개" loading="lazy" src="https://www.carscoops.com/img/gallery/hondas-new-suv-brings-fresh-styling-and-next-gen-hybrid-tech/debuting-the-new-honda-hybrid-powertrain-1793950952.jpg"/>
+</div>
 <h3>싼타페·쏘렌토 정조준… 2030 전동화 패권 노리는 혼다의 첨병
 신형 아반시아는 태국 공장에서 생산되어 호주를 시작으로 일본 등 글로벌 주요 시장에 순차적으로 투입될 전망입니다. 시장에 안착하는 순간 현대 싼타페, 기아 쏘렌토, 토요타 하이랜더(클루거), 마쓰다 CX-80 등 쟁쟁한 글로벌 베스트셀링 3열 SUV들과 정면 승부를 펼치게 됩니다. 혼다는 2027년부터 2031년까지 아반시아를 비롯한 총 13종의 차세대 하이브리드 신차를 쏟아내며, 2030년까지 연간 220만 대의 HEV 판매를 달성하겠다는 야심 찬 청사진을 내걸었습니다. 혁신적인 하이브리드 파워트레인과 과감한 패밀리룩으로 무장한 신형 아반시아가 글로벌 패밀리 SUV 시장의 지각변동을 이끌어낼 수 있을지 귀추가 주목됩니다.</h3>
             </article>
 
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Carscoops 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
@@ -200,19 +388,19 @@
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
-        <a href="/posts/post_1793958716_4.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/bmws-smallest-suv-getting-neue-klasse-treatment-as-2028-ix2/l-intro-1793916217.jpg" alt="파격의 '노이어 클라쎄' 품은 막내 쿠페형 SUV, BMW 뉴 iX2 포착" loading="lazy"></div>
-            <div class="rel-title">파격의 '노이어 클라쎄' 품은 막내 쿠페형 SUV, BMW 뉴 iX2 포착</div>
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
         </a>
         
-        <a href="/posts/post_1793958665_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/wlkXLQ/s3/2027-bmw-i3-touring-screenshot-from-spy-video.jpg" alt="'녹색 지옥'에 나타난 차세대 전기 왜건, BMW 'i3 투어링' 최초 포착" loading="lazy"></div>
-            <div class="rel-title">'녹색 지옥'에 나타난 차세대 전기 왜건, BMW 'i3 투어링' 최초 포착</div>
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
         </a>
         
-        <a href="/posts/post_1793958641_1.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/1ZPWrp/s3/2026-chevrolet-corvette-zr1x-at-sonoma-raceway.jpg" alt="롤스로이스 값 된 ‘서민의 슈퍼카’… 쉐보레 콜벳 ZR1, 5억 5천만 원 ‘역대급 웃돈’ 논란" loading="lazy"></div>
-            <div class="rel-title">롤스로이스 값 된 ‘서민의 슈퍼카’… 쉐보레 콜벳 ZR1, 5억 5천만 원 ‘역대급 웃돈’ 논란</div>
+        <a href="/posts/post_1794526214_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
+            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -242,10 +430,10 @@
         </div>
     </div>
 
-    
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-links">
+                <a href="/about.html">매체소개</a> &bull;
                 <a href="/privacy.html">개인정보처리방침</a> &bull;
                 <a href="/terms.html">이용약관</a> &bull;
                 <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
@@ -253,7 +441,6 @@
             <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
     </footer>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -275,9 +462,7 @@
                 });
             }
             window.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (e.target === modal) modal.style.display = 'none';
             });
 
             document.getElementById('shareX').addEventListener('click', function() {

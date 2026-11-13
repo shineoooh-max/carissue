@@ -20,7 +20,7 @@
     "https://www.carscoops.com/img/gallery/2027-kia-telluride-x-pro-review-the-looks-get-your-attention-the-cabin-wins-you-over/interior-1794003145.jpg",
     "https://www.carscoops.com/img/gallery/2027-kia-telluride-x-pro-review-the-looks-get-your-attention-the-cabin-wins-you-over/comfort-and-design-1794003146.jpg"
   ],
-  "datePublished": "2026-11-07T18:34:14.581250+09:00",
+  "datePublished": "2026-11-07",
   "author": [
     {
       "@type": "Organization",
@@ -40,101 +40,300 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4793184080983542" crossorigin="anonymous"></script>
     <style>
-        
-    :root {
-        --primary: #d32f2f;
-        --dark: #121212;
-        --text: #222222;
-        --text-sub: #666666;
-        --border: #e5e5e5;
-        --bg-footer: #f8f8fa;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif; color: var(--text); background: #ffffff; line-height: 1.6; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; height: auto; display: block; }
-    
-    .site-header { border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-    .logo img { height: 38px; width: auto; }
-    .main-nav { display: flex; gap: 24px; font-weight: 700; font-size: 16px; }
-    .nav-item:hover, .nav-item.active { color: var(--primary); }
+        :root {
+            --bg-dark: #111215;
+            --accent-red: #e11d48;
+            --accent-gold: #d97706;
+            --text-main: #18181b;
+            --text-body: #27272a;
+            --text-sub: #52525b;
+            --border: #e4e4e7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+            color: var(--text-main);
+            background: #ffffff;
+            line-height: 1.6;
+            letter-spacing: -0.02em;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
 
-    .site-footer { background: var(--bg-footer); border-top: 1px solid var(--border); padding: 35px 20px; margin-top: 60px; text-align: center; }
-    .footer-inner { max-width: 1200px; margin: 0 auto; }
-    .footer-links { font-size: 14px; font-weight: 500; color: #555; margin-bottom: 12px; }
-    .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-    .copyright { font-size: 13px; color: #888; }
+        /* 다크 매거진 헤더 */
+        .site-header {
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: #ffffff;
+        }
+        .logo-text span { color: var(--accent-red); }
+        .main-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-item { color: #e4e4e7; font-size: 15px; font-weight: 700; }
+        .nav-item:hover { color: var(--accent-gold); }
 
-    .share-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .share-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .share-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111; }
-    .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .share-act-btn { border: 1px solid #ddd; background: #fafafa; border-radius: 8px; padding: 12px 0; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .share-act-btn:hover { background: #f0f0f0; border-color: #bbb; }
-    .share-close-btn { background: #333; color: #fff; border: none; padding: 10px 0; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-    
-        .post-layout { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-        @media(max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .sidebar-wrap { display: none; } }
-        
-        .post-cat { color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .post-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; word-break: keep-all; }
-        .post-sub { font-size: 18px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
-        .post-meta { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; font-size: 14px; color: #777; }
-        .share-btn { background: #fff; border: 1px solid #ccc; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .share-btn:hover { background: #f5f5f5; border-color: #999; }
+        /* 기사 레이아웃 */
+        .post-layout {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 44px;
+        }
+        @media (max-width: 920px) {
+            .post-layout { grid-template-columns: 1fr; }
+            .sidebar-wrap { display: none; }
+        }
 
-        .featured-img-wrap { margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        /* 기사 헤더 타이포그래피 위계 */
+        .badge-red {
+            display: inline-block;
+            background: var(--accent-red);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.32;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            word-break: keep-all;
+        }
+        @media (max-width: 600px) {
+            .post-title { font-size: 25px; }
+        }
+        .post-sub {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.55;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 28px;
+            font-size: 13px;
+            color: #71717a;
+        }
+        .share-btn {
+            background: #f4f4f5;
+            border: 1px solid #d4d4d8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .share-btn:hover { background: #e4e4e7; }
+
+        /* 대표 이미지 */
+        .featured-img-wrap {
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .featured-img-wrap img { width: 100%; height: auto; }
 
-        .post-content { font-size: 17px; line-height: 1.85; color: #2a2a2a; margin-bottom: 40px; }
-        .post-content p { margin-bottom: 22px; word-break: keep-all; }
-        .post-content h3 { font-size: 21px; margin: 34px 0 14px; color: #111; font-weight: 700; }
-        .content-img { margin: 30px 0; border-radius: 6px; overflow: hidden; }
+        /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
+        .post-content {
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.85;
+            color: var(--text-body);
+            margin-bottom: 40px;
+        }
+        .post-content p {
+            font-size: 17px !important;
+            font-weight: 400 !important;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+        .post-content h3 {
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin: 38px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-red);
+            word-break: keep-all;
+        }
+        .content-img {
+            margin: 26px 0 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f4f4f5;
+        }
         .content-img img { width: 100%; height: auto; }
 
-        .ad-in-article { margin: 35px 0; text-align: center; }
+        .ad-in-article { margin: 34px 0; text-align: center; }
         .ad-bottom { margin: 40px 0; }
-        .ad-multiplex { margin: 35px 0; }
-        .copyright-notice { font-size: 11px; color: #8c8c8c; line-height: 1.5; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; padding: 10px 14px; margin: 35px 0 20px; }
+        .ad-multiplex { margin: 36px 0; }
 
-        .related-wrap { margin-top: 40px; border-top: 2px solid #111; padding-top: 24px; }
-        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-        .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media(max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+        .copyright-notice {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            background: #fafafa;
+            border: 1px solid #f4f4f5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 36px 0 24px;
+        }
+
+        /* 추천 기사 */
+        .related-wrap {
+            margin-top: 44px;
+            border-top: 2px solid var(--bg-dark);
+            padding-top: 24px;
+        }
+        .related-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .related-grid { grid-template-columns: 1fr; }
+        }
         .rel-card { display: block; }
-        .rel-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 10px; background: #eee; }
+        .rel-thumb {
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            margin-bottom: 10px;
+            background: #f4f4f5;
+        }
         .rel-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .rel-title { font-size: 15px; font-weight: 700; line-height: 1.4; color: #222; }
+        .rel-title {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.42;
+            color: var(--text-main);
+        }
+        .rel-card:hover .rel-title { color: var(--accent-red); }
 
-        .sidebar-sticky { position: sticky; top: 80px; width: 300px; height: 600px; }
+        .sidebar-sticky {
+            position: sticky;
+            top: 84px;
+            width: 300px;
+            height: 600px;
+        }
+
+        /* 공유 모달 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .share-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+        .share-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+        .share-act-btn {
+            border: 1px solid #d4d4d8;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .share-act-btn:hover { background: #f4f4f5; }
+        .share-close-btn {
+            background: var(--bg-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 다크 푸터 */
+        .site-footer {
+            background: var(--bg-dark);
+            color: #a1a1aa;
+            padding: 40px 20px;
+            margin-top: 70px;
+            text-align: center;
+            border-top: 3px solid var(--accent-gold);
+        }
+        .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-links { font-size: 14px; margin-bottom: 14px; }
+        .footer-links a { color: #e4e4e7; margin: 0 8px; }
+        .footer-links a:hover { color: var(--accent-gold); }
+        .copyright { font-size: 13px; color: #71717a; }
     </style>
 </head>
 <body>
-    
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" />
+                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
-                <a href="/" class="nav-item ">최신뉴스</a>
-                <a href="/category_domestic.html" class="nav-item ">국내신차</a>
-                <a href="/category_global.html" class="nav-item active">글로벌이슈</a>
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
             </nav>
         </div>
     </header>
-    
-    
+
     <div class="post-layout">
         <main class="post-main">
-            <div class="post-cat">글로벌 뉴스 &bull; Carscoops</div>
+            <span class="badge-red">글로벌 뉴스</span>
             <h1 class="post-title">"시선은 외관이 뺏고, 마음은 실내가 훔친다" 2027 기아 텔루라이드 X-Pro 시승기</h1>
             <div class="post-sub">레인지로버급 당당한 실루엣에 극강의 실용적 인테리어를 품은 북미 패밀리 SUV의 절대강자</div>
-            
+
             <div class="post-meta">
-                <span>발행: 2026-11-07 18:34 (KST)</span>
-                <button type="button" class="share-btn" id="openShareModalBtn">공유하기</button>
+                <span>발행: 2026-11-07 18:34 | CARISSUE 편집국</span>
+                <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
             <div class="featured-img-wrap">
@@ -144,38 +343,27 @@
             <article class="post-content">
                 <h3>레인지로버가 스쳐 지나가는 압도적 프로포션과 캐릭터라인
 기아 텔루라이드는 데뷔 이래 단 한 번도 '첫인상' 싸움에서 밀려본 적이 없다. 최신형으로 진화한 2027년형 텔루라이드 X-Pro 역시 도로 위의 모든 시선을 잡아끄는 완벽한 스탠스와 옹골찬 비례감을 자랑한다. 밋밋하게 라운딩 처리하며 타협하는 여타 3열 패밀리 SUV들과 달리, 텔루라이드는 펜더 상단의 날카로운 캐릭터 라인과 보닛 위의 정교한 주름을 칼같이 살려냈다. 과거의 기아를 기억하는 이들이라면 흠칫 놀랄 만큼 영국의 럭셔리 SUV 레인지로버를 연상시키는 당당한 위압감이 곳곳에서 묻어난다. 여기에 X-Pro 트림 특유의 18인치 휠과 투박한 올터레인 타이어는 차체를 과장되게 부풀리지 않으면서도 정통 오프로더의 다부진 목적성을 완성한다.</h3>
-
-                    <div class="content-img">
-                        <img src="https://www.carscoops.com/img/gallery/2027-kia-telluride-x-pro-review-the-looks-get-your-attention-the-cabin-wins-you-over/intro-1794003142.jpg" alt=""시선은 외관이 뺏고, 마음은 실내가 훔친다" 2027 기아 텔루라이드 X-Pro 시승기" loading="lazy">
-                    </div>
-                    
+<div class="content-img">
+<img 2027="" alt="" loading="lazy" src="https://www.carscoops.com/img/gallery/2027-kia-telluride-x-pro-review-the-looks-get-your-attention-the-cabin-wins-you-over/intro-1794003142.jpg" x-pro="" 기아="" 마음은="" 뺏고,="" 시선은="" 시승기"="" 실내가="" 외관이="" 텔루라이드="" 훔친다"=""/>
+</div>
 <h3>'겉멋'을 넘어선 완성도, 5만 8천 달러의 납득 가능한 가치
 이번에 시승한 모델은 라인업의 최정점에 자리한 '2027 기아 텔루라이드 X-Pro SX 프레스티지'다. 목적지 운송료(1,545달러)를 포함한 시작 가격은 58,335달러(한화 약 8,000만 원 선)로, 대중 패밀리 SUV 세그먼트에서는 결코 가볍지 않은 금액이다. 하지만 일주일간 차량과 매일을 함께한 뒤 내린 결론은 "이 가격표는 온전히 납득할 수 있다"는 점이다. 외관만 번지르르하고 문을 여는 순간 실망감을 안기는 수많은 경쟁차와 달리, 텔루라이드의 진정한 승부처는 도어를 열었을 때 비로소 펼쳐지기 때문이다. 운전석 마사지 시트부터 광활한 공간감, 세심하게 직조된 패키징은 탑승자를 완벽히 설득한다.</h3>
-
-                    <div class="ad-in-article">
-                        <ins class="adsbygoogle"
-                             style="display:block; text-align:center;"
-                             data-ad-layout="in-article"
-                             data-ad-format="fluid"
-                             data-ad-client="ca-pub-4793184080983542"
-                             data-ad-slot="4181249863"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    
+<div class="ad-in-article">
+<ins class="adsbygoogle" data-ad-client="ca-pub-4793184080983542" data-ad-format="fluid" data-ad-layout="in-article" data-ad-slot="4181249863" style="display:block; text-align:center;"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 <h3>디지털 홍수 속 빛나는 '직관의 미학'과 인체공학
 인테리어의 가장 큰 미덕은 일관되고 논리적인 조작계 구성이다. 최근 모든 기능을 스크린 안으로 숨겨버리는 터치 지상주의 트렌드 속에서, 기아는 공조 장치와 주요 인포테인먼트 단축키에 명확한 물리 버튼을 남겨두는 현명함을 택했다. 온도 조절, 풍량, 바람 방향 전환은 주행 중에도 시선을 뺏기지 않고 직관적으로 제어할 수 있다. 센터스택 정중앙에 배치된 볼륨 다이얼은 운전자와 동승자 모두에게 편안한 접근성을 제공한다. 특히 드라이브 모드 다이얼과 다운힐 브레이크 컨트롤(DBC) 버튼의 배치는 인상적이다. 형제 모델인 현대 팰리세이드가 DBC 버튼을 조수석 쪽으로 치우치게 배치해 의구심을 자아냈던 것과 달리, 텔루라이드는 철저히 운전자 중심으로 자연스럽게 손이 닿도록 설계했다.</h3>
-
-                    <div class="content-img">
-                        <img src="https://www.carscoops.com/img/gallery/2027-kia-telluride-x-pro-review-the-looks-get-your-attention-the-cabin-wins-you-over/styling-1794003143.jpg" alt=""시선은 외관이 뺏고, 마음은 실내가 훔친다" 2027 기아 텔루라이드 X-Pro 시승기" loading="lazy">
-                    </div>
-                    
+<div class="content-img">
+<img 2027="" alt="" loading="lazy" src="https://www.carscoops.com/img/gallery/2027-kia-telluride-x-pro-review-the-looks-get-your-attention-the-cabin-wins-you-over/styling-1794003143.jpg" x-pro="" 기아="" 마음은="" 뺏고,="" 시선은="" 시승기"="" 실내가="" 외관이="" 텔루라이드="" 훔친다"=""/>
+</div>
 <h3>옥에 티 하나를 지워버리는 패밀리카의 교과서
 스마트폰 두 대를 나란히 충전할 수 있는 듀얼 무선 충전 패드와 실용적인 수납 솔루션 등 일상에서 체감되는 배려는 차고 넘친다. 굳이 아쉬운 점을 꼽자면, 디지털 클러스터와 인포테인먼트 디스플레이의 UX 그래픽이 2만 5천 달러짜리 엔트리 세단인 K4와 거의 동일하다는 사실이다. 플래그십 SUV만의 고급스럽고 차별화된 그래픽 테마가 적용되었더라면 감성 품질은 한층 더 완벽했을 것이다. 그럼에도 불구하고 대시보드를 가로지르는 정제된 디자인 언어와 탑승객 모두를 안락하게 품어내는 공간성은 이 차가 왜 북미 시장에서 대체 불가능한 패밀리 SUV의 아이콘으로 군림하는지 다시금 증명한다.</h3>
             </article>
 
             
     <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Carscoops 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 에디터의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+        ※ 본 기사는 각 언론사(CARISSUE 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
     </div>
     
 
@@ -202,19 +390,19 @@
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
                     
-        <a href="/posts/post_1794044076_4.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/porsche-launches-espresso-machine-with-a-ducktail-spoiler/l-intro-1793999026.jpg" alt="1,100만 원짜리 '덕테일 스포일러' 품은 커피 머신… 포르쉐와 라마르조코의 화려한 질주" loading="lazy"></div>
-            <div class="rel-title">1,100만 원짜리 '덕테일 스포일러' 품은 커피 머신… 포르쉐와 라마르조코의 화려한 질주</div>
+        <a href="/posts/post_1794526265_4.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62178_120195_3027_v150.jpg" alt="내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다" loading="lazy"></div>
+            <div class="rel-title">내연기관과 전동화의 완벽한 앙상블… BMW 5시리즈, ‘2만 대’ 돌파하며 독보적 왕좌 굳혔다</div>
         </a>
         
-        <a href="/posts/post_1794044037_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/P3MP3L/s3/chevrolet-corvette-zr1x-quarter-mile-run.jpg" alt="0.001초의 인간 한계를 넘다… GM, 드래그 스타트 신호 감지하는 '자동 런치' 특허 공개" loading="lazy"></div>
-            <div class="rel-title">0.001초의 인간 한계를 넘다… GM, 드래그 스타트 신호 감지하는 '자동 런치' 특허 공개</div>
+        <a href="/posts/post_1794526239_3.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62177_120191_1918_v150.jpg" alt=""충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주" loading="lazy"></div>
+            <div class="rel-title">"충전 스트레스 없애니 대박 났다"…샤오미 주행거리 연장형 SUV '스카이노마드', 첫 달 2만 7천 대 폭풍 질주</div>
         </a>
         
-        <a href="/posts/post_1794044016_1.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/BX14GR/s3/jeep-off-roading-marvel.jpg" alt=""멀티버스를 질주하는 오프로더의 제왕" 지프, 마블 히어로들과 역대급 피날레 예고" loading="lazy"></div>
-            <div class="rel-title">"멀티버스를 질주하는 오프로더의 제왕" 지프, 마블 히어로들과 역대급 피날레 예고</div>
+        <a href="/posts/post_1794526214_2.html" class="rel-card">
+            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62179_120198_479_v150.jpg" alt="질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다" loading="lazy"></div>
+            <div class="rel-title">질주하는 유럽, 숨고르는 중국… 글로벌 전기차 지형도 다시 요동친다</div>
         </a>
         
                 </div>
@@ -244,10 +432,10 @@
         </div>
     </div>
 
-    
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-links">
+                <a href="/about.html">매체소개</a> &bull;
                 <a href="/privacy.html">개인정보처리방침</a> &bull;
                 <a href="/terms.html">이용약관</a> &bull;
                 <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
@@ -255,7 +443,6 @@
             <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
     </footer>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -277,9 +464,7 @@
                 });
             }
             window.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
+                if (e.target === modal) modal.style.display = 'none';
             });
 
             document.getElementById('shareX').addEventListener('click', function() {
