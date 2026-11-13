@@ -46,7 +46,16 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 20px;
+            padding: 8px 20px;
+            min-height: 60px;
+        }
+        .logo img {
+            height: 44px;
+            width: auto;
+            object-fit: contain;
+        }
+        @media (max-width: 600px) {
+            .logo img { height: 36px; }
         }
         .logo-text {
             font-size: 24px;
@@ -287,7 +296,7 @@
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo">
-                <img src="/assets/logo.png" alt="CARISSUE" style="height: 32px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <img src="/assets/logo.png?v=2" alt="CARISSUE" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
             </a>
             <nav class="main-nav">
