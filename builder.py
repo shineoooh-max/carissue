@@ -51,6 +51,7 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
     lines = generated_md.split("\n")
     post_title = fallback_title
     subtitle = ""
+    summary_points = []
     body_lines = []
     title_found = False
 
@@ -61,10 +62,18 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
             title_found = True
         elif s_line.startswith("## ") and not subtitle:
             subtitle = s_line[3:].strip()
+        elif s_line.startswith("### "):
+            pt = s_line[4:].strip()
+            if pt:
+                summary_points.append(pt)
+        elif s_line.startswith("#"):
+            pt = s_line.lstrip("#").strip()
+            if pt:
+                summary_points.append(pt)
         else:
             body_lines.append(line)
 
-    # 빈 줄 기준으로 문단 분리
+    # 빈 줄 기준으로 본문 문단 분리
     paragraphs = []
     cur_p = []
     for bl in body_lines:
@@ -78,47 +87,69 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
         paragraphs.append(" ".join(cur_p).strip())
 
     content_html_parts = []
-    img_idx = 1  # images[0]은 상단 대표 이미지로 사용되므로 본문은 1번부터 배치
-    p_count = 0
 
-    for p_text in paragraphs:
-        # 소제목 처리 (### 또는 잘못 붙은 #/## 방어)
-        if p_text.startswith("### "):
-            h3_text = p_text[4:].strip()
-            content_html_parts.append(f"<h3>{h3_text}</h3>")
-            # 소제목 1개당 이미지 1장 배치
+    # 1. 본문 최상단: 왼쪽 빨간 세로줄 핵심 요약 박스 (3~4줄)
+    if summary_points:
+        summary_items_html = "".join(f"<div class='summary-line'>{pt}</div>" for pt in summary_points[:4])
+        content_html_parts.append(f"""
+        <div class="article-summary-box">
+            {summary_items_html}
+        </div>
+        """)
+
+    def make_ad_block():
+        return f"""
+        <div class="ad-in-article">
+            <ins class="adsbygoogle"
+                 style="display:block; text-align:center;"
+                 data-ad-layout="in-article"
+                 data-ad-format="fluid"
+                 data-ad-client="{config.ADSENSE_CLIENT}"
+                 data-ad-slot="{config.AD_SLOTS['in_article']}"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+        </div>
+        """
+
+    total_p = len(paragraphs)
+    img_idx = 1  # images[0]은 상단 대표이미지, 본문 추가 이미지는 images[1](2번째 이미지)부터 시작
+
+    for idx, p_text in enumerate(paragraphs, start=1):
+        clean_p = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", p_text)
+        content_html_parts.append(f"<p>{clean_p}</p>")
+
+        # 본문 마지막 문단 직후에는 중간광고를 절대 넣지 않음
+        if idx >= total_p:
+            continue
+
+        # 1문단 뒤: 중간광고 1 (필수)
+        if idx == 1:
+            content_html_parts.append(make_ad_block())
+
+        # 2문단 뒤: 2번째 이미지(있으면 출력) + 중간광고 2 (필수)
+        elif idx == 2:
             if img_idx < len(images):
                 content_html_parts.append(
-                    f'<div class="content-img"><img src="{images[img_idx]}" alt="{h3_text}" loading="lazy"></div>'
+                    f'<div class="content-img"><img src="{images[img_idx]}" alt="{post_title}" loading="lazy"></div>'
                 )
                 img_idx += 1
-        elif p_text.startswith("#"):
-            clean_h3 = p_text.lstrip("#").strip()
-            content_html_parts.append(f"<h3>{clean_h3}</h3>")
+            content_html_parts.append(make_ad_block())
+
+        # 3문단 뒤: 3번째 이미지(있으면 출력) + 중간광고 3 (필수)
+        elif idx == 3:
             if img_idx < len(images):
                 content_html_parts.append(
-                    f'<div class="content-img"><img src="{images[img_idx]}" alt="{clean_h3}" loading="lazy"></div>'
+                    f'<div class="content-img"><img src="{images[img_idx]}" alt="{post_title}" loading="lazy"></div>'
                 )
                 img_idx += 1
-        else:
-            # 일반 본문 문단 (무조건 <p> 태그 강제)
-            clean_p = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", p_text)
-            content_html_parts.append(f"<p>{clean_p}</p>")
-            p_count += 1
+            content_html_parts.append(make_ad_block())
 
-            # 2번째 문단 뒤에 인아티클 광고 삽입
-            if p_count == 2:
-                content_html_parts.append(f"""
-                <div class="ad-in-article">
-                    <ins class="adsbygoogle"
-                         style="display:block; text-align:center;"
-                         data-ad-layout="in-article"
-                         data-ad-format="fluid"
-                         data-ad-client="{config.ADSENSE_CLIENT}"
-                         data-ad-slot="{config.AD_SLOTS['in_article']}"></ins>
-                    <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
-                </div>
-                """)
+        # 4문단 이후: 남은 추가 이미지(4번째~)가 있을 경우에만 [이미지 + 중간광고] 세트 삽입
+        elif img_idx < len(images):
+            content_html_parts.append(
+                f'<div class="content-img"><img src="{images[img_idx]}" alt="{post_title}" loading="lazy"></div>'
+            )
+            img_idx += 1
+            content_html_parts.append(make_ad_block())
 
     return post_title, subtitle, "\n".join(content_html_parts)
 
@@ -149,7 +180,7 @@ def build_article_page(item_data, all_posts, article_tpl):
     }
 
     related_html = ""
-    for r in [p for p in all_posts if p["id"] != post_id][:3]:
+    for r in [p for p in all_posts if p["id"] != post_id][:6]:
         r_img = r.get("images", ["/assets/logo.png"])[0] if r.get("images") else "/assets/logo.png"
         related_html += f"""
         <a href="/posts/{r['id']}.html" class="rel-card">
