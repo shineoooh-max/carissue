@@ -3,6 +3,7 @@ import os
 import re
 import time
 import json
+from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
 import config
@@ -47,13 +48,40 @@ def get_current_feeds():
         return config.FEEDS_EVENING
 
 
+def build_google_preferred_banner():
+    domain = urlparse(config.SITE_URL).netloc or "carissue.koo1000.com"
+    pref_url = f"https://www.google.com/preferences/source?q={domain}"
+    return f"""
+    <div class="google-pref-wrap" style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 16px; margin:0 0 24px 0; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; background:#fafafa;">
+        <a href="{pref_url}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#ffffff; border:1px solid #dadce0; border-radius:999px; text-decoration:none; color:#1a73e8; font-size:13px; font-weight:700; box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                <path fill="#34A853" d="M12 24c3.3 0 6.08-1.09 8.1-2.96l-3.88-3.05c-1.1.74-2.51 1.18-4.22 1.18-3.24 0-5.99-2.19-6.97-5.13H1.02v3.14C3.05 21.2 7.24 24 12 24Z"/>
+                <path fill="#FBBC05" d="M5.03 14.04c-.25-.74-.39-1.54-.39-2.36 0-.82.14-1.62.39-2.36V6.18H1.02C.37 7.47 0 8.93 0 10.48s.37 3.01 1.02 4.3l4.01-3.14Z"/>
+                <path fill="#EA4335" d="M12 4.75c1.79 0 3.41.62 4.68 1.82l3.51-3.51C18.07 1.19 15.3 0 12 0 7.24 0 3.05 2.8 1.02 6.82l4.01 3.14c.98-2.94 3.73-5.21 6.97-5.21Z"/>
+            </svg>
+            <span>구글 검색 선호 출처로 추가</span>
+        </a>
+        <span style="font-size:13px; color:#5f6368; line-height:1.4;">Google 검색과 디스커버에서 CARISSUE 기사를 더 자주 볼 수 있습니다.</span>
+    </div>
+    """
+
+
 def parse_markdown_to_html(generated_md, fallback_title, images):
     lines = generated_md.split("\n")
     post_title = fallback_title
     subtitle = ""
     summary_points = []
-    body_lines = []
+    body_blocks = []  # ("h3", text) 또는 ("p", text) 튜플 저장
     title_found = False
+
+    cur_p = []
+
+    def flush_paragraph():
+        nonlocal cur_p
+        if cur_p:
+            body_blocks.append(("p", " ".join(cur_p).strip()))
+            cur_p = []
 
     for line in lines:
         s_line = line.strip()
@@ -63,28 +91,31 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
         elif s_line.startswith("## ") and not subtitle:
             subtitle = s_line[3:].strip()
         elif s_line.startswith("### "):
+            flush_paragraph()
             pt = s_line[4:].strip()
             if pt:
-                summary_points.append(pt)
+                if len(pt) <= 35:
+                    if len(summary_points) < 4:
+                        summary_points.append(pt)
+                    body_blocks.append(("h3", pt))
+                else:
+                    body_blocks.append(("p", pt))
         elif s_line.startswith("#"):
+            flush_paragraph()
             pt = s_line.lstrip("#").strip()
             if pt:
-                summary_points.append(pt)
+                if len(pt) <= 35:
+                    if len(summary_points) < 4:
+                        summary_points.append(pt)
+                    body_blocks.append(("h3", pt))
+                else:
+                    body_blocks.append(("p", pt))
+        elif s_line == "":
+            flush_paragraph()
         else:
-            body_lines.append(line)
+            cur_p.append(s_line)
 
-    # 빈 줄 기준으로 본문 문단 분리
-    paragraphs = []
-    cur_p = []
-    for bl in body_lines:
-        if bl.strip() == "":
-            if cur_p:
-                paragraphs.append(" ".join(cur_p).strip())
-                cur_p = []
-        else:
-            cur_p.append(bl.strip())
-    if cur_p:
-        paragraphs.append(" ".join(cur_p).strip())
+    flush_paragraph()
 
     content_html_parts = []
 
@@ -99,7 +130,7 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
 
     def make_ad_block():
         return f"""
-        <div class="ad-in-article">
+        <div class="ad-in-article" style="margin: 28px 0;">
             <ins class="adsbygoogle"
                  style="display:block; text-align:center;"
                  data-ad-layout="in-article"
@@ -110,46 +141,53 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
         </div>
         """
 
-    total_p = len(paragraphs)
-    img_idx = 1  # images[0]은 상단 대표이미지, 본문 추가 이미지는 images[1](2번째 이미지)부터 시작
+    # 유효한 실제 크롤링 이미지 필터링 (images[0]은 상단 대표이미지, images[1:]는 본문 추가 이미지)
+    valid_imgs = [img for img in images if img and "/assets/logo.png" not in img]
+    extra_imgs = valid_imgs[1:]
+    extra_img_idx = 0
 
-    for idx, p_text in enumerate(paragraphs, start=1):
-        clean_p = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", p_text)
-        content_html_parts.append(f"<p>{clean_p}</p>")
+    total_p_count = sum(1 for b_type, _ in body_blocks if b_type == "p")
+    p_counter = 0
+    ad_counter = 0
+    max_in_article_ads = 3
 
-        # 본문 마지막 문단 직후에는 중간광고를 절대 넣지 않음
-        if idx >= total_p:
+    # 두 템포(2문단)마다 [중간광고]와 [추가 이미지]를 번갈아 교차 배치
+    for b_type, b_text in body_blocks:
+        if b_type == "h3":
+            content_html_parts.append(f"<h3>{b_text}</h3>")
             continue
 
-        # 1문단 뒤: 중간광고 1 (필수)
-        if idx == 1:
-            content_html_parts.append(make_ad_block())
+        clean_p = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", b_text)
+        content_html_parts.append(f"<p>{clean_p}</p>")
+        p_counter += 1
 
-        # 2문단 뒤: 2번째 이미지(있으면 출력) + 중간광고 2 (필수)
-        elif idx == 2:
-            if img_idx < len(images):
-                content_html_parts.append(
-                    f'<div class="content-img"><img src="{images[img_idx]}" alt="{post_title}" loading="lazy"></div>'
-                )
-                img_idx += 1
-            content_html_parts.append(make_ad_block())
+        # 마지막 문단 직후에는 중간광고 및 추가 요소를 붙이지 않음 (하단 광고와 겹침 방지)
+        if p_counter >= total_p_count:
+            continue
 
-        # 3문단 뒤: 3번째 이미지(있으면 출력) + 중간광고 3 (필수)
-        elif idx == 3:
-            if img_idx < len(images):
-                content_html_parts.append(
-                    f'<div class="content-img"><img src="{images[img_idx]}" alt="{post_title}" loading="lazy"></div>'
-                )
-                img_idx += 1
-            content_html_parts.append(make_ad_block())
-
-        # 4문단 이후: 남은 추가 이미지(4번째~)가 있을 경우에만 [이미지 + 중간광고] 세트 삽입
-        elif img_idx < len(images):
-            content_html_parts.append(
-                f'<div class="content-img"><img src="{images[img_idx]}" alt="{post_title}" loading="lazy"></div>'
-            )
-            img_idx += 1
-            content_html_parts.append(make_ad_block())
+        # 2문단(두 템포) 단위 체크포인트: 2, 4, 6, 8...
+        if p_counter % 2 == 0:
+            step = p_counter // 2  # 1, 2, 3, 4...
+            # 홀수 스텝(2문단 뒤, 6문단 뒤, 10문단 뒤): 중간광고 배치
+            if step % 2 == 1:
+                if ad_counter < max_in_article_ads:
+                    content_html_parts.append(make_ad_block())
+                    ad_counter += 1
+                elif extra_img_idx < len(extra_imgs):
+                    content_html_parts.append(
+                        f'<div class="content-img" style="margin: 24px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" loading="lazy"></div>'
+                    )
+                    extra_img_idx += 1
+            # 짝수 스텝(4문단 뒤, 8문단 뒤): 본문 추가 이미지 배치 (없으면 건너뛰고 자연스럽게 텍스트 이어감)
+            else:
+                if extra_img_idx < len(extra_imgs):
+                    content_html_parts.append(
+                        f'<div class="content-img" style="margin: 24px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" loading="lazy"></div>'
+                    )
+                    extra_img_idx += 1
+                elif ad_counter < max_in_article_ads:
+                    content_html_parts.append(make_ad_block())
+                    ad_counter += 1
 
     return post_title, subtitle, "\n".join(content_html_parts)
 
@@ -159,7 +197,8 @@ def build_article_page(item_data, all_posts, article_tpl):
     title = item_data["title"]
     subtitle = item_data.get("subtitle", "")
     images = item_data.get("images", [])
-    featured_img = images[0] if images else "/assets/logo.png"
+    valid_imgs = [img for img in images if img and "/assets/logo.png" not in img]
+    featured_img = valid_imgs[0] if valid_imgs else ""
     date_str = item_data.get("date", get_now_kst())
     category = item_data.get("category", "국내 이슈")
     source = item_data.get("source", config.SITE_NAME)
@@ -169,7 +208,7 @@ def build_article_page(item_data, all_posts, article_tpl):
         "@type": "NewsArticle",
         "headline": title,
         "description": subtitle or title,
-        "image": images,
+        "image": valid_imgs if valid_imgs else [f"{config.SITE_URL}/assets/logo.png"],
         "datePublished": item_data.get("iso_date", datetime.now(timezone.utc).isoformat()),
         "author": [{"@type": "Organization", "name": config.SITE_NAME, "url": config.SITE_URL}],
         "publisher": {
@@ -181,7 +220,8 @@ def build_article_page(item_data, all_posts, article_tpl):
 
     related_html = ""
     for r in [p for p in all_posts if p["id"] != post_id][:6]:
-        r_img = r.get("images", ["/assets/logo.png"])[0] if r.get("images") else "/assets/logo.png"
+        r_imgs = [i for i in r.get("images", []) if i and "/assets/logo.png" not in i]
+        r_img = r_imgs[0] if r_imgs else "/assets/logo.png"
         related_html += f"""
         <a href="/posts/{r['id']}.html" class="rel-card">
             <div class="rel-thumb"><img src="{r_img}" alt="{r['title']}" loading="lazy"></div>
@@ -197,6 +237,16 @@ def build_article_page(item_data, all_posts, article_tpl):
     """
 
     html = article_tpl
+    if not featured_img:
+        html = re.sub(r'<div class="featured-img-wrap">.*?</div>', "", html, flags=re.DOTALL)
+
+    # 구글 선호 출처 배너를 본문 최상단(대표 이미지 바로 아래, 요약 박스 위)에 자동 결합
+    raw_content_html = item_data.get("content_html", "")
+    if "google-pref-wrap" not in raw_content_html:
+        full_article_content = build_google_preferred_banner() + "\n" + raw_content_html
+    else:
+        full_article_content = raw_content_html
+
     replacements = {
         "{{SITE_HEADER}}": load_template("header.html"),
         "{{SITE_FOOTER}}": load_template("footer.html"),
@@ -212,7 +262,7 @@ def build_article_page(item_data, all_posts, article_tpl):
         "{{POST_CATEGORY}}": category,
         "{{POST_DATE}}": date_str,
         "{{FEATURED_IMG}}": featured_img,
-        "{{ARTICLE_CONTENT}}": item_data.get("content_html", ""),
+        "{{ARTICLE_CONTENT}}": full_article_content,
         "{{COPYRIGHT_NOTICE}}": copyright_html,
         "{{RELATED_POSTS_HTML}}": related_html,
         "{{SCHEMA_JSON_LD}}": json.dumps(schema_ld, ensure_ascii=False, indent=2),
@@ -238,7 +288,6 @@ def build_index_page(posts, index_tpl):
     sub_heroes = posts[1:4]
     remaining_posts = posts[4:]
 
-    # 1. 상단 60:40 스플릿 메인 기사
     top_hero_html = f"""
     <a href="/posts/{top_hero['id']}.html" class="hero-split">
         <div class="hero-split-img">
@@ -256,7 +305,6 @@ def build_index_page(posts, index_tpl):
     </a>
     """
 
-    # 2. 중단 3열 서브 카드
     sub_heroes_html = ""
     for sh in sub_heroes:
         sub_heroes_html += f"""
@@ -270,7 +318,6 @@ def build_index_page(posts, index_tpl):
         </a>
         """
 
-    # 3. 하단 최신 뉴스 피드
     feed_list_html = ""
     for lp in remaining_posts:
         feed_list_html += f"""
@@ -398,7 +445,6 @@ def scan_existing_posts(exclude_ids):
                 if cat_el and "국내" in cat_el.get_text():
                     rec_cat = "국내 이슈"
 
-                # 기존 본문 HTML 추출 및 긴 문장이 소제목(h3)으로 뭉치는 현상 교정
                 article_el = h_soup.find("article", class_="post-content") or h_soup.find("article")
                 cleaned_body_parts = []
                 if article_el:
@@ -408,7 +454,6 @@ def scan_existing_posts(exclude_ids):
                             t = child.get_text().strip()
                             if not t:
                                 continue
-                            # 45자 초과 시 소제목이 아닌 일반 본문 문단(<p>)으로 교정
                             if len(t) > 45:
                                 cleaned_body_parts.append(f"<p>{t}</p>")
                             else:
@@ -501,7 +546,6 @@ def main():
 
     print(f"\n>>> [스캔 완료] 총 기사 수: {len(all_posts)}개 (신규: {len(new_articles)}개, 기존 복원: {len(existing_posts)}개)")
 
-    # 신규 기사는 무조건 빌드, 디자인 전용 모드일 때는 기존 기사까지 전부 새 article.html로 일괄 재빌드
     target_build_posts = all_posts if design_only else new_articles
     for p in target_build_posts:
         if p.get("content_html"):
