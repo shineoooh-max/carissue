@@ -30,14 +30,13 @@ def normalize_img_url(base_url, src):
 
 
 def extract_best_from_srcset(srcset_val):
-    """srcset 문자열에서 가장 해상도가 큰(마지막) 이미지 URL 추출"""
+    """URL 내부 콤마(Hearst CDN crop 파라미터 등)를 보호하면서 가장 큰 해상도 URL 추출"""
     if not srcset_val:
         return ""
-    candidates = [c.strip() for c in srcset_val.split(",") if c.strip()]
+    candidates = [c.strip() for c in re.split(r",\s*(?=https?://|/)", srcset_val) if c.strip()]
     if not candidates:
         return ""
-    best_url = candidates[-1].split()[0]
-    return best_url
+    return candidates[-1].split()[0]
 
 
 def get_img_fingerprint(img_url):
