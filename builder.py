@@ -270,7 +270,7 @@ def build_article_page(item_data, all_posts, article_tpl):
         "{{POST_SUBTITLE_HTML}}": subtitle_html,
         "{{POST_CATEGORY}}": category,
         "{{POST_DATE}}": date_str,
-        "{{FEATURED_IMG}}": featured_img,
+        "{{FEATURED_IMG}}": featured_img if featured_img else f"{config.SITE_URL}/assets/logo.png",
         "{{ARTICLE_CONTENT}}": full_article_content,
         "{{COPYRIGHT_NOTICE}}": copyright_html,
         "{{RELATED_POSTS_HTML}}": related_html,
