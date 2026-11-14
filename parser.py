@@ -1,22 +1,26 @@
-# parser.py - RSS 수집, 이미지 필터링, Gemini 기사 생성 전용 모듈
+# parser.py - RSS 수집, 다중 고화질 이미지 추출, Gemini 기사 생성 전용 모듈
 import os
 import re
 import urllib.request
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, parse_qs
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from google import genai
 import config
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-BLOCKED_IMG_KEYWORDS = ["logo", "icon", "banner", "btn", "favicon", "avatar", "ad_", "blank", "placeholder"]
+BLOCKED_IMG_KEYWORDS = [
+    "logo", "icon", "banner", "btn", "favicon", "avatar", "ad_",
+    "blank", "placeholder", "spinner", "loading", "1x1", "pixel",
+    "sprite", "sns", "share", "button", "badge", "author", "profile"
+]
 
 
 def normalize_img_url(base_url, src):
     if not src:
         return ""
     src = src.strip()
-    if src.startswith("data:"):
+    if src.startswith("data:") or src.startswith("blob:"):
         return ""
     if src.startswith("//"):
         return "https:" + src
@@ -25,12 +29,44 @@ def normalize_img_url(base_url, src):
     return src
 
 
+def extract_best_from_srcset(srcset_val):
+    """srcset 문자열에서 가장 해상도가 큰(마지막) 이미지 URL 추출"""
+    if not srcset_val:
+        return ""
+    candidates = [c.strip() for c in srcset_val.split(",") if c.strip()]
+    if not candidates:
+        return ""
+    best_url = candidates[-1].split()[0]
+    return best_url
+
+
 def get_img_fingerprint(img_url):
-    path = urlparse(img_url).path
+    """쿼리스트링 기반 CDN(Car and Driver 등)과 파일명 기반 CDN 모두 정확히 구분"""
+    parsed = urlparse(img_url)
+    path = parsed.path
     fname = os.path.basename(path).lower()
     fname = re.sub(r"-\d+x\d+(?=\.[a-z]+$)", "", fname)
     fname = re.sub(r"_(thumb|small|medium|large|s|m|l)(?=\.[a-z]+$)", "", fname)
-    return fname
+
+    # 쿼리스트링에 고유 이미지 ID가 포함된 경우(예: ?id=1234) 함께 지문으로 사용
+    qs = parse_qs(parsed.query)
+    id_part = ""
+    for key in ("id", "img", "file", "idx", "photo"):
+        if key in qs and qs[key]:
+            id_part = f"_{key}={qs[key][0]}"
+            break
+
+    return f"{fname}{id_part}" if fname else img_url
+
+
+def decode_html_bytes(raw_bytes):
+    """UTF-8 및 국내 언론사 CP949/EUC-KR 인코딩 자동 판별 디코딩"""
+    for enc in ("utf-8", "cp949", "euc-kr"):
+        try:
+            return raw_bytes.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return raw_bytes.decode("utf-8", errors="ignore")
 
 
 def fetch_feed_items(feed_conf, history_set):
@@ -41,10 +77,7 @@ def fetch_feed_items(feed_conf, history_set):
     try:
         req = urllib.request.Request(feed_conf["url"], headers={"User-Agent": USER_AGENT})
         raw_data = urllib.request.urlopen(req, timeout=15).read()
-        try:
-            xml_text = raw_data.decode("utf-8")
-        except UnicodeDecodeError:
-            xml_text = raw_data.decode("cp949", errors="ignore")
+        xml_text = decode_html_bytes(raw_data)
 
         root = ET.fromstring(xml_text)
         entries = root.findall(".//item")
@@ -102,7 +135,11 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         full_url = normalize_img_url(url, raw_src)
         if not full_url or not full_url.startswith("http"):
             return
-        if any(x in full_url.lower() for x in BLOCKED_IMG_KEYWORDS):
+        lower_u = full_url.lower()
+        if any(x in lower_u for x in BLOCKED_IMG_KEYWORDS):
+            return
+        # SVG/GIF 아이콘성 확장자 제외
+        if urlparse(lower_u).path.endswith((".svg", ".gif")):
             return
         fp = get_img_fingerprint(full_url)
         if fp and fp in seen_fps:
@@ -112,9 +149,47 @@ def extract_article_details(url, feed_img="", feed_desc=""):
             if fp:
                 seen_fps.add(fp)
 
+    def scan_container_images(container):
+        if not container:
+            return
+        # 1) <picture> 내부 <source srcset="..."> 고화질 원본 우선 수집 (해외 매체 대응)
+        for pic in container.find_all("picture"):
+            source_tag = pic.find("source")
+            if source_tag:
+                best_src = extract_best_from_srcset(
+                    source_tag.get("data-srcset") or source_tag.get("srcset")
+                )
+                if best_src:
+                    try_add_image(best_src)
+                    if len(images) >= 6:
+                        return
+
+        # 2) 일반 <img> 태그의 지연 로딩(data-src 등) 및 srcset 수집 (국내/해외 공통)
+        for img in container.find_all("img"):
+            # 너무 작은 썸네일/아이콘 속성 필터링
+            w = img.get("width")
+            h = img.get("height")
+            if w and w.isdigit() and int(w) < 200:
+                continue
+            if h and h.isdigit() and int(h) < 120:
+                continue
+
+            src = (
+                img.get("data-src")
+                or img.get("data-lazy-src")
+                or img.get("data-original")
+                or img.get("data-img-url")
+                or extract_best_from_srcset(img.get("data-srcset") or img.get("srcset"))
+                or img.get("src")
+            )
+            try_add_image(src)
+            if len(images) >= 6:
+                return
+
     try:
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        html = urllib.request.urlopen(req, timeout=15).read().decode("utf-8", errors="ignore")
+        raw_bytes = urllib.request.urlopen(req, timeout=15).read()
+        html = decode_html_bytes(raw_bytes)
         soup = BeautifulSoup(html, "html.parser")
 
         # 1. og:image 메타 태그를 1순위 대표 이미지로 추출
@@ -126,22 +201,23 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         if not images and feed_img:
             try_add_image(feed_img)
 
-        # 3. 본문 영역 내 고화질 차량 사진 추가 수집 (최대 6장)
+        # 3. 본문 영역 내 고화질 차량 사진 추가 수집 (국내 NDSoft + 해외 미디어 셀렉터 통합)
         article_elem = (
-            soup.find("div", id=re.compile(r"article-view-content-div|articleBody", re.I)) or
-            soup.find("article") or
-            soup.find("div", class_=re.compile(r"article-body|entry-content|content|post-body|view-content", re.I)) or
-            soup.body
+            soup.find("div", id=re.compile(r"article-view-content-div|articleBody|news_body_area", re.I))
+            or soup.find("article")
+            or soup.find("div", class_=re.compile(r"article-body|entry-content|post-content|view-content|content-body", re.I))
+            or soup.body
         )
 
         if article_elem:
-            for img in article_elem.find_all("img"):
-                src = img.get("data-src") or img.get("data-original") or img.get("src")
-                if not src and img.get("srcset"):
-                    src = img.get("srcset").split(",")[0].split(" ")[0]
-                try_add_image(src)
-                if len(images) >= 6:
-                    break
+            scan_container_images(article_elem)
+
+            # 본문 안에서 3장 미만만 잡혔을 경우, 페이지 내 figure/갤러리 영역까지 2차 확장 탐색
+            if len(images) < 3:
+                for gallery_box in soup.find_all(["figure", "div"], class_=re.compile(r"gallery|slider|photo|media|image", re.I)):
+                    scan_container_images(gallery_box)
+                    if len(images) >= 6:
+                        break
 
             paragraphs = [
                 p.get_text().strip()
