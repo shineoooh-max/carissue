@@ -15,11 +15,8 @@
   "description": "전설적인 라이트닝의 순수 혈통 재현할 가성비 고성능 트럭 기대감",
   "image": [
     "https://hips.hearstapps.com/hmg-prod/images/719b859d-c30c-422a-876c-0ba9006dfd81.png?crop=1xw:0.75xh;0xw,0.201xh&resize=1200:*",
-    "https://www.caranddriver.com/news/a74426798/ford-f150-lobo-regular-cab-street-truck-spied/top&resize=980:*",
-    "https://www.caranddriver.com/news/a74426798/ford-f150-lobo-regular-cab-street-truck-spied/0xh&resize=980:*",
-    "https://www.caranddriver.com/news/a74426798/ford-f150-lobo-regular-cab-street-truck-spied/0.035xh&resize=980:*",
-    "https://hips.hearstapps.com/hmg-prod/images/0ff21c2f-f0b3-4687-9db1-9a94b67733a1.jpg?crop=0.713xw:0.535xh;0.133xw,0.209xh&resize=300:*",
-    "https://hips.hearstapps.com/hmg-prod/images/2025-ford-f-150-lobo-pr-101-6849e1aa917f8.jpg?crop=0.714xw:0.543xh;0.286xw,0.258xh&resize=300:*"
+    "https://hips.hearstapps.com/hmg-prod/images/0ff21c2f-f0b3-4687-9db1-9a94b67733a1.jpg?crop=0.713xw:0.535xh;0.133xw,0.209xh&resize=1200:*",
+    "https://hips.hearstapps.com/hmg-prod/images/2025-ford-f-150-lobo-pr-101-6849e1aa917f8.jpg?crop=0.714xw:0.543xh;0.286xw,0.258xh&resize=1200:*"
   ],
   "datePublished": "2026-11-14T15:38:29.668486+09:00",
   "author": [
@@ -166,12 +163,16 @@
 
         /* 대표 이미지 */
         .featured-img-wrap {
-            margin-bottom: 32px;
+            margin-bottom: 28px;
             border-radius: 8px;
             overflow: hidden;
-            background: #f4f4f5;
+            background: #ffffff;
         }
-        .featured-img-wrap img { width: 100%; height: auto; }
+        .featured-img-wrap img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
 
         /* 본문 가독성 스타일 (17px 고정, 한 템포 호흡) */
         .post-content {
@@ -198,14 +199,18 @@
             word-break: keep-all;
         }
         .content-img {
-            margin: 26px 0 30px;
+            margin: 24px 0 12px;
             border-radius: 6px;
             overflow: hidden;
-            background: #f4f4f5;
+            background: #ffffff;
         }
-        .content-img img { width: 100%; height: auto; }
+        .content-img img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
 
-        .ad-in-article { margin: 34px 0; text-align: center; }
+        .ad-in-article { margin: 24px 0 28px; text-align: center; }
         .ad-bottom { margin: 40px 0; }
         .ad-multiplex { margin: 36px 0; }
 
@@ -234,7 +239,12 @@
         .related-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 20px 16px;
+        }
+        @media (max-width: 768px) {
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         @media (max-width: 640px) {
             .related-grid { grid-template-columns: 1fr; }
@@ -324,7 +334,7 @@
         .article-summary-box {
             border-left: 3px solid #e11d48;
             padding: 4px 0 4px 16px;
-            margin: 0 0 32px 0;
+            margin: 0 0 22px 0;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -336,34 +346,21 @@
             line-height: 1.45;
             letter-spacing: -0.02em;
         }
-
-        /* 추천 뉴스 3칸 x 2줄 (총 6개) 그리드 */
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px 16px;
-        }
-        @media (max-width: 768px) {
-            .related-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
     </style>
 </head>
 <body>
     <header class="site-header">
-    <div class="header-inner" style="padding: 4px 20px; min-height: 62px;">
-        <a href="/" class="logo" style="display: flex; align-items: center;">
-            <img src="/assets/logo.png?v=3" alt="CARISSUE" style="height: 52px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
-        </a>
-        <nav class="main-nav">
-            <a href="/" class="nav-item">최신뉴스</a>
-            <a href="/about.html" class="nav-item">소개</a>
-        </nav>
-    </div>
-</header>
-
+        <div class="header-inner" style="padding: 4px 20px; min-height: 62px;">
+            <a href="/" class="logo" style="display: flex; align-items: center;">
+                <img src="/assets/logo.png?v=3" alt="CARISSUE" style="height: 52px; width: auto; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-text" style="display: none;">CAR<span>ISSUE</span></div>
+            </a>
+            <nav class="main-nav">
+                <a href="/" class="nav-item">최신뉴스</a>
+                <a href="/about.html" class="nav-item">소개</a>
+            </nav>
+        </div>
+    </header>
 
     <div class="post-layout">
         <main class="post-main">
@@ -376,59 +373,71 @@
                 <button type="button" class="share-btn" id="openShareModalBtn">공유</button>
             </div>
 
+            <!-- 레드라인 핵심 요약 목차 (메인 이미지 상단 배치) -->
+            <div class="article-summary-box">
+                <div class="summary-line">2도어 싱글캡의 깜짝 등장</div>
+                <div class="summary-line">범상치 않은 고성능의 단서들</div>
+                <div class="summary-line">램 럼블비에 맞설 강력한 카드</div>
+            </div>
+
+            <!-- 메인 대표 이미지 + 출처 캡션 -->
             <div class="featured-img-wrap">
-                <img src="https://hips.hearstapps.com/hmg-prod/images/719b859d-c30c-422a-876c-0ba9006dfd81.png?crop=1xw:0.75xh;0xw,0.201xh&resize=1200:*" alt="2도어 정통의 귀환? 포드 F-150 로보 싱글캡 스파이샷 포착">
+                <img src="https://hips.hearstapps.com/hmg-prod/images/719b859d-c30c-422a-876c-0ba9006dfd81.png?crop=1xw:0.75xh;0xw,0.201xh&resize=1200:*" alt="2도어 정통의 귀환? 포드 F-150 로보 싱글캡 스파이샷 포착" referrerpolicy="no-referrer">
+                <div class="featured-caption" style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - Car and Driver</div>
             </div>
 
             <article class="post-content">
-                
-    <div class="google-pref-wrap" style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 16px; margin:0 0 24px 0; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; background:#fafafa;">
-        <a href="https://www.google.com/preferences/source?q=carissue.koo1000.com" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#ffffff; border:1px solid #dadce0; border-radius:999px; text-decoration:none; color:#1a73e8; font-size:13px; font-weight:700; box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
-                <path fill="#34A853" d="M12 24c3.3 0 6.08-1.09 8.1-2.96l-3.88-3.05c-1.1.74-2.51 1.18-4.22 1.18-3.24 0-5.99-2.19-6.97-5.13H1.02v3.14C3.05 21.2 7.24 24 12 24Z"/>
-                <path fill="#FBBC05" d="M5.03 14.04c-.25-.74-.39-1.54-.39-2.36 0-.82.14-1.62.39-2.36V6.18H1.02C.37 7.47 0 8.93 0 10.48s.37 3.01 1.02 4.3l4.01-3.14Z"/>
-                <path fill="#EA4335" d="M12 4.75c1.79 0 3.41.62 4.68 1.82l3.51-3.51C18.07 1.19 15.3 0 12 0 7.24 0 3.05 2.8 1.02 6.82l4.01 3.14c.98-2.94 3.73-5.21 6.97-5.21Z"/>
-            </svg>
-            <span>구글 검색 선호 출처로 추가</span>
-        </a>
-        <span style="font-size:13px; color:#5f6368; line-height:1.4;">Google 검색과 디스커버에서 CARISSUE 기사를 더 자주 볼 수 있습니다.</span>
-    </div>
-    
+                <div class="google-pref-wrap" style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 16px; margin:0 0 24px 0; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; background:#fafafa;">
+                    <a href="https://www.google.com/preferences/source?q=carissue.koo1000.com" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#ffffff; border:1px solid #dadce0; border-radius:999px; text-decoration:none; color:#1a73e8; font-size:13px; font-weight:700; box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                            <path fill="#34A853" d="M12 24c3.3 0 6.08-1.09 8.1-2.96l-3.88-3.05c-1.1.74-2.51 1.18-4.22 1.18-3.24 0-5.99-2.19-6.97-5.13H1.02v3.14C3.05 21.2 7.24 24 12 24Z"/>
+                            <path fill="#FBBC05" d="M5.03 14.04c-.25-.74-.39-1.54-.39-2.36 0-.82.14-1.62.39-2.36V6.18H1.02C.37 7.47 0 8.93 0 10.48s.37 3.01 1.02 4.3l4.01-3.14Z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.79 0 3.41.62 4.68 1.82l3.51-3.51C18.07 1.19 15.3 0 12 0 7.24 0 3.05 2.8 1.02 6.82l4.01 3.14c.98-2.94 3.73-5.21 6.97-5.21Z"/>
+                        </svg>
+                        <span>구글 검색 선호 출처로 추가</span>
+                    </a>
+                    <span style="font-size:13px; color:#5f6368; line-height:1.4;">Google 검색과 디스커버에서 CARISSUE 기사를 더 자주 볼 수 있습니다.</span>
+                </div>
 
-        <div class="article-summary-box">
-            <div class='summary-line'>2도어 싱글캡의 깜짝 등장</div><div class='summary-line'>범상치 않은 고성능의 단서들</div><div class='summary-line'>램 럼블비에 맞설 강력한 카드</div>
-        </div>
-        
-<h3>2도어 싱글캡의 깜짝 등장</h3>
-<p>포드가 선보인 신형 F-150 로보는 과거 가솔린 시절 명성을 떨친 SVT 라이트닝의 계보를 잇는 스트리트 픽업트럭입니다. V8 엔진과 낮아진 차고로 무장했으나 4도어 모델로만 출시되어 클래식 팬들에게는 다소 아쉬움을 남겼습니다.</p>
-<p>하지만 최근 포착된 위장막 테스트카는 마니아들의 기대를 다시 불태우고 있습니다. 베이스 모델인 XL 트림의 2도어 레귤러 캡 차체에 로보 전용으로 알려진 각진 프런트 범퍼를 장착한 모습이 확인되었기 때문입니다.</p>
-<h3>범상치 않은 고성능의 단서들</h3>
-<p>차량의 하체와 디테일에서도 의미심장한 요소들이 포착되었습니다. 로보와 동일한 22인치 6-스포크 휠을 장착했지만, 타이어는 브리지스톤 대신 포드 퍼포먼스 FP700S에 주로 쓰이는 미쉐린 프라이머시 LTX를 장착했습니다.</p>
-<div class="content-img" style="margin: 24px 0 12px 0;"><img src="https://www.caranddriver.com/news/a74426798/ford-f150-lobo-regular-cab-street-truck-spied/top&resize=980:*" alt="2도어 정통의 귀환? 포드 F-150 로보 싱글캡 스파이샷 포착" referrerpolicy="no-referrer" loading="lazy"></div>
+                <h3>2도어 싱글캡의 깜짝 등장</h3>
+                <p>포드가 선보인 신형 F-150 로보는 과거 가솔린 시절 명성을 떨친 SVT 라이트닝의 계보를 잇는 스트리트 픽업트럭입니다. V8 엔진과 낮아진 차고로 무장했으나 4도어 모델로만 출시되어 클래식 팬들에게는 다소 아쉬움을 남겼습니다.</p>
+                <p>하지만 최근 포착된 위장막 테스트카는 마니아들의 기대를 다시 불태우고 있습니다. 베이스 모델인 XL 트림의 2도어 레귤러 캡 차체에 로보 전용으로 알려진 각진 프런트 범퍼를 장착한 모습이 확인되었기 때문입니다.</p>
 
-        <div class="ad-in-article" style="margin: 24px 0 28px 0;">
-            <ins class="adsbygoogle"
-                 style="display:block; text-align:center;"
-                 data-ad-layout="in-article"
-                 data-ad-format="fluid"
-                 data-ad-client="ca-pub-4793184080983542"
-                 data-ad-slot="4181249863"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-        
-<p>여기에 호박색 주간주행등과 스포티한 듀얼 머플러 팁이 더해져 눈길을 끕니다. 엔진룸의 정체는 아직 베일에 싸여 있지만, 최고출력 700마력을 뿜어내는 5.0리터 V8 슈퍼차저 패키지의 탑재 가능성까지 조심스럽게 점쳐집니다.</p>
-<h3>램 럼블비에 맞설 강력한 카드</h3>
-<p>만약 이 차량이 2도어 로보로 공식 출시된다면 가격 경쟁력은 비약적으로 상승할 전망입니다. 현재 6만 달러(약 8,300만 원)에 육박하는 4도어 슈퍼크루 사양보다 훨씬 저렴한 가격에 접근할 수 있기 때문입니다.</p>
-<div class="content-img" style="margin: 24px 0;"><img src="https://www.caranddriver.com/news/a74426798/ford-f150-lobo-regular-cab-street-truck-spied/0xh&resize=980:*" alt="2도어 정통의 귀환? 포드 F-150 로보 싱글캡 스파이샷 포착" referrerpolicy="no-referrer" loading="lazy"></div>
-<p>최근 램(Ram) 역시 '럼블비(Rumble Bee)' 머슬 트럭의 부활을 준비하며 공도용 고성능 픽업 시장을 정조준하고 있습니다. 포드가 오리지널 라이트닝의 헤리티지를 품은 2도어 카드로 맞불을 놓을지 글로벌 팬들의 이목이 집중됩니다.</p>
+                <h3>범상치 않은 고성능의 단서들</h3>
+                <p>차량의 하체와 디테일에서도 의미심장한 요소들이 포착되었습니다. 로보와 동일한 22인치 6-스포크 휠을 장착했지만, 타이어는 브리지스톤 대신 포드 퍼포먼스 FP700S에 주로 쓰이는 미쉐린 프라이머시 LTX를 장착했습니다.</p>
+
+                <figure class="content-img" style="margin: 24px 0 12px 0;">
+                    <img src="https://hips.hearstapps.com/hmg-prod/images/0ff21c2f-f0b3-4687-9db1-9a94b67733a1.jpg?crop=0.713xw:0.535xh;0.133xw,0.209xh&resize=1200:*" alt="2도어 정통의 귀환? 포드 F-150 로보 싱글캡 스파이샷 포착" referrerpolicy="no-referrer" loading="lazy" onerror="this.closest('.content-img').style.display='none';">
+                    <figcaption style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - Car and Driver</figcaption>
+                </figure>
+
+                <div class="ad-in-article" style="margin: 24px 0 28px 0;">
+                    <ins class="adsbygoogle"
+                         style="display:block; text-align:center;"
+                         data-ad-layout="in-article"
+                         data-ad-format="fluid"
+                         data-ad-client="ca-pub-4793184080983542"
+                         data-ad-slot="4181249863"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                </div>
+
+                <p>여기에 호박색 주간주행등과 스포티한 듀얼 머플러 팁이 더해져 눈길을 끕니다. 엔진룸의 정체는 아직 베일에 싸여 있지만, 최고출력 700마력을 뿜어내는 5.0리터 V8 슈퍼차저 패키지의 탑재 가능성까지 조심스럽게 점쳐집니다.</p>
+
+                <h3>램 럼블비에 맞설 강력한 카드</h3>
+                <p>만약 이 차량이 2도어 로보로 공식 출시된다면 가격 경쟁력은 비약적으로 상승할 전망입니다. 현재 6만 달러(약 8,300만 원)에 육박하는 4도어 슈퍼크루 사양보다 훨씬 저렴한 가격에 접근할 수 있기 때문입니다.</p>
+
+                <figure class="content-img" style="margin: 24px 0 12px 0;">
+                    <img src="https://hips.hearstapps.com/hmg-prod/images/2025-ford-f-150-lobo-pr-101-6849e1aa917f8.jpg?crop=0.714xw:0.543xh;0.286xw,0.258xh&resize=1200:*" alt="2도어 정통의 귀환? 포드 F-150 로보 싱글캡 스파이샷 포착" referrerpolicy="no-referrer" loading="lazy" onerror="this.closest('.content-img').style.display='none';">
+                    <figcaption style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - Car and Driver</figcaption>
+                </figure>
+
+                <p>최근 램(Ram) 역시 '럼블비(Rumble Bee)' 머슬 트럭의 부활을 준비하며 공도용 고성능 픽업 시장을 정조준하고 있습니다. 포드가 오리지널 라이트닝의 헤리티지를 품은 2도어 카드로 맞불을 놓을지 글로벌 팬들의 이목이 집중됩니다.</p>
             </article>
 
-            
-    <div class="copyright-notice">
-        ※ 본 기사는 각 언론사(Car and Driver 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
-    </div>
-    
+            <div class="copyright-notice">
+                ※ 본 기사는 각 언론사(Car and Driver 등)의 공식 보도자료 및 외신 브리핑을 바탕으로 CARISSUE 편집국의 분석을 더해 재구성되었으며, 대표 이미지의 저작권은 해당 원문 출처에 있습니다.
+            </div>
 
             <div class="ad-bottom">
                 <ins class="adsbygoogle"
@@ -452,37 +461,30 @@
             <div class="related-wrap">
                 <div class="related-title">CARISSUE 주요 추천 뉴스</div>
                 <div class="related-grid">
-                    
-        <a href="/posts/post_1794638288_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/nAbWEG/s3/tesla-cybercab-la-auto-show-2024.jpg" alt="4천만 원대 테슬라 사이버캡 주문 개시, 파격가 이면에 숨은 구독료" referrerpolicy="no-referrer" loading="lazy"></div>
-            <div class="rel-title">4천만 원대 테슬라 사이버캡 주문 개시, 파격가 이면에 숨은 구독료</div>
-        </a>
-        
-        <a href="/posts/post_1794638277_2.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/1ZPjyL/s3/porsche-mission-s-spy-video.jpg" alt="뉘르부르크링에 뜬 포르쉐 차세대 슈퍼카, '미션 S'의 깜짝 등장" referrerpolicy="no-referrer" loading="lazy"></div>
-            <div class="rel-title">뉘르부르크링에 뜬 포르쉐 차세대 슈퍼카, '미션 S'의 깜짝 등장</div>
-        </a>
-        
-        <a href="/posts/post_1794638264_1.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/this-isnt-a-new-ducati-its-actually-a-chinese-superbike/l-intro-1794609567.jpg" alt="두카티인 줄 알았는데 중국산? 210마력 슈퍼바이크 CFMOTO V4SR-RR" referrerpolicy="no-referrer" loading="lazy"></div>
-            <div class="rel-title">두카티인 줄 알았는데 중국산? 210마력 슈퍼바이크 CFMOTO V4SR-RR</div>
-        </a>
-        
-        <a href="/posts/post_1794638248_0.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/john-hennessey-says-the-blackbird-is-about-much-more-than-big-numbers/l-intro-1794602449.jpg" alt="2,000마력 내려놓은 헤네시, 순수 감성 품은 하이퍼카 '블랙버드'" referrerpolicy="no-referrer" loading="lazy"></div>
-            <div class="rel-title">2,000마력 내려놓은 헤네시, 순수 감성 품은 하이퍼카 '블랙버드'</div>
-        </a>
-        
-        <a href="/posts/post_1794612633_4.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62174_120181_046_v150.jpg" alt="100년의 헤리티지를 품은 12대의 예술품, 벤틀리 '올림피아 콜렉션' 공개" referrerpolicy="no-referrer" loading="lazy"></div>
-            <div class="rel-title">100년의 헤리티지를 품은 12대의 예술품, 벤틀리 '올림피아 콜렉션' 공개</div>
-        </a>
-        
-        <a href="/posts/post_1794612615_3.html" class="rel-card">
-            <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62175_120185_2738_v150.jpg" alt="전고체 배터리의 난제 풀었다… 퀀텀스케이프, ‘상압·1000회 수명’ 혁신 기술 공개" referrerpolicy="no-referrer" loading="lazy"></div>
-            <div class="rel-title">전고체 배터리의 난제 풀었다… 퀀텀스케이프, ‘상압·1000회 수명’ 혁신 기술 공개</div>
-        </a>
-        
+                    <a href="/posts/post_1794638288_3.html" class="rel-card">
+                        <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/nAbWEG/s3/tesla-cybercab-la-auto-show-2024.jpg" alt="4천만 원대 테슬라 사이버캡 주문 개시, 파격가 이면에 숨은 구독료" referrerpolicy="no-referrer" loading="lazy"></div>
+                        <div class="rel-title">4천만 원대 테슬라 사이버캡 주문 개시, 파격가 이면에 숨은 구독료</div>
+                    </a>
+                    <a href="/posts/post_1794638277_2.html" class="rel-card">
+                        <div class="rel-thumb"><img src="https://cdn.motor1.com/images/mgl/1ZPjyL/s3/porsche-mission-s-spy-video.jpg" alt="뉘르부르크링에 뜬 포르쉐 차세대 슈퍼카, '미션 S'의 깜짝 등장" referrerpolicy="no-referrer" loading="lazy"></div>
+                        <div class="rel-title">뉘르부르크링에 뜬 포르쉐 차세대 슈퍼카, '미션 S'의 깜짝 등장</div>
+                    </a>
+                    <a href="/posts/post_1794638264_1.html" class="rel-card">
+                        <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/this-isnt-a-new-ducati-its-actually-a-chinese-superbike/l-intro-1794609567.jpg" alt="두카티인 줄 알았는데 중국산? 210마력 슈퍼바이크 CFMOTO V4SR-RR" referrerpolicy="no-referrer" loading="lazy"></div>
+                        <div class="rel-title">두카티인 줄 알았는데 중국산? 210마력 슈퍼바이크 CFMOTO V4SR-RR</div>
+                    </a>
+                    <a href="/posts/post_1794638248_0.html" class="rel-card">
+                        <div class="rel-thumb"><img src="https://www.carscoops.com/img/gallery/john-hennessey-says-the-blackbird-is-about-much-more-than-big-numbers/l-intro-1794602449.jpg" alt="2,000마력 내려놓은 헤네시, 순수 감성 품은 하이퍼카 '블랙버드'" referrerpolicy="no-referrer" loading="lazy"></div>
+                        <div class="rel-title">2,000마력 내려놓은 헤네시, 순수 감성 품은 하이퍼카 '블랙버드'</div>
+                    </a>
+                    <a href="/posts/post_1794612633_4.html" class="rel-card">
+                        <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62174_120181_046_v150.jpg" alt="100년의 헤리티지를 품은 12대의 예술품, 벤틀리 '올림피아 콜렉션' 공개" referrerpolicy="no-referrer" loading="lazy"></div>
+                        <div class="rel-title">100년의 헤리티지를 품은 12대의 예술품, 벤틀리 '올림피아 콜렉션' 공개</div>
+                    </a>
+                    <a href="/posts/post_1794612615_3.html" class="rel-card">
+                        <div class="rel-thumb"><img src="https://cdn.autoherald.co.kr/news/thumbnail/202611/62175_120185_2738_v150.jpg" alt="전고체 배터리의 난제 풀었다… 퀀텀스케이프, ‘상압·1000회 수명’ 혁신 기술 공개" referrerpolicy="no-referrer" loading="lazy"></div>
+                        <div class="rel-title">전고체 배터리의 난제 풀었다… 퀀텀스케이프, ‘상압·1000회 수명’ 혁신 기술 공개</div>
+                    </a>
                 </div>
             </div>
         </main>
@@ -511,17 +513,16 @@
     </div>
 
     <footer class="site-footer">
-    <div class="footer-inner">
-        <div class="footer-links">
-            <a href="/about.html">About Us</a> &bull;
-            <a href="/privacy.html">개인정보처리방침</a> &bull;
-            <a href="/terms.html">이용약관</a> &bull;
-            <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="/about.html">About Us</a> &bull;
+                <a href="/privacy.html">개인정보처리방침</a> &bull;
+                <a href="/terms.html">이용약관</a> &bull;
+                <a href="mailto:shineoooh@gmail.com">광고·제휴 문의</a>
+            </div>
+            <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
         </div>
-        <p class="copyright">&copy; 2026 CARISSUE. All rights reserved.</p>
-    </div>
-</footer>
-
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
