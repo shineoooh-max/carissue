@@ -67,7 +67,7 @@ def build_google_preferred_banner():
     """
 
 
-def parse_markdown_to_html(generated_md, fallback_title, images):
+def parse_markdown_to_html(generated_md, fallback_title, images, source="CARISSUE"):
     lines = generated_md.split("\n")
     post_title = fallback_title
     subtitle = ""
@@ -117,16 +117,17 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
 
     flush_paragraph()
 
-    content_html_parts = []
-
-    # 1. 본문 최상단: 왼쪽 빨간 세로줄 핵심 요약 박스 (3~4줄)
+    # 왼쪽 빨간 세로줄 핵심 요약 박스 HTML 생성 (메인 이미지 위로 배치하기 위해 별도 보관)
+    summary_box_html = ""
     if summary_points:
         summary_items_html = "".join(f"<div class='summary-line'>{pt}</div>" for pt in summary_points[:4])
-        content_html_parts.append(f"""
-        <div class="article-summary-box">
+        summary_box_html = f"""
+        <div class="article-summary-box" style="margin: 0 0 22px 0;">
             {summary_items_html}
         </div>
-        """)
+        """
+
+    content_html_parts = []
 
     def make_ad_block():
         return f"""
@@ -141,6 +142,14 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
         </div>
         """
 
+    def make_content_img_block(img_url):
+        return f"""
+        <figure class="content-img" style="margin: 24px 0 12px 0;">
+            <img src="{img_url}" alt="{post_title}" referrerpolicy="no-referrer" loading="lazy" onerror="this.closest('.content-img').style.display='none';">
+            <figcaption style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - {source}</figcaption>
+        </figure>
+        """
+
     # 유효한 실제 크롤링 이미지 필터링 (images[0]은 상단 대표이미지, images[1:]는 본문 추가 이미지)
     valid_imgs = [img for img in images if img and "/assets/logo.png" not in img]
     extra_imgs = valid_imgs[1:]
@@ -151,7 +160,7 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
     ad_counter = 0
     max_in_article_ads = 3
 
-    # 세 템포(3문단)마다 [추가 이미지] + 그 바로 아래 [중간광고] 세트 배치 (추가 이미지가 없으면 중간광고만 단독 배치, 최대 3회)
+    # 세 템포(3문단)마다 [추가 이미지 + 출처 캡션] + 그 바로 아래 [중간광고] 세트 배치
     for b_type, b_text in body_blocks:
         if b_type == "h3":
             content_html_parts.append(f"<h3>{b_text}</h3>")
@@ -165,25 +174,18 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
         if p_counter >= total_p_count:
             continue
 
-        # 3문단(세 템포) 단위 체크포인트: 3, 6, 9...
         if p_counter % 3 == 0:
-            # 1) 추가 이미지가 남아 있으면 먼저 삽입
             if extra_img_idx < len(extra_imgs):
-                content_html_parts.append(
-                    f'<div class="content-img" style="margin: 24px 0 12px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" referrerpolicy="no-referrer" loading="lazy"></div>'
-                )
+                content_html_parts.append(make_content_img_block(extra_imgs[extra_img_idx]))
                 extra_img_idx += 1
-            # 2) 이미지 바로 아래(또는 이미지가 없는 경우 해당 위치)에 중간광고 배치 (최대 3개)
             if ad_counter < max_in_article_ads:
                 content_html_parts.append(make_ad_block())
                 ad_counter += 1
 
-    # 본문이 짧아 3문단 체크포인트가 부족해 미처 들어가지 못한 추가 이미지가 남아있다면 마지막 문단 직전에 보충
     if extra_img_idx < len(extra_imgs) and len(content_html_parts) > 1:
-        remaining_img_html = f'<div class="content-img" style="margin: 24px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" referrerpolicy="no-referrer" loading="lazy"></div>'
-        content_html_parts.insert(-1, remaining_img_html)
+        content_html_parts.insert(-1, make_content_img_block(extra_imgs[extra_img_idx]))
 
-    return post_title, subtitle, "\n".join(content_html_parts)
+    return post_title, subtitle, summary_box_html, "\n".join(content_html_parts)
 
 
 def build_article_page(item_data, all_posts, article_tpl):
@@ -196,6 +198,7 @@ def build_article_page(item_data, all_posts, article_tpl):
     date_str = item_data.get("date", get_now_kst())
     category = item_data.get("category", "국내 이슈")
     source = item_data.get("source", config.SITE_NAME)
+    summary_box_html = item_data.get("summary_box_html", "")
 
     schema_ld = {
         "@context": "https://schema.org",
@@ -233,13 +236,25 @@ def build_article_page(item_data, all_posts, article_tpl):
     html = article_tpl
     if not featured_img:
         html = re.sub(r'<div class="featured-img-wrap">.*?</div>', "", html, flags=re.DOTALL)
-
-    # 구글 선호 출처 배너를 본문 최상단(대표 이미지 바로 아래, 요약 박스 위)에 자동 결합
-    raw_content_html = item_data.get("content_html", "")
-    if "google-pref-wrap" not in raw_content_html:
-        full_article_content = build_google_preferred_banner() + "\n" + raw_content_html
     else:
-        full_article_content = raw_content_html
+        # 대표 메인 이미지 하단에 '출처 - {source}' 캡션 추가 + 요약 목차를 메인 이미지 바로 위로 배치
+        caption_tag = f'<div class="featured-caption" style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - {source}</div>'
+        html = re.sub(
+            r'(<div class="featured-img-wrap">.*?)(</div>)',
+            rf'{summary_box_html}\n\1{caption_tag}\2',
+            html,
+            count=1,
+            flags=re.DOTALL
+        )
+        summary_box_html = ""
+
+    # 구글 선호 출처 배너 결합 (대표 이미지가 없는 기사라면 요약 목차도 함께 상단 결합)
+    raw_content_html = item_data.get("content_html", "")
+    prefix_blocks = [summary_box_html] if summary_box_html else []
+    if "google-pref-wrap" not in raw_content_html:
+        prefix_blocks.append(build_google_preferred_banner())
+    prefix_blocks.append(raw_content_html)
+    full_article_content = "\n".join(b for b in prefix_blocks if b)
 
     replacements = {
         "{{SITE_HEADER}}": load_template("header.html"),
@@ -462,7 +477,7 @@ def scan_existing_posts(exclude_ids):
                             t_html = child.decode_contents().strip()
                             if t_html:
                                 cleaned_body_parts.append(f"<p>{t_html}</p>")
-                        elif tag_name == "div" and "content-img" in child.get("class", []):
+                        elif tag_name in ["div", "figure"] and "content-img" in child.get("class", []):
                             cleaned_body_parts.append(str(child))
                         elif tag_name == "div" and "ad-in-article" in child.get("class", []):
                             cleaned_body_parts.append(str(child))
@@ -476,6 +491,7 @@ def scan_existing_posts(exclude_ids):
                     "date": rec_date,
                     "iso_date": rec_date[:10],
                     "images": rec_images,
+                    "summary_box_html": "",
                     "content_html": "\n".join(cleaned_body_parts)
                 })
         except Exception as err:
@@ -516,8 +532,8 @@ def main():
                 if not generated_md:
                     continue
 
-                post_title, subtitle, content_html = parse_markdown_to_html(
-                    generated_md, item["title"], images
+                post_title, subtitle, summary_box_html, content_html = parse_markdown_to_html(
+                    generated_md, item["title"], images, item["source"]
                 )
 
                 post_id = f"post_{int(time.time())}_{len(new_articles)}"
@@ -532,6 +548,7 @@ def main():
                     "date": now_dt.strftime("%Y-%m-%d %H:%M"),
                     "iso_date": now_dt.isoformat(),
                     "images": images,
+                    "summary_box_html": summary_box_html,
                     "content_html": content_html
                 })
                 save_history(item["link"])
