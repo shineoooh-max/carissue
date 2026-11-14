@@ -48,7 +48,6 @@ def get_img_fingerprint(img_url):
     fname = re.sub(r"-\d+x\d+(?=\.[a-z]+$)", "", fname)
     fname = re.sub(r"_(thumb|small|medium|large|s|m|l)(?=\.[a-z]+$)", "", fname)
 
-    # 쿼리스트링에 고유 이미지 ID가 포함된 경우(예: ?id=1234) 함께 지문으로 사용
     qs = parse_qs(parsed.query)
     id_part = ""
     for key in ("id", "img", "file", "idx", "photo"):
@@ -138,6 +137,9 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         lower_u = full_url.lower()
         if any(x in lower_u for x in BLOCKED_IMG_KEYWORDS):
             return
+        # 템플릿 치환자({width} 등)나 비정상 이스케이프가 포함된 깨진 CDN URL 제외
+        if "{" in full_url or "}" in full_url or "\\u" in full_url:
+            return
         # SVG/GIF 아이콘성 확장자 제외
         if urlparse(lower_u).path.endswith((".svg", ".gif")):
             return
@@ -166,7 +168,6 @@ def extract_article_details(url, feed_img="", feed_desc=""):
 
         # 2) 일반 <img> 태그의 지연 로딩(data-src 등) 및 srcset 수집 (국내/해외 공통)
         for img in container.find_all("img"):
-            # 너무 작은 썸네일/아이콘 속성 필터링
             w = img.get("width")
             h = img.get("height")
             if w and w.isdigit() and int(w) < 200:
@@ -212,7 +213,6 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         if article_elem:
             scan_container_images(article_elem)
 
-            # 본문 안에서 3장 미만만 잡혔을 경우, 페이지 내 figure/갤러리 영역까지 2차 확장 탐색
             if len(images) < 3:
                 for gallery_box in soup.find_all(["figure", "div"], class_=re.compile(r"gallery|slider|photo|media|image", re.I)):
                     scan_container_images(gallery_box)
