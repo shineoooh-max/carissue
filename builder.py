@@ -130,7 +130,7 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
 
     def make_ad_block():
         return f"""
-        <div class="ad-in-article" style="margin: 28px 0;">
+        <div class="ad-in-article" style="margin: 24px 0 28px 0;">
             <ins class="adsbygoogle"
                  style="display:block; text-align:center;"
                  data-ad-layout="in-article"
@@ -151,7 +151,7 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
     ad_counter = 0
     max_in_article_ads = 3
 
-    # 두 템포(2문단)마다 [중간광고]와 [추가 이미지]를 번갈아 교차 배치
+    # 세 템포(3문단)마다 [추가 이미지] + 그 바로 아래 [중간광고] 세트 배치 (추가 이미지가 없으면 중간광고만 단독 배치, 최대 3회)
     for b_type, b_text in body_blocks:
         if b_type == "h3":
             content_html_parts.append(f"<h3>{b_text}</h3>")
@@ -161,33 +161,27 @@ def parse_markdown_to_html(generated_md, fallback_title, images):
         content_html_parts.append(f"<p>{clean_p}</p>")
         p_counter += 1
 
-        # 마지막 문단 직후에는 중간광고 및 추가 요소를 붙이지 않음 (하단 광고와 겹침 방지)
+        # 마지막 문단 직후에는 배치 생략 (하단 광고와 겹침 방지)
         if p_counter >= total_p_count:
             continue
 
-        # 2문단(두 템포) 단위 체크포인트: 2, 4, 6, 8...
-        if p_counter % 2 == 0:
-            step = p_counter // 2  # 1, 2, 3, 4...
-            # 홀수 스텝(2문단 뒤, 6문단 뒤, 10문단 뒤): 중간광고 배치
-            if step % 2 == 1:
-                if ad_counter < max_in_article_ads:
-                    content_html_parts.append(make_ad_block())
-                    ad_counter += 1
-                elif extra_img_idx < len(extra_imgs):
-                    content_html_parts.append(
-                        f'<div class="content-img" style="margin: 24px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" loading="lazy"></div>'
-                    )
-                    extra_img_idx += 1
-            # 짝수 스텝(4문단 뒤, 8문단 뒤): 본문 추가 이미지 배치 (없으면 건너뛰고 자연스럽게 텍스트 이어감)
-            else:
-                if extra_img_idx < len(extra_imgs):
-                    content_html_parts.append(
-                        f'<div class="content-img" style="margin: 24px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" loading="lazy"></div>'
-                    )
-                    extra_img_idx += 1
-                elif ad_counter < max_in_article_ads:
-                    content_html_parts.append(make_ad_block())
-                    ad_counter += 1
+        # 3문단(세 템포) 단위 체크포인트: 3, 6, 9...
+        if p_counter % 3 == 0:
+            # 1) 추가 이미지가 남아 있으면 먼저 삽입
+            if extra_img_idx < len(extra_imgs):
+                content_html_parts.append(
+                    f'<div class="content-img" style="margin: 24px 0 12px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" referrerpolicy="no-referrer" loading="lazy"></div>'
+                )
+                extra_img_idx += 1
+            # 2) 이미지 바로 아래(또는 이미지가 없는 경우 해당 위치)에 중간광고 배치 (최대 3개)
+            if ad_counter < max_in_article_ads:
+                content_html_parts.append(make_ad_block())
+                ad_counter += 1
+
+    # 본문이 짧아 3문단 체크포인트가 부족해 미처 들어가지 못한 추가 이미지가 남아있다면 마지막 문단 직전에 보충
+    if extra_img_idx < len(extra_imgs) and len(content_html_parts) > 1:
+        remaining_img_html = f'<div class="content-img" style="margin: 24px 0;"><img src="{extra_imgs[extra_img_idx]}" alt="{post_title}" referrerpolicy="no-referrer" loading="lazy"></div>'
+        content_html_parts.insert(-1, remaining_img_html)
 
     return post_title, subtitle, "\n".join(content_html_parts)
 
@@ -224,7 +218,7 @@ def build_article_page(item_data, all_posts, article_tpl):
         r_img = r_imgs[0] if r_imgs else "/assets/logo.png"
         related_html += f"""
         <a href="/posts/{r['id']}.html" class="rel-card">
-            <div class="rel-thumb"><img src="{r_img}" alt="{r['title']}" loading="lazy"></div>
+            <div class="rel-thumb"><img src="{r_img}" alt="{r['title']}" referrerpolicy="no-referrer" loading="lazy"></div>
             <div class="rel-title">{r['title']}</div>
         </a>
         """
@@ -291,7 +285,7 @@ def build_index_page(posts, index_tpl):
     top_hero_html = f"""
     <a href="/posts/{top_hero['id']}.html" class="hero-split">
         <div class="hero-split-img">
-            <img src="{get_thumb(top_hero)}" alt="{top_hero['title']}">
+            <img src="{get_thumb(top_hero)}" alt="{top_hero['title']}" referrerpolicy="no-referrer">
         </div>
         <div class="hero-split-body">
             <div class="hero-kicker">
@@ -310,7 +304,7 @@ def build_index_page(posts, index_tpl):
         sub_heroes_html += f"""
         <a href="/posts/{sh['id']}.html" class="sub-card">
             <div class="sub-card-img">
-                <img src="{get_thumb(sh)}" alt="{sh['title']}" loading="lazy">
+                <img src="{get_thumb(sh)}" alt="{sh['title']}" referrerpolicy="no-referrer" loading="lazy">
             </div>
             <div><span class="badge-red">{sh.get('category', '글로벌 뉴스')}</span></div>
             <h3>{sh['title']}</h3>
@@ -323,7 +317,7 @@ def build_index_page(posts, index_tpl):
         feed_list_html += f"""
         <a href="/posts/{lp['id']}.html" class="feed-item">
             <div class="feed-thumb">
-                <img src="{get_thumb(lp)}" alt="{lp['title']}" loading="lazy">
+                <img src="{get_thumb(lp)}" alt="{lp['title']}" referrerpolicy="no-referrer" loading="lazy">
             </div>
             <div class="feed-content">
                 <span class="badge-red">{lp.get('category', '국내 이슈')}</span>
@@ -445,6 +439,12 @@ def scan_existing_posts(exclude_ids):
                 if cat_el and "국내" in cat_el.get_text():
                     rec_cat = "국내 이슈"
 
+                # 기존 HTML 하단 저작권 문구에서 원문 언론사명 추출 및 보존
+                rec_source = config.SITE_NAME
+                src_match = re.search(r"각 언론사\((.+?)\s*등\)의", raw_html)
+                if src_match and src_match.group(1).strip():
+                    rec_source = src_match.group(1).strip()
+
                 article_el = h_soup.find("article", class_="post-content") or h_soup.find("article")
                 cleaned_body_parts = []
                 if article_el:
@@ -472,7 +472,7 @@ def scan_existing_posts(exclude_ids):
                     "title": rec_title,
                     "subtitle": rec_sub,
                     "category": rec_cat,
-                    "source": config.SITE_NAME,
+                    "source": rec_source,
                     "date": rec_date,
                     "iso_date": rec_date[:10],
                     "images": rec_images,
