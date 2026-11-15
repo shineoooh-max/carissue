@@ -1,6 +1,7 @@
 # parser.py - RSS 수집, 다중 고화질 이미지 추출, Gemini 기사 생성 전용 모듈
 import os
 import re
+import struct
 import urllib.request
 from urllib.parse import urljoin, urlparse, parse_qs
 import xml.etree.ElementTree as ET
@@ -12,7 +13,9 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 BLOCKED_IMG_KEYWORDS = [
     "logo", "icon", "banner", "btn", "favicon", "avatar", "ad_",
     "blank", "placeholder", "spinner", "loading", "1x1", "pixel",
-    "sprite", "sns", "share", "button", "badge", "author", "profile"
+    "sprite", "sns", "share", "button", "badge", "author", "profile",
+    "noimage", "no-image", "default", "reporter", "journalist", "brand",
+    "emblem", "ci_", "bi_", "thumb_s", "/skin/", "/common/", "/layout/"
 ]
 
 
@@ -55,6 +58,52 @@ def get_img_fingerprint(img_url):
             break
 
     return f"{fname}{id_part}" if fname else img_url
+
+
+def is_valid_large_image(img_url, min_width=450):
+    """실제 이미지 파일의 앞부분(헤더)만 빠르게 읽어 가로 해상도가 450px 이상인지 검증"""
+    try:
+        req = urllib.request.Request(
+            img_url,
+            headers={"User-Agent": USER_AGENT, "Range": "bytes=0-32768"}
+        )
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = resp.read(32768)
+
+        # PNG 헤더 파싱
+        if data[:8] == b"\x89PNG\r\n\x1a\n" and len(data) >= 24:
+            w, h = struct.unpack(">II", data[16:24])
+            return w >= min_width and h >= 220
+
+        # JPEG SOF 마커 파싱
+        if data[:2] == b"\xff\xd8":
+            idx = 2
+            while idx < len(data) - 9:
+                if data[idx] != 0xFF:
+                    idx += 1
+                    continue
+                marker = data[idx + 1]
+                if marker in (0xC0, 0xC1, 0xC2):
+                    h, w = struct.unpack(">HH", data[idx + 5:idx + 9])
+                    return w >= min_width and h >= 220
+                if marker in (0xD8, 0xD9, 0x01) or (0xD0 <= marker <= 0xD7):
+                    idx += 2
+                    continue
+                seg_len = struct.unpack(">H", data[idx + 2:idx + 4])[0]
+                idx += 2 + seg_len
+
+        # WebP 헤더 파싱
+        if data[:4] == b"RIFF" and data[8:12] == b"WEBP" and len(data) >= 30:
+            chunk = data[12:16]
+            if chunk == b"VP8X" and len(data) >= 30:
+                w = int.from_bytes(data[24:27], "little") + 1
+                h = int.from_bytes(data[27:30], "little") + 1
+                return w >= min_width and h >= 220
+
+        # 헤더 파싱이 어려운 CDN 응답은 최소 용량(15KB 이상)으로 1차 방어
+        return len(data) >= 15360
+    except Exception:
+        return False
 
 
 def decode_html_bytes(raw_bytes):
@@ -128,23 +177,32 @@ def extract_article_details(url, feed_img="", feed_desc=""):
     seen_fps = set()
     text_content = ""
     safe_desc = feed_desc or ""
+    is_korean_media = any(domain in url.lower() for domain in ("motorgraph.com", "carguy.kr", "autoherald.co.kr"))
 
-    def try_add_image(raw_src):
+    def try_add_image(raw_src, skip_size_check=False):
         full_url = normalize_img_url(url, raw_src)
         if not full_url or not full_url.startswith("http"):
             return
         lower_u = full_url.lower()
         if any(x in lower_u for x in BLOCKED_IMG_KEYWORDS):
             return
-        # 템플릿 치환자({width} 등)나 비정상 이스케이프가 포함된 깨진 CDN URL 제외
         if "{" in full_url or "}" in full_url or "\\u" in full_url:
             return
-        # SVG/GIF 아이콘성 확장자 제외
         if urlparse(lower_u).path.endswith((".svg", ".gif")):
             return
+
+        # 국내 언론사(모터그래프/카가이/오토헤럴드)는 기사 본문 업로드 경로(/news/photo/) 외 찌꺼기 이미지 원천 차단
+        if is_korean_media and "/news/photo/" not in lower_u:
+            return
+
         fp = get_img_fingerprint(full_url)
         if fp and fp in seen_fps:
             return
+
+        # og:image가 아닌 본문 추가 이미지는 실제 가로 450px 이상 고화질만 통과
+        if not skip_size_check and not is_valid_large_image(full_url, min_width=450):
+            return
+
         if full_url not in images:
             images.append(full_url)
             if fp:
@@ -162,16 +220,24 @@ def extract_article_details(url, feed_img="", feed_desc=""):
                 )
                 if best_src:
                     try_add_image(best_src)
-                    if len(images) >= 6:
+                    if len(images) >= 5:
                         return
 
         # 2) 일반 <img> 태그의 지연 로딩(data-src 등) 및 srcset 수집 (국내/해외 공통)
         for img in container.find_all("img"):
+            # 기자 프로필/관련기사/배너 박스 내부에 속한 img 태그 제외
+            parent_classes = " ".join(
+                " ".join(p.get("class", [])) + " " + (p.get("id") or "")
+                for p in img.parents if getattr(p, "get", None)
+            ).lower()
+            if any(bad in parent_classes for bad in ("reporter", "journalist", "profile", "author", "related", "recommend", "banner", "brand", "tag", "byline")):
+                continue
+
             w = img.get("width")
             h = img.get("height")
-            if w and w.isdigit() and int(w) < 200:
+            if w and w.isdigit() and int(w) < 300:
                 continue
-            if h and h.isdigit() and int(h) < 120:
+            if h and h.isdigit() and int(h) < 180:
                 continue
 
             src = (
@@ -183,7 +249,7 @@ def extract_article_details(url, feed_img="", feed_desc=""):
                 or img.get("src")
             )
             try_add_image(src)
-            if len(images) >= 6:
+            if len(images) >= 5:
                 return
 
     try:
@@ -195,28 +261,21 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         # 1. og:image 메타 태그를 1순위 대표 이미지로 추출
         og_img = soup.find("meta", property="og:image")
         if og_img and og_img.get("content"):
-            try_add_image(og_img["content"])
+            try_add_image(og_img["content"], skip_size_check=True)
 
         # 2. og:image가 없을 때만 feed_img 보조 활용
         if not images and feed_img:
-            try_add_image(feed_img)
+            try_add_image(feed_img, skip_size_check=True)
 
-        # 3. 본문 영역 내 고화질 차량 사진 추가 수집 (국내 NDSoft + 해외 미디어 셀렉터 통합)
+        # 3. 순수 기사 본문 영역만 정확히 타겟팅 (전체 <article>이나 페이지 전체 스캔 제거)
         article_elem = (
             soup.find("div", id=re.compile(r"article-view-content-div|articleBody|news_body_area", re.I))
-            or soup.find("article")
             or soup.find("div", class_=re.compile(r"article-body|entry-content|post-content|view-content|content-body", re.I))
-            or soup.body
+            or soup.find("article")
         )
 
         if article_elem:
             scan_container_images(article_elem)
-
-            if len(images) < 3:
-                for gallery_box in soup.find_all(["figure", "div"], class_=re.compile(r"gallery|slider|photo|media|image", re.I)):
-                    scan_container_images(gallery_box)
-                    if len(images) >= 6:
-                        break
 
             paragraphs = [
                 p.get_text().strip()
