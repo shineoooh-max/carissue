@@ -304,6 +304,7 @@ def build_article_page(item_data, all_posts, article_tpl):
         "{{POST_SUBTITLE_HTML}}": subtitle_html,
         "{{POST_CATEGORY}}": category,
         "{{POST_DATE}}": date_str,
+        "{{POST_AUTHOR}}": item_data.get("author", "CARISSUE 편집국"),
         "{{FEATURED_IMG}}": featured_img if featured_img else f"{config.SITE_URL}/assets/logo.png",
         "{{ARTICLE_CONTENT}}": full_article_content,
         "{{COPYRIGHT_NOTICE}}": copyright_html,
@@ -498,6 +499,11 @@ def scan_existing_posts(exclude_ids):
                 if src_match and src_match.group(1).strip():
                     rec_source = src_match.group(1).strip()
 
+                rec_author = "CARISSUE 편집국"
+                author_match = re.search(r"발행:\s*[^|<]+\|\s*([^<]+)", raw_html)
+                if author_match and author_match.group(1).strip():
+                    rec_author = author_match.group(1).strip()
+
                 article_el = h_soup.find("article", class_="post-content") or h_soup.find("article")
                 cleaned_body_parts = []
                 if article_el:
@@ -526,6 +532,7 @@ def scan_existing_posts(exclude_ids):
                     "subtitle": rec_sub,
                     "category": rec_cat,
                     "source": rec_source,
+                    "author": rec_author,
                     "date": rec_date,
                     "iso_date": rec_date[:10],
                     "images": rec_images,
