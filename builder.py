@@ -3,6 +3,7 @@ import os
 import re
 import time
 import json
+from html import escape
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
@@ -46,6 +47,23 @@ def get_current_feeds():
     else:
         print(f">>> [KST 오후] 글로벌 기사 수집 시작 (현재시각: {now.strftime('%H:%M')})")
         return config.FEEDS_EVENING
+
+
+def normalize_img_item(img_item):
+    """딕셔너리({'url': ..., 'caption': ...})와 문자열 URL 모두 안전하게 정규화"""
+    if isinstance(img_item, dict):
+        return (img_item.get("url") or "").strip(), (img_item.get("caption") or "").strip()
+    if isinstance(img_item, str):
+        return img_item.strip(), ""
+    return "", ""
+
+
+def format_caption_credit(caption, source):
+    """이미지 설명이 있으면 '설명 · 출처 - 언론사', 없으면 '출처 - 언론사' 반환"""
+    safe_source = escape(source or config.SITE_NAME)
+    if caption:
+        return f"{escape(caption)} &middot; 출처 - {safe_source}"
+    return f"출처 - {safe_source}"
 
 
 def build_google_preferred_banner():
@@ -142,16 +160,22 @@ def parse_markdown_to_html(generated_md, fallback_title, images, source="CARISSU
         </div>
         """
 
-    def make_content_img_block(img_url):
+    def make_content_img_block(img_item):
+        img_url, img_caption = normalize_img_item(img_item)
+        alt_text = escape(img_caption if img_caption else post_title)
+        caption_credit = format_caption_credit(img_caption, source)
         return f"""
         <figure class="content-img" style="margin: 24px 0 12px 0;">
-            <img src="{img_url}" alt="{post_title}" referrerpolicy="no-referrer" loading="lazy" onerror="this.closest('.content-img').style.display='none';">
-            <figcaption style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - {source}</figcaption>
+            <img src="{img_url}" alt="{alt_text}" referrerpolicy="no-referrer" loading="lazy" onerror="this.closest('.content-img').style.display='none';">
+            <figcaption style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px; line-height: 1.4;">{caption_credit}</figcaption>
         </figure>
         """
 
     # 유효한 실제 크롤링 이미지 필터링 (images[0]은 상단 대표이미지, images[1:]는 본문 추가 이미지)
-    valid_imgs = [img for img in images if img and "/assets/logo.png" not in img]
+    valid_imgs = [
+        img for img in images
+        if normalize_img_item(img)[0] and "/assets/logo.png" not in normalize_img_item(img)[0]
+    ]
     extra_imgs = valid_imgs[1:]
     extra_img_idx = 0
 
@@ -160,7 +184,7 @@ def parse_markdown_to_html(generated_md, fallback_title, images, source="CARISSU
     ad_counter = 0
     max_in_article_ads = 3
 
-    # 세 템포(3문단)마다 [추가 이미지 + 출처 캡션] + 그 바로 아래 [중간광고] 세트 배치
+    # 세 템포(3문단)마다 [추가 이미지 + 설명·출처 캡션] + 그 바로 아래 [중간광고] 세트 배치
     for b_type, b_text in body_blocks:
         if b_type == "h3":
             content_html_parts.append(f"<h3>{b_text}</h3>")
@@ -193,8 +217,14 @@ def build_article_page(item_data, all_posts, article_tpl):
     title = item_data["title"]
     subtitle = item_data.get("subtitle", "")
     images = item_data.get("images", [])
-    valid_imgs = [img for img in images if img and "/assets/logo.png" not in img]
-    featured_img = valid_imgs[0] if valid_imgs else ""
+
+    normalized_imgs = [
+        normalize_img_item(img) for img in images
+        if normalize_img_item(img)[0] and "/assets/logo.png" not in normalize_img_item(img)[0]
+    ]
+    valid_img_urls = [u for u, _ in normalized_imgs]
+    featured_img, featured_caption = normalized_imgs[0] if normalized_imgs else ("", "")
+
     date_str = item_data.get("date", get_now_kst())
     category = item_data.get("category", "국내 이슈")
     source = item_data.get("source", config.SITE_NAME)
@@ -205,7 +235,7 @@ def build_article_page(item_data, all_posts, article_tpl):
         "@type": "NewsArticle",
         "headline": title,
         "description": subtitle or title,
-        "image": valid_imgs if valid_imgs else [f"{config.SITE_URL}/assets/logo.png"],
+        "image": valid_img_urls if valid_img_urls else [f"{config.SITE_URL}/assets/logo.png"],
         "datePublished": item_data.get("iso_date", datetime.now(timezone.utc).isoformat()),
         "author": [{"@type": "Organization", "name": config.SITE_NAME, "url": config.SITE_URL}],
         "publisher": {
@@ -217,11 +247,14 @@ def build_article_page(item_data, all_posts, article_tpl):
 
     related_html = ""
     for r in [p for p in all_posts if p["id"] != post_id][:6]:
-        r_imgs = [i for i in r.get("images", []) if i and "/assets/logo.png" not in i]
+        r_imgs = [
+            normalize_img_item(i)[0] for i in r.get("images", [])
+            if normalize_img_item(i)[0] and "/assets/logo.png" not in normalize_img_item(i)[0]
+        ]
         r_img = r_imgs[0] if r_imgs else "/assets/logo.png"
         related_html += f"""
         <a href="/posts/{r['id']}.html" class="rel-card">
-            <div class="rel-thumb"><img src="{r_img}" alt="{r['title']}" referrerpolicy="no-referrer" loading="lazy"></div>
+            <div class="rel-thumb"><img src="{r_img}" alt="{escape(r['title'])}" referrerpolicy="no-referrer" loading="lazy"></div>
             <div class="rel-title">{r['title']}</div>
         </a>
         """
@@ -237,8 +270,9 @@ def build_article_page(item_data, all_posts, article_tpl):
     if not featured_img:
         html = re.sub(r'<div class="featured-img-wrap">.*?</div>', "", html, flags=re.DOTALL)
     else:
-        # 대표 메인 이미지 하단에 '출처 - {source}' 캡션 추가 + 요약 목차를 메인 이미지 바로 위로 배치
-        caption_tag = f'<div class="featured-caption" style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px;">출처 - {source}</div>'
+        # 대표 메인 이미지 하단에 '{이미지 설명} · 출처 - {source}' 캡션 추가 + 요약 목차를 메인 이미지 바로 위로 배치
+        featured_credit = format_caption_credit(featured_caption, source)
+        caption_tag = f'<div class="featured-caption" style="font-size: 12px; color: #6b7280; text-align: right; margin-top: 6px; line-height: 1.4;">{featured_credit}</div>'
         html = re.sub(
             r'(<div class="featured-img-wrap">.*?)(</div>)',
             rf'{summary_box_html}\n\1{caption_tag}\2',
@@ -291,7 +325,11 @@ def build_index_page(posts, index_tpl):
 
     def get_thumb(p):
         imgs = p.get("images", [])
-        return imgs[0] if (imgs and len(imgs) > 0 and imgs[0]) else "/assets/logo.png"
+        if imgs and len(imgs) > 0:
+            u, _ = normalize_img_item(imgs[0])
+            if u:
+                return u
+        return "/assets/logo.png"
 
     top_hero = posts[0]
     sub_heroes = posts[1:4]
@@ -300,7 +338,7 @@ def build_index_page(posts, index_tpl):
     top_hero_html = f"""
     <a href="/posts/{top_hero['id']}.html" class="hero-split">
         <div class="hero-split-img">
-            <img src="{get_thumb(top_hero)}" alt="{top_hero['title']}" referrerpolicy="no-referrer">
+            <img src="{get_thumb(top_hero)}" alt="{escape(top_hero['title'])}" referrerpolicy="no-referrer">
         </div>
         <div class="hero-split-body">
             <div class="hero-kicker">
@@ -319,7 +357,7 @@ def build_index_page(posts, index_tpl):
         sub_heroes_html += f"""
         <a href="/posts/{sh['id']}.html" class="sub-card">
             <div class="sub-card-img">
-                <img src="{get_thumb(sh)}" alt="{sh['title']}" referrerpolicy="no-referrer" loading="lazy">
+                <img src="{get_thumb(sh)}" alt="{escape(sh['title'])}" referrerpolicy="no-referrer" loading="lazy">
             </div>
             <div><span class="badge-red">{sh.get('category', '글로벌 뉴스')}</span></div>
             <h3>{sh['title']}</h3>
@@ -332,7 +370,7 @@ def build_index_page(posts, index_tpl):
         feed_list_html += f"""
         <a href="/posts/{lp['id']}.html" class="feed-item">
             <div class="feed-thumb">
-                <img src="{get_thumb(lp)}" alt="{lp['title']}" referrerpolicy="no-referrer" loading="lazy">
+                <img src="{get_thumb(lp)}" alt="{escape(lp['title'])}" referrerpolicy="no-referrer" loading="lazy">
             </div>
             <div class="feed-content">
                 <span class="badge-red">{lp.get('category', '국내 이슈')}</span>
