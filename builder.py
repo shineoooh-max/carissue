@@ -59,11 +59,11 @@ def normalize_img_item(img_item):
 
 
 def format_caption_credit(caption, source):
-    """이미지 설명이 있으면 '설명 · 출처 - 언론사', 없으면 '출처 - 언론사' 반환"""
+    """이미지 설명이 있으면 '설명 · 사진 - 언론사', 없으면 '사진 - 언론사' 반환"""
     safe_source = escape(source or config.SITE_NAME)
     if caption:
-        return f"{escape(caption)} &middot; 출처 - {safe_source}"
-    return f"출처 - {safe_source}"
+        return f"{escape(caption)} &middot; 사진 - {safe_source}"
+    return f"사진 - {safe_source}"
 
 
 def build_google_preferred_banner():
