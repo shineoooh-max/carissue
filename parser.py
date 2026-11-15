@@ -1,4 +1,4 @@
-# parser.py - RSS 수집, 다중 고화질 이미지 추출, Gemini 기사 생성 전용 모듈
+# parser.py - RSS 수집, 다중 고화질 이미지 + 캡션 추출, Gemini 기사 생성 전용 모듈
 import os
 import re
 import struct
@@ -32,8 +32,53 @@ def normalize_img_url(base_url, src):
     return src
 
 
+def clean_caption_text(raw_caption):
+    """이미지 alt/figcaption에서 파일명이나 의미 없는 기호 제거 후 정제"""
+    if not raw_caption:
+        return ""
+    text = re.sub(r"\s+", " ", raw_caption).strip()
+    # 파일명 형태(예: 20261115_1234.jpg, image1.png) 제외
+    if re.search(r"\.(jpg|jpeg|png|webp|gif)$", text, re.I):
+        return ""
+    # 너무 짧거나 단순한 단어 제외
+    if len(text) < 4 or text.lower() in ("image", "photo", "picture", "이미지", "사진", "썸네일"):
+        return ""
+    # 불필요한 대괄호 출처 표기([사진=현대차] 등)는 가독성을 위해 정리
+    text = re.sub(r"^\[[^\]]+\]\s*", "", text).strip()
+    if len(text) > 70:
+        text = text[:67].rstrip() + "..."
+    return text
+
+
+def extract_caption_from_tag(img_tag):
+    """<img> 태그의 부모 <figure>/<figcaption> 또는 alt/title 속성에서 설명 추출"""
+    if not img_tag:
+        return ""
+
+    # 1순위: 감싸고 있는 <figure> 내부의 <figcaption> 텍스트
+    figure = img_tag.find_parent("figure")
+    if figure:
+        figcap = figure.find("figcaption")
+        if figcap:
+            cleaned = clean_caption_text(figcap.get_text())
+            if cleaned:
+                return cleaned
+
+    # 2순위: ND소프트(모터그래프/카가이/오토헤럴드) 이미지 캡션 클래스 탐색
+    parent_box = img_tag.find_parent(["div", "td", "p"])
+    if parent_box:
+        cap_el = parent_box.find(["figcaption", "span", "p", "div"], class_=re.compile(r"caption|desc|txt|title", re.I))
+        if cap_el and cap_el != img_tag:
+            cleaned = clean_caption_text(cap_el.get_text())
+            if cleaned:
+                return cleaned
+
+    # 3순위: img 태그의 alt 또는 title 속성
+    alt_text = img_tag.get("alt") or img_tag.get("title") or ""
+    return clean_caption_text(alt_text)
+
+
 def extract_best_from_srcset(srcset_val):
-    """URL 내부 콤마(Hearst CDN crop 파라미터 등)를 보호하면서 가장 큰 해상도 URL 추출"""
     if not srcset_val:
         return ""
     candidates = [c.strip() for c in re.split(r",\s*(?=https?://|/)", srcset_val) if c.strip()]
@@ -43,7 +88,6 @@ def extract_best_from_srcset(srcset_val):
 
 
 def get_img_fingerprint(img_url):
-    """쿼리스트링 기반 CDN(Car and Driver 등)과 파일명 기반 CDN 모두 정확히 구분"""
     parsed = urlparse(img_url)
     path = parsed.path
     fname = os.path.basename(path).lower()
@@ -61,7 +105,6 @@ def get_img_fingerprint(img_url):
 
 
 def is_valid_large_image(img_url, min_width=450):
-    """실제 이미지 파일의 앞부분(헤더)만 빠르게 읽어 가로 해상도가 450px 이상인지 검증"""
     try:
         req = urllib.request.Request(
             img_url,
@@ -70,12 +113,10 @@ def is_valid_large_image(img_url, min_width=450):
         with urllib.request.urlopen(req, timeout=6) as resp:
             data = resp.read(32768)
 
-        # PNG 헤더 파싱
         if data[:8] == b"\x89PNG\r\n\x1a\n" and len(data) >= 24:
             w, h = struct.unpack(">II", data[16:24])
             return w >= min_width and h >= 220
 
-        # JPEG SOF 마커 파싱
         if data[:2] == b"\xff\xd8":
             idx = 2
             while idx < len(data) - 9:
@@ -92,7 +133,6 @@ def is_valid_large_image(img_url, min_width=450):
                 seg_len = struct.unpack(">H", data[idx + 2:idx + 4])[0]
                 idx += 2 + seg_len
 
-        # WebP 헤더 파싱
         if data[:4] == b"RIFF" and data[8:12] == b"WEBP" and len(data) >= 30:
             chunk = data[12:16]
             if chunk == b"VP8X" and len(data) >= 30:
@@ -100,14 +140,12 @@ def is_valid_large_image(img_url, min_width=450):
                 h = int.from_bytes(data[27:30], "little") + 1
                 return w >= min_width and h >= 220
 
-        # 헤더 파싱이 어려운 CDN 응답은 최소 용량(15KB 이상)으로 1차 방어
         return len(data) >= 15360
     except Exception:
         return False
 
 
 def decode_html_bytes(raw_bytes):
-    """UTF-8 및 국내 언론사 CP949/EUC-KR 인코딩 자동 판별 디코딩"""
     for enc in ("utf-8", "cp949", "euc-kr"):
         try:
             return raw_bytes.decode(enc)
@@ -173,13 +211,13 @@ def fetch_feed_items(feed_conf, history_set):
 
 
 def extract_article_details(url, feed_img="", feed_desc=""):
-    images = []
-    seen_fps = set()
+    images = []  # [{"url": ..., "caption": ...}, ...] 형태로 저장
+    fp_to_idx = {}
     text_content = ""
     safe_desc = feed_desc or ""
     is_korean_media = any(domain in url.lower() for domain in ("motorgraph.com", "carguy.kr", "autoherald.co.kr"))
 
-    def try_add_image(raw_src, skip_size_check=False):
+    def try_add_image(raw_src, caption="", skip_size_check=False):
         full_url = normalize_img_url(url, raw_src)
         if not full_url or not full_url.startswith("http"):
             return
@@ -191,41 +229,45 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         if urlparse(lower_u).path.endswith((".svg", ".gif")):
             return
 
-        # 국내 언론사(모터그래프/카가이/오토헤럴드)는 기사 본문 업로드 경로(/news/photo/) 외 찌꺼기 이미지 원천 차단
         if is_korean_media and "/news/photo/" not in lower_u:
             return
 
         fp = get_img_fingerprint(full_url)
-        if fp and fp in seen_fps:
+
+        # 이미 og:image로 먼저 들어온 동일 이미지인데 본문 스캔에서 캡션이 발견되면 캡션만 보강!
+        if fp and fp in fp_to_idx:
+            existing_idx = fp_to_idx[fp]
+            if caption and not images[existing_idx]["caption"]:
+                images[existing_idx]["caption"] = caption
             return
 
-        # og:image가 아닌 본문 추가 이미지는 실제 가로 450px 이상 고화질만 통과
         if not skip_size_check and not is_valid_large_image(full_url, min_width=450):
             return
 
-        if full_url not in images:
-            images.append(full_url)
-            if fp:
-                seen_fps.add(fp)
+        new_idx = len(images)
+        images.append({"url": full_url, "caption": caption})
+        if fp:
+            fp_to_idx[fp] = new_idx
 
     def scan_container_images(container):
         if not container:
             return
-        # 1) <picture> 내부 <source srcset="..."> 고화질 원본 우선 수집 (해외 매체 대응)
+        # 1) <picture> 내부 고화질 원본 수집
         for pic in container.find_all("picture"):
             source_tag = pic.find("source")
+            img_in_pic = pic.find("img")
             if source_tag:
                 best_src = extract_best_from_srcset(
                     source_tag.get("data-srcset") or source_tag.get("srcset")
                 )
                 if best_src:
-                    try_add_image(best_src)
+                    cap = extract_caption_from_tag(img_in_pic or pic)
+                    try_add_image(best_src, caption=cap)
                     if len(images) >= 5:
                         return
 
-        # 2) 일반 <img> 태그의 지연 로딩(data-src 등) 및 srcset 수집 (국내/해외 공통)
+        # 2) 일반 <img> 태그 수집 + 캡션 추출
         for img in container.find_all("img"):
-            # 기자 프로필/관련기사/배너 박스 내부에 속한 img 태그 제외
             parent_classes = " ".join(
                 " ".join(p.get("class", [])) + " " + (p.get("id") or "")
                 for p in img.parents if getattr(p, "get", None)
@@ -248,7 +290,8 @@ def extract_article_details(url, feed_img="", feed_desc=""):
                 or extract_best_from_srcset(img.get("data-srcset") or img.get("srcset"))
                 or img.get("src")
             )
-            try_add_image(src)
+            cap = extract_caption_from_tag(img)
+            try_add_image(src, caption=cap)
             if len(images) >= 5:
                 return
 
@@ -258,16 +301,17 @@ def extract_article_details(url, feed_img="", feed_desc=""):
         html = decode_html_bytes(raw_bytes)
         soup = BeautifulSoup(html, "html.parser")
 
-        # 1. og:image 메타 태그를 1순위 대표 이미지로 추출
+        # 1. og:image 메타 태그 (og:image:alt가 있으면 함께 추출)
         og_img = soup.find("meta", property="og:image")
+        og_alt = soup.find("meta", property="og:image:alt")
+        og_caption = clean_caption_text(og_alt["content"]) if (og_alt and og_alt.get("content")) else ""
         if og_img and og_img.get("content"):
-            try_add_image(og_img["content"], skip_size_check=True)
+            try_add_image(og_img["content"], caption=og_caption, skip_size_check=True)
 
-        # 2. og:image가 없을 때만 feed_img 보조 활용
         if not images and feed_img:
             try_add_image(feed_img, skip_size_check=True)
 
-        # 3. 순수 기사 본문 영역만 정확히 타겟팅 (전체 <article>이나 페이지 전체 스캔 제거)
+        # 2. 순수 기사 본문 영역 스캔 (동일한 1번 이미지의 본문 캡션도 여기서 자동 매칭됨)
         article_elem = (
             soup.find("div", id=re.compile(r"article-view-content-div|articleBody|news_body_area", re.I))
             or soup.find("div", class_=re.compile(r"article-body|entry-content|post-content|view-content|content-body", re.I))
