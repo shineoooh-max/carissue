@@ -338,9 +338,31 @@ def extract_article_details(url, feed_img="", feed_desc=""):
 
     return text_content[:4000], images
 
-
-def generate_article_content(api_key, source, category, original_title, raw_text):
+def generate_article_content(api_key, source, category, original_title, raw_text, images=None):
     client = genai.Client(api_key=api_key)
+
+    # 영문 등 외국어 캡션이 있는 이미지만 추출해 번역 요청 목록 구성
+    caption_lines = []
+    if images:
+        for idx, img in enumerate(images):
+            cap = img.get("caption", "").strip() if isinstance(img, dict) else ""
+            if cap and re.search(r"[a-zA-Z]{3,}", cap):
+                caption_lines.append(f"{idx}: {cap}")
+
+    caption_instruction = ""
+    if caption_lines:
+        joined_caps = "\n".join(caption_lines)
+        caption_instruction = f"""
+
+[이미지 캡션 한국어 요약 번역 대상]
+{joined_caps}
+
+7. 위 [이미지 캡션 한국어 요약 번역 대상]에 있는 영문 사진 설명을 자동차 매거진 사진 캡션에 어울리는 간결한 한국어 명사구(15~25자 내외, 예: '2027년형 애스턴마틴 발할라 전면부 모습')로 번역하여, 기사 본문이 모두 끝난 맨 마지막 줄 아래에 아래 형식으로만 출력하세요.
+[IMG_CAPTIONS]
+번호: 한국어 캡션
+[/IMG_CAPTIONS]
+"""
+
     prompt = f"""
 당신은 프리미엄 자동차 전문 웹진 'CARISSUE(카이슈)'의 수석 에디터입니다.
 아래 출처({source}, 분류: {category})의 원문을 바탕으로 모바일 가독성이 뛰어난 한국어 자동차 매거진 기사를 작성하세요.
@@ -356,7 +378,7 @@ def generate_article_content(api_key, source, category, original_title, raw_text
 3. 분량 조절: 원문 내용의 밀도와 길이에 자연스럽게 비례하여 작성하세요. 짧은 단신이나 보도자료는 억지로 늘리지 말고 4~5문단 내외로 핵심만 간결하게 정리하고, 원문이 풍부한 심층 기사는 6~8문단 내외로 깊이 있게 구성하세요.
 4. 섹션 구성: 내용의 흐름에 따라 2~4개의 섹션으로 나누고, 각 섹션 시작 전 반드시 `### 짧은 소제목` (15자 내외)을 붙이세요.
 5. 모바일 문단 호흡: 한 문단은 모바일 화면에서 3~4줄로 편하게 읽히도록 2~3문장(약 100~140자) 분량으로 끊어 작성하고, 문단과 문단 사이에는 반드시 빈 줄을 넣으세요.
-6. 본문 문단에는 `#` 기호나 굵은 마크다운 제목을 쓰지 말고 순수 텍스트 문장으로만 작성하세요.
+6. 본문 문단에는 `#` 기호나 굵은 마크다운 제목을 쓰지 말고 순수 텍스트 문장으로만 작성하세요.{caption_instruction}
 """
     try:
         interaction = client.interactions.create(
