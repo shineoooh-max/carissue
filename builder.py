@@ -84,8 +84,19 @@ def build_google_preferred_banner():
     </div>
     """
 
-
 def parse_markdown_to_html(generated_md, fallback_title, images, source="CARISSUE"):
+    # Gemini가 생성한 한국어 이미지 캡션 블록 분리 및 반영
+    cap_match = re.search(r"\[IMG_CAPTIONS\](.*?)\[/IMG_CAPTIONS\]", generated_md, flags=re.DOTALL)
+    if cap_match:
+        for cap_line in cap_match.group(1).strip().splitlines():
+            m = re.match(r"^\s*(\d+)\s*:\s*(.+)$", cap_line.strip())
+            if m:
+                c_idx = int(m.group(1))
+                ko_cap = m.group(2).strip()
+                if 0 <= c_idx < len(images) and isinstance(images[c_idx], dict) and ko_cap:
+                    images[c_idx]["caption"] = ko_cap
+        generated_md = re.sub(r"\[IMG_CAPTIONS\].*?\[/IMG_CAPTIONS\]", "", generated_md, flags=re.DOTALL).strip()
+
     lines = generated_md.split("\n")
     post_title = fallback_title
     subtitle = ""
@@ -572,7 +583,7 @@ def main():
                     continue
 
                 generated_md = parser.generate_article_content(
-                    api_key, item["source"], item["category"], item["title"], raw_text
+                    api_key, item["source"], item["category"], item["title"], raw_text, images
                 )
                 if not generated_md:
                     continue
