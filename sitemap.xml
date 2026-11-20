@@ -2,23 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://carissue.koo1000.com/</loc>
-    <lastmod>2026-11-19</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://carissue.koo1000.com/about.html</loc>
-    <lastmod>2026-11-19</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://carissue.koo1000.com/privacy.html</loc>
-    <lastmod>2026-11-19</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://carissue.koo1000.com/terms.html</loc>
-    <lastmod>2026-11-19</lastmod>
+    <lastmod>2026-11-20</lastmod>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://carissue.koo1000.com/posts/post_1795168138_3.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://carissue.koo1000.com/posts/post_1795168118_2.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://carissue.koo1000.com/posts/post_1795168095_1.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://carissue.koo1000.com/posts/post_1795168076_0.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://carissue.koo1000.com/posts/post_1795131258_4.html</loc>
