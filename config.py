@@ -10,7 +10,7 @@ HISTORY_FILE = "published_links.txt"
 META_DB_PATH = "posts_meta.json"
 
 # Gemini 모델 설정
-GEMINI_MODEL = "gemini-3.8-flash"
+GEMINI_MODEL = "gemini-3.5-flash-lite"
 
 # 구글 애드센스 고정 슬롯 번호
 ADSENSE_CLIENT = "ca-pub-4793184080983542"
