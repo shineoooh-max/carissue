@@ -21,19 +21,19 @@ AD_SLOTS = {
     "multiplex": "3913014950"    # 하단 멀티플렉스
 }
 
-# 수집 대상 RSS 피드 (오전: 국내 총 5개 / 오후: 글로벌 총 5개)
+# 수집 대상 RSS 피드 (오전: 국내 총 3개 / 오후: 글로벌 총 3개)
 FEEDS_MORNING = [
     {
         "name": "오토헤럴드",
         "category": "국내 이슈",
         "url": "http://www.autoherald.co.kr/rss/allArticle.xml",
-        "target_count": 2
+        "target_count": 1
     },
     {
         "name": "모터그래프",
         "category": "국내 이슈",
         "url": "https://www.motorgraph.com/rss/allArticle.xml",
-        "target_count": 2
+        "target_count": 1
     },
     {
         "name": "카가이",
@@ -48,7 +48,7 @@ FEEDS_EVENING = [
         "name": "Carscoops",
         "category": "글로벌 뉴스",
         "url": "https://www.carscoops.com/feed/",
-        "target_count": 2
+        "target_count": 1
     },
     {
         "name": "Motor1",
@@ -66,6 +66,6 @@ FEEDS_EVENING = [
         "name": "Car and Driver",
         "category": "글로벌 뉴스",
         "url": "https://www.caranddriver.com/rss/all.xml/",
-        "target_count": 1
+        "target_count": 0
     }
 ]

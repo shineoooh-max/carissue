@@ -573,15 +573,27 @@ def main():
         feeds = get_current_feeds()
 
         for f_conf in feeds:
-            items = parser.fetch_feed_items(f_conf, history_set)
+            target_count = f_conf.get("target_count", 0)
+            if target_count <= 0:
+                continue
+
+            candidate_conf = {**f_conf, "target_count": target_count * 4}
+            items = parser.fetch_feed_items(candidate_conf, history_set)
+            candidates = []
             for item in items:
-                print(f"\n[기사 생성] 원문 분석: {item['title']}")
+                print(f"\n[후보 크롤링] 원문 분석: {item['title']}")
                 raw_text, images = parser.extract_article_details(
                     item["link"], item["feed_img"], item.get("feed_desc", "")
                 )
                 if not raw_text or len(raw_text) < 80:
                     continue
+                candidates.append((item, raw_text, images))
 
+            candidates.sort(key=lambda x: len(x[2]), reverse=True)
+            selected_candidates = candidates[:target_count]
+
+            for item, raw_text, images in selected_candidates:
+                print(f"\n[기사 생성] 선정 기사 (이미지 {len(images)}장): {item['title']}")
                 generated_md = parser.generate_article_content(
                     api_key, item["source"], item["category"], item["title"], raw_text, images
                 )
