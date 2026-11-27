@@ -17,6 +17,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -39,7 +40,7 @@ jobs:
           DESIGN_ONLY: ${{ github.event.inputs.design_only || 'false' }}
         run: |
           python -m py_compile config.py parser.py builder.py
-          python builder.py
+          python -u builder.py
 
       - name: Commit and Push Changes
         run: |

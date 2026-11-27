@@ -2,6 +2,7 @@
 import os
 import re
 import struct
+import time
 import urllib.request
 from urllib.parse import urljoin, urlparse, parse_qs
 import xml.etree.ElementTree as ET
@@ -110,7 +111,7 @@ def is_valid_large_image(img_url, min_width=450):
             img_url,
             headers={"User-Agent": USER_AGENT, "Range": "bytes=0-32768"}
         )
-        with urllib.request.urlopen(req, timeout=6) as resp:
+        with urllib.request.urlopen(req, timeout=15) as resp:
             data = resp.read(32768)
 
         if data[:8] == b"\x89PNG\r\n\x1a\n" and len(data) >= 24:
@@ -154,14 +155,30 @@ def decode_html_bytes(raw_bytes):
     return raw_bytes.decode("utf-8", errors="ignore")
 
 
+def fetch_url_bytes(url, headers=None, timeout=15, max_retries=2):
+    req_headers = headers or {"User-Agent": USER_AGENT}
+    last_err = None
+    for attempt in range(max_retries + 1):
+        try:
+            req = urllib.request.Request(url, headers=req_headers)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read()
+        except Exception as e:
+            last_err = e
+            if attempt < max_retries:
+                wait_sec = 2 * (attempt + 1)
+                print(f"HTTP 요청 재시도 ({attempt + 1}/{max_retries}, {wait_sec}s 대기): {url} -> {e}")
+                time.sleep(wait_sec)
+    raise last_err
+
+
 def fetch_feed_items(feed_conf, history_set):
     items = []
     target = feed_conf["target_count"]
     print(f"\n[{feed_conf['name']}] RSS 수집 시작 ({feed_conf['category']} - 목표: {target}건)")
 
     try:
-        req = urllib.request.Request(feed_conf["url"], headers={"User-Agent": USER_AGENT})
-        raw_data = urllib.request.urlopen(req, timeout=15).read()
+        raw_data = fetch_url_bytes(feed_conf["url"], timeout=15, max_retries=2)
         xml_text = decode_html_bytes(raw_data)
 
         root = ET.fromstring(xml_text)
@@ -296,8 +313,7 @@ def extract_article_details(url, feed_img="", feed_desc=""):
                 return
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        raw_bytes = urllib.request.urlopen(req, timeout=15).read()
+        raw_bytes = fetch_url_bytes(url, timeout=15, max_retries=2)
         html = decode_html_bytes(raw_bytes)
         soup = BeautifulSoup(html, "html.parser")
 
@@ -339,7 +355,7 @@ def extract_article_details(url, feed_img="", feed_desc=""):
     return text_content[:4000], images
 
 def generate_article_content(api_key, source, category, original_title, raw_text, images=None):
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=api_key, http_options={"timeout": 60000})
 
     # 영문 등 외국어 캡션이 있는 이미지만 추출해 번역 요청 목록 구성
     caption_lines = []
@@ -380,12 +396,19 @@ def generate_article_content(api_key, source, category, original_title, raw_text
 5. 모바일 문단 호흡: 한 문단은 모바일 화면에서 3~4줄로 편하게 읽히도록 2~3문장(약 100~140자) 분량으로 끊어 작성하고, 문단과 문단 사이에는 반드시 빈 줄을 넣으세요.
 6. 본문 문단에는 `#` 기호나 굵은 마크다운 제목을 쓰지 말고 순수 텍스트 문장으로만 작성하세요.{caption_instruction}
 """
-    try:
-        interaction = client.interactions.create(
-            model=config.GEMINI_MODEL,
-            input=prompt
-        )
-        return interaction.output_text.strip()
-    except Exception as e:
-        print(f"Gemini API 에러: {e}")
-        return None
+    max_retries = 2
+    for attempt in range(max_retries + 1):
+        try:
+            interaction = client.interactions.create(
+                model=config.GEMINI_MODEL,
+                input=prompt
+            )
+            return interaction.output_text.strip()
+        except Exception as e:
+            print(f"Gemini API 에러 (시도 {attempt + 1}/{max_retries + 1}): {e}")
+            if attempt < max_retries:
+                wait_sec = 2 * (attempt + 1)
+                print(f"{wait_sec}초 후 Gemini API 재시도...")
+                time.sleep(wait_sec)
+    print("Gemini API 최대 재시도 초과로 해당 기사를 건너뜁니다.")
+    return None
